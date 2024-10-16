@@ -1,0 +1,82 @@
+
+.not-found-page
+    position: relative
+    z-index: 2
+    display: inline-flex
+    flex-direction: column
+    justify-content: center
+    align-items: center
+    width: 100%
+    height: 100vh
+    color: #000
+    font-weight: 700
+    font-family: "Source Sans 3"
+    background: #6d6d6d
+
+    &::before
+        content: ''
+        position: absolute
+        z-index: -3
+        top: 0
+        width: 100vw
+        height: 100vh
+        background-image: url('/img/Background.png')
+        background-repeat: no-repeat
+        background-attachment: fixed
+        background-position: center center
+        background-size: cover
+        object-fit: cover
+        filter: grayscale(100%)
+
+    &::after
+        content: ''
+        position: absolute
+        z-index: -1
+        top: 0
+        width: 100vw
+        height: 100vh
+        background: rgba(27, 26, 26, 0.353)
+
+    .info
+        position: relative
+        z-index: 2
+        color: #fff
+
+        .not-found-page__title
+            font-size: 370px
+            text-transform: uppercase
+            line-height: 66%
+            margin-bottom: 51px
+
+        .not-found-page__info
+            font-size: 56px
+            line-height: 164%
+            text-transform: uppercase
+
+            &:nth-last-child(2)
+                margin-bottom: 51px
+
+        .link-home
+            position: relative
+            top: 0
+            left: 0
+            z-index: 2
+            padding: 5px 30px
+            color: #fff
+            font-size: 48px
+            text-transform: uppercase
+            background: rgba(255, 255, 255, 0.1)
+            border-radius: 999px
+            box-shadow: inset -1px 2px 0 0 rgba(255, 255, 255, 0.25), 0 0 52px 0 rgba(0, 0, 0, 0.25)
+
+            &::before
+                position: absolute
+                z-index: -1
+                content: ''
+                top: 0
+                left: 0
+                width: 374px
+                height: 78px
+                background: rgba(255, 255, 255, 0.1)
+                border-radius: 999px
+                backdrop-filter: blur(100px)

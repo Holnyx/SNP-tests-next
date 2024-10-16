@@ -1,0 +1,15 @@
+@import './viewport'
+    
+@mixin font-style($fw, $fs, $lh, $ls)
+    font-weight: $fw
+    font-size: $fs
+    line-height: $lh
+    letter-spacing: $ls
+
+@mixin mobile
+    @media (max-width: $mobile)
+        @content
+
+@mixin laptop
+    @media (max-width: $laptop)
+        @content
