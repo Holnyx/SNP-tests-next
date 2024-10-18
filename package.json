@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"json-server --watch db.json --port 3001\" \"next dev\"",
+    "dev": "next dev",
     "build": "next build && cp next.config.mjs .next/",
     "export": "next build && next export",
     "start": "next start",
