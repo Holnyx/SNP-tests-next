@@ -3,21 +3,26 @@ import { useRouter } from 'next/router';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
+import AdminPage from '@/components/pages/AdminPage/AdminPage';
+import CreateTests from '@/components/pages/CreateTests/CreateTests';
 
 const Home = ({
   props,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
 
-  useEffect(() => {
-    if (!props) {
-      router.push('/signIn');
-    }
-  }, [props]);
+  // useEffect(() => {
+  //   if (!props) {
+  //     router.push('/signIn');
+  //   }
+  // }, [props]);
 
   return (
     <>
       <HeadComponent />
+      <AdminPage>
+        <CreateTests />
+      </AdminPage>
     </>
   );
 };
