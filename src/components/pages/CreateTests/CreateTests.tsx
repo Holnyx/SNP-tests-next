@@ -12,7 +12,7 @@ import cx from 'classnames';
 
 
 const CreateTests = () => {
-  const [select, setSelect] = useState('disabled');
+  const [select, setSelect] = useState('Select question type');
   const [addQuestion, setAddQuestion] = useState(false);
   const [answerOption, setAnswerOption] = useState(false);
   return (

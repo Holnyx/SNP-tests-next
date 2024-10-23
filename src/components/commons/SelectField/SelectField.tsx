@@ -5,58 +5,58 @@ import s from './SelectField.module.sass';
 import cx from 'classnames';
 
 type SelectFieldPropsItem = {
-  title?: string;
-  htmlFor?: string;
   defaultValue: string;
-  required?: boolean;
-  name?: string;
-  id?: string;
   directionOptions: TestsOptionsItem[];
   setSelect: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const SelectField: FC<SelectFieldPropsItem> = ({
-  title,
-  htmlFor,
   defaultValue,
-  required,
-  name,
-  id,
   directionOptions,
   setSelect,
 }) => {
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setSelect(event.currentTarget.value);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
   };
 
-  const isPlaceholder = directionOptions.some(
-    el => el.value === defaultValue && el.disabled
-  );
+  const handleSelect = (option: TestsOptionsItem) => {
+    setSelect(option.title);
+    setIsOpen(false);
+  };
 
   return (
-    <div className={s['input-box']}>
-      <label htmlFor={htmlFor}>{title}</label>
-      <select
-        defaultValue={defaultValue}
-        required={required}
-        className={cx(s['input-style'], {
-          [s['select-placeholder']]: !isPlaceholder,
-        })}
-        name={name}
-        id={id}
-        onChange={handleChange}
+    <div className={s['dropdown']}>
+      <div
+        className={s['dropdown--header']}
+        onClick={toggleDropdown}
       >
-        {directionOptions.map((option, i) => (
-          <option
-            key={i}
-            value={option.value}
-            disabled={option.disabled}
-          >
-            {option.title}
-          </option>
-        ))}
-      </select>
-      {/* <Icon iconId={'ic-dropdown'} className='ic-dropdown' viewBox='0 0 26 26' width='26' height='26' /> */}
+        {defaultValue}
+        <span
+          className={cx(s['dropdown--arrow'], {
+            [s['dropdown--open']]: isOpen,
+          })}
+        ></span>
+      </div>
+      {isOpen && (
+        <div className={s['dropdown--options']}>
+          {directionOptions.map(
+            (option, index) =>
+              !option.disabled && (
+                <div
+                  key={index}
+                  className={cx(s['dropdown--option'], {
+                    [s['selected']]: option.title === defaultValue,
+                  })}
+                  onClick={() => handleSelect(option)}
+                >
+                  {option.title}
+                </div>
+              )
+          )}
+        </div>
+      )}
     </div>
   );
 };
