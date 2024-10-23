@@ -5,6 +5,8 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
 import AdminPage from '@/components/pages/AdminPage/AdminPage';
 import CreateTests from '@/components/pages/CreateTests/CreateTests';
+import UserPage from '@/components/pages/UserPage/UserPage';
+import TakeTestsPage from '@/components/pages/TakeTestsPage/TakeTestsPage';
 
 const Home = ({
   props,
@@ -20,9 +22,6 @@ const Home = ({
   return (
     <>
       <HeadComponent />
-      <AdminPage>
-        <CreateTests />
-      </AdminPage>
     </>
   );
 };
