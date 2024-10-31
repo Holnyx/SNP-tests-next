@@ -1,4 +1,5 @@
 import React, { FC, memo } from 'react';
+import Link from 'next/link';
 
 import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 import { sidebarLinksState } from '@/components/state/sidebarLinksState';
@@ -9,9 +10,10 @@ import cx from 'classnames';
 type SidebarItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   menuOpen: boolean;
+  user?: string;
 };
 
-const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen }) => {
+const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
   return (
     <>
       <aside className={cx(s.container, { [s.show]: menuOpen })}>
@@ -21,20 +23,28 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen }) => {
         />
         <h3 className={s.title}>Test Management</h3>
         <ul className={s.menu}>
-          {sidebarLinksState.map((element, i) => {
-            return (
-              <li>
-                <a
-                  href={element.href}
-                  className={cx(s.link, {
-                    [s['log-out']]: element.title === 'Log Out',
-                  })}
-                >
-                  {element.title}
-                </a>
-              </li>
-            );
-          })}
+          {sidebarLinksState
+            .filter(
+              element => !(element.title === 'Create Tests' && user === 'user')
+            )
+            .map((element, i) => {
+              const href =
+                element.title !== 'Log Out'
+                  ? `/${user}${element.href}`
+                  : '/signIn';
+              return (
+                <li key={i}>
+                  <Link
+                    className={cx(s.link, {
+                      [s['log-out']]: element.title === 'Log Out',
+                    })}
+                    href={href}
+                  >
+                    {element.title}
+                  </Link>
+                </li>
+              );
+            })}
         </ul>
       </aside>
     </>

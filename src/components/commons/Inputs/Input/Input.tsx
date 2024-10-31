@@ -1,5 +1,6 @@
-import React, { FC, memo } from 'react';
+import React, { ChangeEvent, FC, memo } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 import starUrl from '/public/img/checkbox-icon.svg?url';
 
@@ -11,9 +12,20 @@ type InputItems = {
   type: string;
   name: string;
   leftCheck: boolean;
+  setInputValue: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const Input: FC<InputItems> = ({ title, type, name, leftCheck }) => {
+const Input: FC<InputItems> = ({
+  title,
+  type,
+  name,
+  leftCheck,
+  setInputValue,
+}) => {
+  const router = useRouter();
+  const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.currentTarget.value);
+  };
   const changeStyle =
     type === 'checkbox'
       ? s['checkbox']
@@ -21,51 +33,63 @@ const Input: FC<InputItems> = ({ title, type, name, leftCheck }) => {
       ? s['radio']
       : s.input;
 
+  const changeStyleAdminCheckbox = router.pathname === '/signUp';
+
   return (
-    <div className={s.container}>
+    <div
+      className={cx(s.container, {
+        [s['admin-container']]: changeStyleAdminCheckbox,
+      })}
+    >
       {leftCheck && (
         <label
-          htmlFor={name}
+          htmlFor={title}
           className={s.label}
         >
           {title}
         </label>
       )}
       <input
-        className={cx(changeStyle, {[s['margin-right']]: title === ''})}
+        className={cx(changeStyle, { [s['margin-right']]: title === '' })}
         type={type}
-        id={title === 'Select true answer' ? 'myCheckbox' : name}
+        id={title === 'Select true answer' ? 'myCheckbox' : title}
+        name={name}
+        onChange={onValueChanged}
       />
       {type === 'checkbox' && (
         <label
-          htmlFor={title === 'Select true answer' ? 'myCheckbox' : name}
-          className={s['custom-checkbox']}
+          htmlFor={title === 'Select true answer' ? 'myCheckbox' : title}
+          className={cx(s['custom-checkbox'], {
+            [s['admin-checkbox']]: changeStyleAdminCheckbox,
+          })}
         >
           <Image
             src={starUrl}
             alt={'checkbox-icon'}
             priority
-            className={s['custom-checkbox-img']}
+            className={cx(s['custom-checkbox-img'])}
           />
         </label>
       )}
       {type === 'radio' && (
         <label
           className={s['custom-radio']}
-          htmlFor={name}
+          htmlFor={title}
         >
           <input
             className={s['real-radio']}
             type="radio"
-            id={name}
+            id={title}
             name={name}
           />
         </label>
       )}
       {!leftCheck && title !== '' && (
         <label
-          htmlFor={name}
-          className={s.label}
+          htmlFor={title}
+          className={cx(s.label, {
+            [s['admin-label']]: changeStyleAdminCheckbox,
+          })}
         >
           {title}
         </label>

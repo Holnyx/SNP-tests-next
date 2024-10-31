@@ -1,23 +1,14 @@
 import { memo, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { parseCookies } from 'nookies';
 
 import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
-import AdminPage from '@/components/pages/AdminPage/AdminPage';
-import CreateTests from '@/components/pages/CreateTests/CreateTests';
-import UserPage from '@/components/pages/UserPage/UserPage';
-import TakeTestsPage from '@/components/pages/TakeTestsPage/TakeTestsPage';
 
 const Home = ({
   props,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const router = useRouter();
-
-  // useEffect(() => {
-  //   if (!props) {
-  //     router.push('/signIn');
-  //   }
-  // }, [props]);
 
   return (
     <>
@@ -27,10 +18,10 @@ const Home = ({
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
-  const { req } = context;
-  const cookies = req.headers.cookie;
+  const cookies = parseCookies(context);
+  const userRole = cookies.userRole;
 
-  if (!cookies) {
+  if (!userRole) {
     return {
       redirect: {
         destination: '/signIn',
@@ -39,8 +30,27 @@ export const getServerSideProps: GetServerSideProps = async context => {
     };
   }
 
+  if (userRole === 'user') {
+    return {
+      redirect: {
+        destination: '/user-page',
+        permanent: false,
+      },
+    };
+  } else if (userRole === 'admin') {
+    return {
+      redirect: {
+        destination: '/admin-page',
+        permanent: false,
+      },
+    };
+  }
+
   return {
-    props: {},
+    redirect: {
+      destination: '/signIn',
+      permanent: false,
+    },
   };
 };
 

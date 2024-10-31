@@ -1,19 +1,22 @@
-import React, { ChangeEvent, FC, memo, useState } from 'react';
+import React, { ChangeEvent, Dispatch, FC, memo, SetStateAction, useState } from 'react';
 import { TestsOptionsItem } from '@/components/state/testsOptions';
 
 import s from './SelectField.module.sass';
 import cx from 'classnames';
+import { TestsOptionsForSelect } from '@/store/types';
 
 type SelectFieldPropsItem = {
   defaultValue: string;
   directionOptions: TestsOptionsItem[];
   setSelect: React.Dispatch<React.SetStateAction<string>>;
+  onChange: Dispatch<SetStateAction<string>>
 };
 
 const SelectField: FC<SelectFieldPropsItem> = ({
   defaultValue,
   directionOptions,
   setSelect,
+  onChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -24,6 +27,7 @@ const SelectField: FC<SelectFieldPropsItem> = ({
   const handleSelect = (option: TestsOptionsItem) => {
     setSelect(option.title);
     setIsOpen(false);
+    onChange(option.value)
   };
 
   return (

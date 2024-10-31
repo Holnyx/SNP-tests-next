@@ -1,43 +1,85 @@
-import React, { memo } from 'react';
+import React, { FC, memo, useState } from 'react';
+
+import Input from '../Inputs/Input/Input';
+import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
+import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
 
 import s from './QuestionBox.module.sass';
 import cx from 'classnames';
-import Input from '../Inputs/Input/Input';
-import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
+import { QuestionItem } from '@/store/types';
 
-const QuestionBox = () => {
+type QuestionBoxItems = {
+  question: QuestionItem[];
+  takeTest: boolean;
+};
+
+const QuestionBox: FC<QuestionBoxItems> = ({ question, takeTest }) => {
+  const [answerOption, setAnswerOption] = useState(false);
+
   return (
     <div className={s['questions-box']}>
-      <h3 className={s.title}>What is the capital of ahwbdhwadjhbawbdnawbdhbwadbahwdbjhb France?</h3>
-      <ul className={s['answer-list']}>
-        <li className={s['option']}>
+      {question.map(question => {
+        return (
+          <div key={question.id}>
+            <h3 className={s.title}>{question.title}</h3>
+            <ul className={s['answer-list']}>
+              {question.answer.map(answer => {
+                return (
+                  <li className={s['option']}>
+                    <Input
+                      title={answer.title}
+                      type={question.questionType}
+                      name={answer.name}
+                      leftCheck={false}
+                      setInputValue={() => {}}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+
+      {!question && answerOption && (
+        <div className={s['test-title']}>
           <Input
-            title={'Berlin'}
+            title={'Answer the question:'}
+            type={'text'}
+            name={'question'}
+            leftCheck={true}
+            setInputValue={() => {}}
+          />
+
+          <Input
+            title={'Select true answer'}
             type={'checkbox'}
-            name={'Berlin'}
+            name={'selectTrue'}
             leftCheck={false}
+            setInputValue={() => {}}
           />
-          <DeleteButton />
-        </li>
-        <li className={s['option']}>
-          <Input
-            title={'Madrid'}
-            type={'radio'}
-            name={'Madrid'}
-            leftCheck={false}
+          <div className={s.buttons}>
+            <ChangeButton
+              title="Add answer"
+              onClick={() => {}}
+            />
+          </div>
+        </div>
+      )}
+      {!takeTest && (
+        <div className={s.buttons}>
+          <ChangeButton
+            title={'Delete question'}
+            onClick={() => {}}
           />
-          <DeleteButton />
-        </li>
-        <li className={s['option']}>
-          <Input
-            title={''}
-            type={'number'}
-            name={'number'}
-            leftCheck={false}
+          <ChangeButton
+            title={'Add answer'}
+            onClick={() => {
+              setAnswerOption(!answerOption);
+            }}
           />
-          <DeleteButton />
-        </li>
-      </ul>
+        </div>
+      )}
     </div>
   );
 };

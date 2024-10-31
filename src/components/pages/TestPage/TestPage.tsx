@@ -1,21 +1,41 @@
-import React, { memo } from 'react';
+import React, { FC, memo, useEffect, useState } from 'react';
+
+import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
+import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 
 import s from './TestPage.module.sass';
 import cx from 'classnames';
-import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
-import Input from '@/components/commons/Inputs/Input/Input';
-import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
+import { testItemsStateTest } from '@/components/state/testsStateTest';
+import { useRouter } from 'next/router';
 
-const TestPage = () => {
+type TestPageItems = {
+  user: string;
+};
+
+const TestPage: FC<TestPageItems> = ({ user }) => {
+  const [takeTest, setTakeTest] = useState(false);
+  const router = useRouter();
+
   return (
     <div className={s.container}>
-      <h2 className={s.title}> Test Title</h2>
-        <QuestionBox />
+      {testItemsStateTest.map(test => {
+        return (
+          <div key={test.id}>
+            <h2 className={s.title}>{test.title}</h2>
+            <QuestionBox
+              question={test.questions}
+              takeTest={takeTest}
+            />
+          </div>
+        );
+      })}
+
       <div className={s['buttons-box']}>
-        {' '}
         <ChangeButton
           title={'Go Back'}
-          onClick={() => {}}
+          onClick={() => {
+            router.push(`/${user}/takeTests`);
+          }}
         />
         <ChangeButton
           title={'Go Forward'}

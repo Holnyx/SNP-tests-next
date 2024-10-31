@@ -15,7 +15,6 @@
         @include font-style(400,16px,142%,0)
 
         @include mobile
-            width: 100px
             @include font-style(400,14px,142%,0)
 
     .input
@@ -110,6 +109,27 @@
 .radio:checked + .custom-radio::before
     transform: translate(-50%, -50%) scale(1)
 
-
 .margin-right
     margin-right: 20px
+
+.admin-checkbox
+    width: 20px
+    height: 16px
+
+    .custom-checkbox-img
+        width: 10px
+        height: 10px
+
+.admin-container
+    gap: 20px
+    width: auto
+    
+    @include mobile
+        flex-wrap: nowrap
+
+    .admin-label
+        width: 100%
+        @include font-style(400,14px,142%,0)
+
+        @include mobile
+            @include font-style(400,12px,142%,0)

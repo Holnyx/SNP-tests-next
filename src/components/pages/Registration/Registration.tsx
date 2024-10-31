@@ -8,6 +8,7 @@ import ButtonLog from '@/components/commons/Buttons/ButtonLog';
 
 import s from './Registration.module.sass';
 import cx from 'classnames';
+import Input from '@/components/commons/Inputs/Input/Input';
 
 const Registration = () => {
   return (
@@ -35,6 +36,12 @@ const Registration = () => {
             getType={'password'}
             getName={'password-confirmation'}
             getClassName={s.input}
+          />
+          <Input
+            title={'Create an admin account'}
+            type={'checkbox'}
+            name={'selectTrue'}
+            leftCheck={false}
           />
           <div className={s['button-box']}>
             <ButtonLog

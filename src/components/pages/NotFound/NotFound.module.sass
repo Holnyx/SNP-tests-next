@@ -19,14 +19,15 @@
         z-index: -3
         top: 0
         width: 100vw
-        height: 100vh
-        background-image: url('/img/Background.png')
+        height: 100%
+        background-image: url('/img/logIn-img.jpeg')
         background-repeat: no-repeat
         background-attachment: fixed
         background-position: center center
         background-size: cover
         object-fit: cover
-        filter: grayscale(100%)
+        filter: blur(10px) grayscale(100%)
+        transition: 1s filter ease
 
     &::after
         content: ''
@@ -34,8 +35,8 @@
         z-index: -1
         top: 0
         width: 100vw
-        height: 100vh
-        background: rgba(27, 26, 26, 0.353)
+        height: 100%
+        background: rgba(27, 26, 26, 0.551)
 
     .info
         position: relative
@@ -80,3 +81,7 @@
                 background: rgba(255, 255, 255, 0.1)
                 border-radius: 999px
                 backdrop-filter: blur(100px)
+
+.not-found-page.hover
+    &::before
+        filter: blur(5px) grayscale(0%)

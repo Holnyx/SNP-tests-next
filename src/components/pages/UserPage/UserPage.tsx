@@ -7,26 +7,31 @@ import CreateTests from '../CreateTests/CreateTests';
 
 import s from './UserPage.module.sass';
 import cx from 'classnames';
+import Footer from '@/components/commons/Footer/Footer';
 
 type UserPageItems = {
   children: ReactNode;
+  user?: string;
 };
 
-const UserPage: FC<UserPageItems> = ({ children }) => {
+const UserPage: FC<UserPageItems> = ({ children, user }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
-      <HeadComponent title={'User'} />
+      <HeadComponent title={user} />
       <div className={s.background}>
         <Header
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
+          name={user}
         />
         {children}
         <Sidebar
+          user={user}
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
         />
+        <Footer />
       </div>
     </>
   );
