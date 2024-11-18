@@ -35,7 +35,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const [inputValue, setInputValue] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
-  const [errorAnswerList, setErrorAnswerList] = useState(false);
+  // const [errorAnswerList, setErrorAnswerList] = useState(false);
 
   const addAnswerAction = useActionWithPayload(addAnswer);
   const removeAnswerAction = useActionWithPayload(removeAnswer);

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -10,6 +10,30 @@ import s from './Authorization.module.sass';
 import cx from 'classnames';
 
 const Authorization = () => {
+  const [error, setError] = useState(false);
+  const [inputNameValue, setInputNameValue] = useState('');
+  const [inputPasswordValue, setInputPasswordValue] = useState('');
+
+  const checkNameValue =
+    inputNameValue.length >= 3 && inputNameValue.trim() !== '';
+
+  const checkPasswordValue =
+    inputPasswordValue.length >= 5 && inputPasswordValue.trim() !== '';
+
+  const onClickHandlerSignUp = useCallback(() => {
+    if (checkNameValue) {
+      setError(true);
+    } else {
+      setError(true);
+    }
+
+    if (checkPasswordValue) {
+      setError(false);
+    } else {
+      setError(true);
+    }
+  }, [checkNameValue, checkPasswordValue]);
+
   return (
     <div className={s.authorization}>
       <div className={s['login-form']}>
@@ -22,18 +46,23 @@ const Authorization = () => {
             getTitle={'User name'}
             getType={'text'}
             getName={'username'}
-            getClassName={s.input}
+            setInputValue={setInputNameValue}
+            error={error}
+            value={inputNameValue}
           />
           <InputForLogIn
             getTitle={'Password'}
             getType={'password'}
             getName={'password'}
-            getClassName={s.input}
+            setInputValue={setInputPasswordValue}
+            error={error}
+            value={inputPasswordValue}
           />
           <div className={s['button-box']}>
             <ButtonLog
               getTitle={'Sign in'}
               getClassName={s.button}
+              onClick={onClickHandlerSignUp}
             />
             <span className={s['sign-up']}>
               Don't have an account?{' '}
