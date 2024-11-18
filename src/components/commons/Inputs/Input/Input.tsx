@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, memo } from 'react';
+import React, { ChangeEvent, FC, memo, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -13,6 +13,9 @@ type InputItems = {
   name: string;
   leftCheck: boolean;
   setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  value?: string;
+  id?: string;
+  error?: boolean;
 };
 
 const Input: FC<InputItems> = ({
@@ -21,10 +24,17 @@ const Input: FC<InputItems> = ({
   name,
   leftCheck,
   setInputValue,
+  value,
+  id,
+  error,
 }) => {
+  const [isChecked, setIsChecked] = useState(false);
   const router = useRouter();
   const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.currentTarget.value);
+    if (type === 'checkbox') {
+      setIsChecked(e.currentTarget.checked);
+    }
   };
   const changeStyle =
     type === 'checkbox'
@@ -41,24 +51,46 @@ const Input: FC<InputItems> = ({
         [s['admin-container']]: changeStyleAdminCheckbox,
       })}
     >
-      {leftCheck && (
-        <label
-          htmlFor={title}
-          className={s.label}
-        >
-          {title}
-        </label>
+      {type !== 'radio' && (
+        <>
+          {leftCheck && (
+            <label
+              htmlFor={id}
+              className={s.label}
+            >
+              {title}
+            </label>
+          )}
+          <input
+            className={cx(changeStyle, { [s['margin-right']]: title === '' })}
+            type={type}
+            id={id}
+            name={name}
+            checked={isChecked}
+            onChange={onValueChanged}
+            value={value}
+          />
+          {value === '' && error && title.includes('Title') ? (
+            <span className={cx(s['error-message'])}>
+              The title must contain more than one character
+            </span>
+          ) : value === '' && error && title.includes('Answer') ? (
+            <span className={cx(s['error-message'])}>
+              The answer must contain from 1 to 19 characters
+            </span>
+          ) : value && value.length > 19 && title.includes('Answer') ? (
+            <span className={cx(s['error-message'])}>
+              The answer must not exceed 19 characters
+            </span>
+          ) : (
+            ''
+          )}
+        </>
       )}
-      <input
-        className={cx(changeStyle, { [s['margin-right']]: title === '' })}
-        type={type}
-        id={title === 'Select true answer' ? 'myCheckbox' : title}
-        name={name}
-        onChange={onValueChanged}
-      />
+
       {type === 'checkbox' && (
         <label
-          htmlFor={title === 'Select true answer' ? 'myCheckbox' : title}
+          htmlFor={id}
           className={cx(s['custom-checkbox'], {
             [s['admin-checkbox']]: changeStyleAdminCheckbox,
           })}
@@ -72,21 +104,22 @@ const Input: FC<InputItems> = ({
         </label>
       )}
       {type === 'radio' && (
-        <label
-          className={s['custom-radio']}
-          htmlFor={title}
-        >
+        <>
           <input
             className={s['real-radio']}
             type="radio"
-            id={title}
+            id={id}
             name={name}
           />
-        </label>
+          <label
+            className={s['custom-radio']}
+            htmlFor={id}
+          />
+        </>
       )}
       {!leftCheck && title !== '' && (
         <label
-          htmlFor={title}
+          htmlFor={id}
           className={cx(s.label, {
             [s['admin-label']]: changeStyleAdminCheckbox,
           })}

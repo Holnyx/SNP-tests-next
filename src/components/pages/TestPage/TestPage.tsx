@@ -1,12 +1,13 @@
 import React, { FC, memo, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 
+import { testItemsStateTest } from '@/components/state/testsStateTest';
+
 import s from './TestPage.module.sass';
 import cx from 'classnames';
-import { testItemsStateTest } from '@/components/state/testsStateTest';
-import { useRouter } from 'next/router';
 
 type TestPageItems = {
   user: string;

@@ -1,9 +1,10 @@
 import React, { memo, useState } from 'react';
+import { useRouter } from 'next/router';
+
+import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 
 import s from './NotFound.module.sass';
 import cx from 'classnames';
-import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
-import { useRouter } from 'next/router';
 
 const NotFoundPage = () => {
   const [isHover, setIsHover] = useState(false);

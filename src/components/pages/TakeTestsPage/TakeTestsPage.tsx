@@ -1,12 +1,13 @@
 import React, { Dispatch, FC, memo, SetStateAction } from 'react';
+import { useRouter } from 'next/router';
 
 import DeleteButton from '@/components/commons/Buttons/DeleteButton/DeleteButton';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 
+import { testItemsStateTest } from '@/components/state/testsStateTest';
+
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
-import { testItemsStateTest } from '@/components/state/testsStateTest';
-import { useRouter } from 'next/router';
 
 type TakeTestsPageItems = {
   user: string;

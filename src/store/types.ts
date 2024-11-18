@@ -25,3 +25,22 @@ export type TestsState = {
 };
 
 export type TestsOptionsForSelect = 'none' | 'radio' | 'checkbox' | 'number';
+
+export type SelectedTestItems = {
+  title: string;
+  questions: [
+    {
+      id: string;
+      title: string;
+      questionType: TestsOptionsForSelect;
+      answer: [
+        {
+          id: string;
+          title: string;
+          name: string;
+          isTrue: boolean;
+        }
+      ];
+    }
+  ];
+};

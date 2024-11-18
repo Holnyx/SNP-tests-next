@@ -42,27 +42,38 @@
         justify-content: center
         align-items: center
         gap: 25px
-        max-width: 750px
+        max-width: 850px
         width: 100%
 
         .test-title
             display: flex
             flex-direction: row
             justify-content: center
-            align-items: flex-start
+            align-items: center
             flex-wrap: wrap
-            gap: 20px
-            max-width: 750px
+            gap: 30px
             width: 100%
-            padding: 15px
+            padding: 40px 15px
             border: 1px solid rgba(255, 255, 255, 0.1)
             border-radius: 30px
             box-sizing: border-box
 
             @include mobile
                 max-width: 310px
-                gap: 14px
+                gap: 20px
 
 .buttons
     display: flex
     gap: 20px
+
+
+.error
+    padding-bottom: 40px
+
+.error-message
+    width: 100%
+    color: $color-red
+    @include font-style(300,12px,142%,0)
+
+    @include mobile
+        font-size: 8px

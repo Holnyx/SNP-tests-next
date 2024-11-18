@@ -2,23 +2,22 @@
 @import '../../../../styles/mixins'
 
 .container
-    position: relative
     display: flex
     justify-content: center
     align-items: center
-    gap: 10px
+    gap: 5px
 
     @include mobile
         flex-wrap: wrap
 
     .label
+        width: 100px
         @include font-style(400,16px,142%,0)
 
         @include mobile
             @include font-style(400,14px,142%,0)
 
     .input
-        width: 100%
         padding: 10px 20px
         @include font-style(400,16px,142%,0)
         background-color: $color-gray
@@ -99,14 +98,14 @@
             width: 10px
             height: 10px
 
-.real-radio
+.radio, .real-radio
     position: absolute
     z-index: -1
     width: 0
     height: 0
     opacity: 0
 
-.real-radio:checked + .custom-radio::before
+.radio:checked + .custom-radio::before
     transform: translate(-50%, -50%) scale(1)
 
 .margin-right
@@ -123,7 +122,7 @@
 .admin-container
     gap: 20px
     width: auto
-
+    
     @include mobile
         flex-wrap: nowrap
 
@@ -133,15 +132,3 @@
 
         @include mobile
             @include font-style(400,12px,142%,0)
-
-.error-message
-    position: absolute
-    bottom: -23px
-    right: 0
-    width: 100%
-    color: $color-red
-    @include font-style(300,12px,142%,0)
-
-    @include mobile
-        bottom: -15px
-        font-size: 8px

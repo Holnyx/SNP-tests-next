@@ -1,24 +1,27 @@
 import React, { FC, memo, useState } from 'react';
-import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
+import { useRouter } from 'next/router';
 import Image from 'next/image';
 
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
+import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
+import useBodyScrollLock from '@/hooks/useBodyScrollLock';
+
 import s from './ModalWindow.module.sass';
 import cx from 'classnames';
-import useBodyScrollLock from '@/hooks/useBodyScrollLock';
-import { useRouter } from 'next/router';
 
 type ModalWindowItems = {
   modalWindowIsOpen: boolean;
   titleModalWindow: string;
   setModalWindowIsOpen: () => void;
+  setModalFunctionOnClick: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ModalWindow: FC<ModalWindowItems> = ({
   modalWindowIsOpen,
   titleModalWindow,
   setModalWindowIsOpen,
+  setModalFunctionOnClick,
 }) => {
   const router = useRouter();
   const replaceButton = router.pathname === '/admin/takeTests';
@@ -54,13 +57,17 @@ const ModalWindow: FC<ModalWindowItems> = ({
           <div className={s['buttons_box']}>
             <ChangeButton
               title={'Cancel'}
-              onClick={setModalWindowIsOpen}
+              onClick={() => {
+                setModalWindowIsOpen();
+                setModalFunctionOnClick(false);
+              }}
             />
             <ChangeButton
               title={'Yes'}
               onClick={() => {
                 onClickHandlerButtonForTakeTest();
-                setModalWindowIsOpen()
+                setModalWindowIsOpen();
+                setModalFunctionOnClick(true);
               }}
             />
           </div>

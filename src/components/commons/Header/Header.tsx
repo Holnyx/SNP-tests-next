@@ -1,4 +1,5 @@
 import React, { FC, memo } from 'react';
+import { useRouter } from 'next/router';
 import Image from 'next/image';
 
 import adminIcon from '/public/img/admin-icon.svg?url';
@@ -8,7 +9,6 @@ import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 
 import s from './Header.module.sass';
 import cx from 'classnames';
-import { useRouter } from 'next/router';
 
 type HeaderItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -18,7 +18,9 @@ type HeaderItems = {
 
 const Header: FC<HeaderItems> = ({ showSidebar, menuOpen, name }) => {
   const router = useRouter();
-  const isTakeTests = router.pathname === '/admin/takeTests' || router.pathname === '/user/takeTests';
+  const isTakeTests =
+    router.pathname === '/admin/takeTests' ||
+    router.pathname === '/user/takeTests';
 
   return (
     <header className={s.container}>

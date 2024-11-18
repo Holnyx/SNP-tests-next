@@ -5,10 +5,10 @@ import Link from 'next/link';
 import leafImage from '/public/img/logIn-img.jpeg';
 import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
+import Input from '@/components/commons/Inputs/Input/Input';
 
 import s from './Registration.module.sass';
 import cx from 'classnames';
-import Input from '@/components/commons/Inputs/Input/Input';
 
 const Registration = () => {
   return (
@@ -42,6 +42,7 @@ const Registration = () => {
             type={'checkbox'}
             name={'selectTrue'}
             leftCheck={false}
+            setInputValue={() => {}}
           />
           <div className={s['button-box']}>
             <ButtonLog

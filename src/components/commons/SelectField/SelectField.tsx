@@ -1,15 +1,15 @@
-import React, { ChangeEvent, Dispatch, FC, memo, SetStateAction, useState } from 'react';
+import React, { Dispatch, FC, memo, SetStateAction, useState } from 'react';
 import { TestsOptionsItem } from '@/components/state/testsOptions';
 
 import s from './SelectField.module.sass';
 import cx from 'classnames';
-import { TestsOptionsForSelect } from '@/store/types';
 
 type SelectFieldPropsItem = {
   defaultValue: string;
   directionOptions: TestsOptionsItem[];
   setSelect: React.Dispatch<React.SetStateAction<string>>;
-  onChange: Dispatch<SetStateAction<string>>
+  onChange: Dispatch<SetStateAction<string>>;
+  error: boolean;
 };
 
 const SelectField: FC<SelectFieldPropsItem> = ({
@@ -17,6 +17,7 @@ const SelectField: FC<SelectFieldPropsItem> = ({
   directionOptions,
   setSelect,
   onChange,
+  error,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -27,7 +28,7 @@ const SelectField: FC<SelectFieldPropsItem> = ({
   const handleSelect = (option: TestsOptionsItem) => {
     setSelect(option.title);
     setIsOpen(false);
-    onChange(option.value)
+    onChange(option.value);
   };
 
   return (
@@ -60,6 +61,9 @@ const SelectField: FC<SelectFieldPropsItem> = ({
               )
           )}
         </div>
+      )}
+      {error && defaultValue === 'Select question type' && (
+        <span className={cx(s['error-message'])}>Select question type</span>
       )}
     </div>
   );

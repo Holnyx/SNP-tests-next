@@ -1,13 +1,12 @@
-import React, { Children, FC, memo, ReactNode, useState } from 'react';
+import React, { FC, memo, ReactNode, useState } from 'react';
 
 import Header from '@/components/commons/Header/Header';
 import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
 import Sidebar from '@/components/commons/Sidebar/Sidebar';
-import CreateTests from '../CreateTests/CreateTests';
+import Footer from '@/components/commons/Footer/Footer';
 
 import s from './UserPage.module.sass';
 import cx from 'classnames';
-import Footer from '@/components/commons/Footer/Footer';
 
 type UserPageItems = {
   children: ReactNode;

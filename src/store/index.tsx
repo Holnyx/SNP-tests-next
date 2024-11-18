@@ -1,22 +1,21 @@
-import { combineReducers } from 'redux';
-import createSagaMiddleware from 'redux-saga';
+import { applyMiddleware, combineReducers, legacy_createStore } from 'redux';
 import { configureStore } from '@reduxjs/toolkit';
-// import musicReducer from './musicReducer';
-// import rootSaga from '@/saga/musicSaga';
-
-const sagaMiddleware = createSagaMiddleware();
+import questionReducer from './questionReduser';
+import testReducer from './testReduser';
+import { thunk } from 'redux-thunk';
+import answersReducer from './answersReducer';
 
 const rootReducer = combineReducers({
-  // musicList: musicReducer,
+  questions: questionReducer,
+  tests: testReducer,
+  answers: answersReducer,
 });
 
-export const store = configureStore({
-  reducer: rootReducer,
-  middleware: getDefaultMiddleware =>
-    getDefaultMiddleware().concat(sagaMiddleware),
-});
+export const store = legacy_createStore(
+  rootReducer,
+  {},
+  applyMiddleware(thunk)
+);
 export type AppRootStateItems = ReturnType<typeof rootReducer>;
-
-// sagaMiddleware.run(rootSaga);
 
 export default store;
