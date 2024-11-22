@@ -9,6 +9,7 @@ import React, {
 import { useSelector } from 'react-redux';
 import { v1 } from 'uuid';
 import { useRouter } from 'next/router';
+import { getCookie, setCookie } from 'cookies-next';
 
 import { testsOptions } from '@/components/state/testsOptions';
 
@@ -17,9 +18,10 @@ import Input from '@/components/commons/Inputs/Input/Input';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 
-import { QuestionItem, TestsOptionsForSelect } from '@/store/types';
+import { QuestionItem, TestsItem, TestsOptionsForSelect } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
-import { addQuestion } from '@/store/questionReduser';
+import { addQuestion, removeAllQuestion } from '@/store/questionReduser';
+import { addTest } from '@/store/testReduser';
 import { questionSelector } from '@/store/selectors';
 
 import s from './CreateTests.module.sass';
@@ -49,6 +51,8 @@ const CreateTests: FC<CreateTestsItems> = ({
   const [errorList, setErrorList] = useState(false);
   const router = useRouter();
 
+  const addTestAction = useActionWithPayload(addTest);
+  const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
   const addQuestionAction = useActionWithPayload(addQuestion);
   const allQuestions = useSelector(questionSelector);
 
@@ -76,7 +80,8 @@ const CreateTests: FC<CreateTestsItems> = ({
     },
     [addQuestionAction, checkQuestionValue, cleanInputs]
   );
-  const saveClickHandler = useCallback(() => {
+
+  const saveQuestionClickHandler = useCallback(() => {
     const newQuestion: QuestionItem = {
       id: v1(),
       title: inputValue,
@@ -86,24 +91,11 @@ const CreateTests: FC<CreateTestsItems> = ({
     addQuestionHandler(newQuestion);
   }, [addQuestionHandler, inputValue, selectType]);
 
-  const changeTitleModalWindow = (editTitle: string, createTitle: string) => {
-    if (pathRouteEdit && error) {
-      setTitleModalWindow(editTitle);
-    } else if (pathRouteCreate) {
-      setTitleModalWindow(createTitle);
-    }
-  };
-  useEffect(() => {
-    if (allQuestions.length >= 2) {
-      setErrorList(false);
-    }
-  }, [allQuestions.length]);
-
   const onClickHandlerSaveTest = useCallback(() => {
     if (!checkTestTitleValue) {
-      setErrorTestTitle(true);
-    } else {
       setErrorTestTitle(false);
+    } else {
+      setErrorTestTitle(true);
     }
 
     if (allQuestions.length < 2) {
@@ -120,6 +112,52 @@ const CreateTests: FC<CreateTestsItems> = ({
       );
     }
   }, [checkTestTitleValue, allQuestions.length]);
+
+  const addTestHandler = useCallback(
+    (test: TestsItem) => {
+      if (!checkQuestionValue) {
+        addTestAction(test);
+        cleanInputs();
+        setError(false);
+      } else {
+        setError(true);
+      }
+    },
+    [addTestAction, checkQuestionValue, cleanInputs]
+  );
+  const saveTestClickHandler = useCallback(() => {
+    const newTest: TestsItem = {
+      id: v1(),
+      title: testTitleValue,
+      questions: allQuestions,
+    };
+    addTestHandler(newTest);
+    console.log(newTest);
+  }, [addTestHandler, testTitleValue, allQuestions]);
+
+  const changeTitleModalWindow = (editTitle: string, createTitle: string) => {
+    if (pathRouteEdit && error) {
+      setTitleModalWindow(editTitle);
+    } else if (pathRouteCreate) {
+      setTitleModalWindow(createTitle);
+    }
+  };
+
+  useEffect(() => {
+    if (modalFunctionOnClick) {
+      saveTestClickHandler();
+      cleanInputs();
+      setTestTitleValue('');
+      setErrorTestTitle(false);
+      removeAllQuestionAction();
+    }
+  }, [modalFunctionOnClick]);
+
+  useEffect(() => {
+    if (allQuestions.length >= 2) {
+      setErrorList(false);
+    }
+  }, [allQuestions.length]);
 
   const pathRouteEdit = router.pathname === '/admin/editTest';
   const pathRouteCreate = router.pathname === '/admin/createTests';
@@ -160,7 +198,7 @@ const CreateTests: FC<CreateTestsItems> = ({
           <ChangeButton
             title={'Add question'}
             onClick={() => {
-              saveClickHandler();
+              saveQuestionClickHandler();
             }}
           />
         </div>

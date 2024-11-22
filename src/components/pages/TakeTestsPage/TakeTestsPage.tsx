@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, memo, SetStateAction } from 'react';
+import React, { Dispatch, FC, memo, SetStateAction, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 import DeleteButton from '@/components/commons/Buttons/DeleteButton/DeleteButton';
@@ -8,6 +8,11 @@ import { testItemsStateTest } from '@/components/state/testsStateTest';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
+import { useSelector } from 'react-redux';
+import { testSelector } from '@/store/selectors';
+import { useActionWithPayload } from '@/hooks/useAction';
+import { initTestsFromStorage } from '@/store/testReduser';
+import { getCookie, setCookie } from 'cookies-next';
 
 type TakeTestsPageItems = {
   user: string;
@@ -22,10 +27,12 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
 }) => {
   const router = useRouter();
 
+  const allTests = useSelector(testSelector);
+
   return (
     <div className={s.container}>
       <h2 className={s.title}> Take Test</h2>
-      {testItemsStateTest.map(test => {
+      {allTests.map(test => {
         return (
           <div
             className={s['tests-box']}

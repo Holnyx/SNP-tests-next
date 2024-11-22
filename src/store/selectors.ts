@@ -3,19 +3,16 @@ import { AppRootStateItems } from '.';
 import { AnswerItem, QuestionItem, TestsItem } from './types';
 
 const questionsSelector = (state: AppRootStateItems) => state.questions;
-const testsSelector = (state: AppRootStateItems) => state.tests;
+const testsSelector = (state: AppRootStateItems) => state.tests.testsList;
 const answersSelector = (state: AppRootStateItems) => state.answers;
 
-export const answerSelector = createSelector(questionsSelector, state => [
-  ...state,
-]);
+export const answerSelector = createSelector(questionsSelector, state => state);
 
-export const questionSelector = createSelector(questionsSelector, state => [
-  ...state,
-]);
-export const testSelector = createSelector(testsSelector, state => [
-  ...state.testsList,
-]);
+export const questionSelector = createSelector(
+  questionsSelector,
+  state => state
+);
+export const testSelector = createSelector(testsSelector, state => state);
 // export const searchQuerySelector = createSelector(
 //   rootSelector,
 //   state => state.tests

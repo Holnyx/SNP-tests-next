@@ -13,6 +13,9 @@ const questionSlice = createSlice({
     removeQuestion(state, action: PayloadAction<{ questionId: string }>) {
       return state.filter(element => element.id !== action.payload.questionId);
     },
+    removeAllQuestion(state) {
+      return [];
+    },
     addAnswer(
       state,
       action: PayloadAction<{ questionId: string; answer: AnswerItem }>
@@ -41,7 +44,7 @@ const questionSlice = createSlice({
   },
 });
 
-export const { addQuestion, removeQuestion, addAnswer, removeAnswer } =
+export const { addQuestion, removeQuestion, addAnswer, removeAnswer, removeAllQuestion } =
   questionSlice.actions;
 
 export default questionSlice.reducer;

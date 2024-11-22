@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useState } from 'react';
+import React, { FC, memo, SetStateAction, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { v1 } from 'uuid';
 
@@ -20,7 +20,7 @@ type QuestionBoxItems = {
   question: QuestionItem;
   takeTest: boolean;
   changeTitleModalWindow: (editTitle: string, createTitle: string) => void;
-  setModalWindowIsOpen: () => void;
+  setModalWindowIsOpen: React.Dispatch<SetStateAction<boolean>>;
   modalFunctionOnClick: boolean;
 };
 
@@ -41,8 +41,6 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const removeAnswerAction = useActionWithPayload(removeAnswer);
   const removeQuestionAction = useActionWithPayload(removeQuestion);
   const allQuestions = useSelector(questionSelector);
-
-  console.log(allQuestions);
 
   const checkAnswerValue =
     inputValue.length >= 3 &&
@@ -106,7 +104,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       'Are you sure you want to delete the question?',
       'Are you sure you want to delete the question?'
     );
-    setModalWindowIsOpen();
+    setModalWindowIsOpen(true);
     if (modalFunctionOnClick) {
       removeQuestionHandler(question.id);
     }

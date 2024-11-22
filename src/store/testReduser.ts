@@ -49,11 +49,15 @@ const testSlice = createSlice({
   initialState,
   reducers: {
     addTest(state, action: PayloadAction<TestsItem>) {
-      state.testsList.unshift(action.payload);
+      state.testsList.push(action.payload);
+    },
+
+    initTestsFromStorage: (state, action: PayloadAction<TestsItem[]>) => {
+      state.testsList = [...action.payload];
     },
   },
 });
 
-export const { addTest } = testSlice.actions;
+export const { addTest, initTestsFromStorage } = testSlice.actions;
 
 export default testSlice.reducer;

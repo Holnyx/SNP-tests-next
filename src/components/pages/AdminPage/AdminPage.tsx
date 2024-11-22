@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 
@@ -14,11 +14,15 @@ import TestPage from '../TestPage/TestPage';
 import {
   selectedQuestionSelector,
   selectedTestSelector,
+  testSelector,
 } from '@/store/selectors';
 import { SelectedTestItems, TestsOptionsForSelect } from '@/store/types';
 
 import s from './AdminPage.module.sass';
 import cx from 'classnames';
+import { useActionWithPayload } from '@/hooks/useAction';
+import { initTestsFromStorage } from '@/store/testReduser';
+import { getCookie, setCookie } from 'cookies-next';
 
 type AdminPageItems = {
   admin?: string;
@@ -115,6 +119,27 @@ const AdminPage: FC<AdminPageItems> = ({ admin }) => {
   // selectedMusicId={selectedMusicId}
 
   ////////////////
+  const allTests = useSelector(testSelector);
+  const InitTestsFromStorageAction = useActionWithPayload(initTestsFromStorage);
+
+  useEffect(() => {
+    const storedTests = getCookie('tests');
+    if (storedTests) {
+      InitTestsFromStorageAction(JSON.parse(storedTests));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (allTests.length > 0) {
+      setCookie('tests', JSON.stringify(allTests), {
+        path: '/',
+        sameSite: 'lax',
+      });
+    } else {
+      setCookie('tests', '');
+    }
+  }, [allTests]);
+
 
   return (
     <>
