@@ -4,16 +4,18 @@ import AdminPage from '@/components/pages/AdminPage/AdminPage';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getCookie } from 'cookies-next';
 import { TestsItem } from '@/store/types';
+import UserPage from '@/components/pages/UserPage/UserPage';
 
 const TestPage = ({
   user,
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
-    <AdminPage
-      admin="admin"
+    <UserPage
+      user="user"
       id={id}
-    ></AdminPage>
+      search={''}
+    ></UserPage>
   );
 };
 

@@ -1,8 +1,15 @@
-import React, { Dispatch, FC, memo, SetStateAction, useCallback } from 'react';
+import React, {
+  Dispatch,
+  FC,
+  memo,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-
 
 import DeleteButton from '@/components/commons/Buttons/DeleteButton/DeleteButton';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
@@ -13,6 +20,8 @@ import { useActionWithPayload } from '@/hooks/useAction';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
+import { useDebounce } from '@/hooks/useDebounce';
+import { TestsItem } from '@/store/types';
 
 type TakeTestsPageItems = {
   user: string;
@@ -20,6 +29,9 @@ type TakeTestsPageItems = {
   setTitleModalWindow: Dispatch<SetStateAction<string>>;
   editTest: (id: string) => void;
   modalFunctionOnClick: boolean;
+  search: string;
+  isSearching: boolean;
+  results: TestsItem[];
 };
 
 const TakeTestsPage: FC<TakeTestsPageItems> = ({
@@ -28,11 +40,13 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   setTitleModalWindow,
   editTest,
   modalFunctionOnClick,
+  search,
+  isSearching,
+  results,
 }) => {
   const router = useRouter();
 
   const allTests = useSelector(testSelector);
-
   const removeTestAction = useActionWithPayload(removeTest);
 
   const onClickHandlerDelete = useCallback(
@@ -53,42 +67,46 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
 
   return (
     <div className={s.container}>
-
       <h2 className={s.title}> Take Test</h2>
-      {allTests.map(test => {
-        return (
-          <div
-            className={s['tests-box']}
-            key={test.id}
-          >
-            <div className={s.test}>
-              <span>{test.title}</span>
-              {user !== 'user' && (
-                <DeleteButton
+      {isSearching && <div className={s['search-title']}>Searching ...</div>}
+      {!isSearching &&
+        results.map(test => {
+          return (
+            <div
+              className={s['tests-box']}
+              key={test.id}
+            >
+              <div className={s.test}>
+                <span>{test.title}</span>
+                {user !== 'user' && (
+                  <DeleteButton
+                    onClick={() => {
+                      onClickHandlerDelete(test.id);
+                    }}
+                  />
+                )}
+                {router.pathname !== '/user/takeTests' && (
+                  <ChangeButton
+                    title={'Edit test'}
+                    onClick={() => {
+                      editTest(test.id);
+                      router.push(`/${user}/editTest/${test.id}`);
+                    }}
+                  />
+                )}
+
+                <ChangeButton
+                  title={'Take the Test'}
                   onClick={() => {
-                    onClickHandlerDelete(test.id);
+                    setTitleModalWindow('Start taking the test?');
+                    setModalWindowIsOpen();
                   }}
                 />
-              )}
-              <ChangeButton
-                title={'Edit test'}
-                onClick={() => {
-                  editTest(test.id);
-                  router.push(`/${user}/editTest/${test.id}`);
-                }}
-              />
-              <ChangeButton
-                title={'Take the Test'}
-                onClick={() => {
-                  setTitleModalWindow('Start taking the test?');
-                  setModalWindowIsOpen();
-                }}
-              />
-              <span className={s['test-date']}>{formatDate(test.date)}</span>
+                <span className={s['test-date']}>{formatDate(test.date)}</span>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
     </div>
   );
 };

@@ -13,6 +13,7 @@ const TestPage = ({
     <AdminPage
       admin="admin"
       id={id}
+      search={''}
     ></AdminPage>
   );
 };

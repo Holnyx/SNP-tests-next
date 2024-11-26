@@ -1,12 +1,4 @@
-import React, {
-  FC,
-  memo,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
-import { useSelector } from 'react-redux';
+import React, { FC, memo, SetStateAction, useCallback, useState } from 'react';
 import { v1 } from 'uuid';
 
 import Input from '../Inputs/Input/Input';
@@ -133,15 +125,6 @@ const QuestionBox: FC<QuestionBoxItems> = ({
                   key={answer.id}
                   className={s['option']}
                 >
-                  {/* <Input
-                    title={answer.title}
-                    type={question.questionType}
-                    name={answer.name}
-                    leftCheck={false}
-                    setInputValue={() => {}}
-                    id={answer.id}
-                    error={error}
-                  /> */}
                   <span>{answer.title}</span>
                   <DeleteButton
                     onClick={() => {

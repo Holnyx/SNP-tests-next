@@ -36,6 +36,9 @@ const testSlice = createSlice({
     initTestsFromStorage: (state, action: PayloadAction<TestsItem[]>) => {
       state.testsList = [...action.payload];
     },
+    setSearchQuery(state, action: PayloadAction<string>) {
+      state.searchQuery = action.payload;
+    },
   },
 });
 
@@ -45,6 +48,7 @@ export const {
   removeTest,
   sortTestsByDateAsc,
   sortTestsByDateDesc,
+  setSearchQuery,
 } = testSlice.actions;
 
 export default testSlice.reducer;

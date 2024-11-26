@@ -12,33 +12,105 @@ import CreateTests from '../CreateTests/CreateTests';
 import TakeTestsPage from '../TakeTestsPage/TakeTestsPage';
 import TestPage from '../TestPage/TestPage';
 
+import { useDebounce } from '@/hooks/useDebounce';
+import { TestsItem } from '@/store/types';
 import { selectedTestSelector, testSelector } from '@/store/selectors';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { initTestsFromStorage } from '@/store/testReduser';
 
 import s from './AdminPage.module.sass';
 import cx from 'classnames';
-import { QuestionItem, TestsItem } from '@/store/types';
 
 type AdminPageItems = {
   admin?: string;
   id?: string;
+  search: string;
 };
 
-const AdminPage: FC<AdminPageItems> = ({ admin, id }) => {
+const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalWindowIsOpen, setModalWindowIsOpen] = useState(false);
   const [titleModalWindow, setTitleModalWindow] = useState('');
   const [modalFunctionOnClick, setModalFunctionOnClick] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(search);
+  const [isSearching, setIsSearching] = useState(false);
+  const [results, setResults] = useState<TestsItem[]>([]);
+  const [creationDate, setCreationDate] = useState('');
+
+  const [selectedTestItem, setSelectedTestItem] = useState<TestsItem>({
+    id: '',
+    title: '',
+    date: '',
+    questions: [],
+  });
 
   const router = useRouter();
-
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
+  const selectedTest = useSelector(state => selectedTestSelector(state, id));
   const InitTestsFromStorageAction = useActionWithPayload(initTestsFromStorage);
 
   const onClickHandler = useCallback(() => {
     setModalWindowIsOpen(prevValue => !prevValue);
   }, []);
+
+  const editTest = useCallback(
+    (testId: string) => {
+      if (selectedTest) {
+        setSelectedTestItem({
+          id: testId,
+          title: selectedTest.title,
+          date: '',
+          questions: selectedTest.questions,
+        });
+      }
+    },
+    [selectedTest]
+  );
+
+  const getCurrentDate = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
+
+  const searchCharacters = (search: string): Promise<TestsItem[]> => {
+    return new Promise<TestsItem[]>(resolve => {
+      const filteredTests = allTests.filter(test =>
+        test.title.toLowerCase().includes(search.toLowerCase())
+      );
+      resolve(filteredTests);
+    });
+  };
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      setIsSearching(true);
+      setTimeout(() => {
+        searchCharacters(debouncedSearchTerm).then((results: TestsItem[]) => {
+          setIsSearching(false);
+          setResults(results);
+        });
+      }, 500);
+    } else {
+      setResults(allTests);
+      setIsSearching(false);
+    }
+  }, [debouncedSearchTerm, allTests]);
+
+  useEffect(() => {
+    if (id && selectedTest) {
+      setSelectedTestItem({
+        id,
+        title: selectedTest.title,
+        date: '',
+        questions: selectedTest.questions,
+      });
+    }
+  }, [id, selectedTest]);
 
   useEffect(() => {
     const storedTests = getCookie('tests');
@@ -58,51 +130,6 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id }) => {
     }
   }, [allTests]);
 
-  const [selectedTestItem, setSelectedTestItem] = useState<TestsItem>({
-    id: '',
-    title: '',
-    date: '',
-    questions: [],
-  });
-  const selectedTest = useSelector(state => selectedTestSelector(state, id));
-
-  const editTest = useCallback(
-    (testId: string) => {
-      if (selectedTest) {
-        setSelectedTestItem({
-          id: testId,
-          title: selectedTest.title,
-          date: '',
-          questions: selectedTest.questions,
-        });
-      }
-    },
-    [selectedTest]
-  );
-
-  useEffect(() => {
-    if (id && selectedTest) {
-      setSelectedTestItem({
-        id,
-        title: selectedTest.title,
-        date: '',
-        questions: selectedTest.questions,
-      });
-    }
-  }, [id, selectedTest]);
-
-  const [creationDate, setCreationDate] = useState('');
-
-  const getCurrentDate = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // Месяцы от 0 до 11
-    const day = String(now.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-  };
-console.log(getCurrentDate);
-
   return (
     <>
       <HeadComponent title={'Admin'} />
@@ -116,6 +143,8 @@ console.log(getCurrentDate);
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
           name={admin}
+          defaultSearchValue={debouncedSearchTerm}
+          setSearchTerm={setSearchTerm}
         />
 
         {(router.asPath.startsWith('/admin/createTests') ||
@@ -138,6 +167,9 @@ console.log(getCurrentDate);
             setTitleModalWindow={setTitleModalWindow}
             editTest={editTest}
             modalFunctionOnClick={modalFunctionOnClick}
+            search={search}
+            isSearching={isSearching}
+            results={results}
           />
         )}
         {router.pathname === `/admin/testPage/${id}` && (

@@ -11,19 +11,32 @@ import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 import s from './Header.module.sass';
 import cx from 'classnames';
 import { useActionWithPayload } from '@/hooks/useAction';
-import { sortTestsByDateAsc, sortTestsByDateDesc } from '@/store/testReduser';
+import {
+  setSearchQuery,
+  sortTestsByDateAsc,
+  sortTestsByDateDesc,
+} from '@/store/testReduser';
 
 type HeaderItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   menuOpen: boolean;
   name?: string;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  defaultSearchValue: string;
 };
 
-const Header: FC<HeaderItems> = ({ showSidebar, menuOpen, name }) => {
+const Header: FC<HeaderItems> = ({
+  showSidebar,
+  menuOpen,
+  name,
+  setSearchTerm,
+  defaultSearchValue,
+}) => {
   const [onClickSort, setOnClickSort] = useState(false);
-  
+
   const router = useRouter();
 
+  const setSearchQueryAction = useActionWithPayload(setSearchQuery);
   const sortTestsByDateAscAction = useActionWithPayload(sortTestsByDateAsc);
   const sortTestsByDateDescAction = useActionWithPayload(sortTestsByDateDesc);
 
@@ -33,10 +46,23 @@ const Header: FC<HeaderItems> = ({ showSidebar, menuOpen, name }) => {
     } else {
       sortTestsByDateAscAction();
     }
-    console.log(onClickSort);
-
     setOnClickSort(prevValue => !prevValue);
   }, [onClickSort]);
+
+  const handleSearchChange = useCallback(
+    (query: string) => {
+      if (query) {
+        setSearchQueryAction(query);
+        router.push({
+          pathname: router.pathname,
+          query: { ...router.query, search: query },
+        });
+      } else {
+        router.push(router.pathname);
+      }
+    },
+    [router, setSearchQuery]
+  );
 
   const isTakeTests =
     router.pathname === '/admin/takeTests' ||
@@ -50,7 +76,12 @@ const Header: FC<HeaderItems> = ({ showSidebar, menuOpen, name }) => {
       />
       {isTakeTests ? (
         <div className={s['search']}>
-          <SearchInput />
+          <SearchInput
+            setSearchTerm={setSearchTerm}
+            defaultValue={defaultSearchValue}
+            onSearchChange={handleSearchChange}
+            clearSearchInput={setSearchQueryAction}
+          />
           <Image
             className={cx(s['sort-icon'], {
               [s['sort-icon-click']]: onClickSort,
