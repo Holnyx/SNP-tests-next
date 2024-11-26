@@ -1,4 +1,4 @@
-import React, { FC, memo, useState } from 'react';
+import React, { FC, memo, useCallback, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
@@ -10,6 +10,8 @@ import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 
 import s from './Header.module.sass';
 import cx from 'classnames';
+import { useActionWithPayload } from '@/hooks/useAction';
+import { sortTestsByDateAsc, sortTestsByDateDesc } from '@/store/testReduser';
 
 type HeaderItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -19,7 +21,23 @@ type HeaderItems = {
 
 const Header: FC<HeaderItems> = ({ showSidebar, menuOpen, name }) => {
   const [onClickSort, setOnClickSort] = useState(false);
+  
   const router = useRouter();
+
+  const sortTestsByDateAscAction = useActionWithPayload(sortTestsByDateAsc);
+  const sortTestsByDateDescAction = useActionWithPayload(sortTestsByDateDesc);
+
+  const onClickSortFunction = useCallback(() => {
+    if (onClickSort) {
+      sortTestsByDateDescAction();
+    } else {
+      sortTestsByDateAscAction();
+    }
+    console.log(onClickSort);
+
+    setOnClickSort(prevValue => !prevValue);
+  }, [onClickSort]);
+
   const isTakeTests =
     router.pathname === '/admin/takeTests' ||
     router.pathname === '/user/takeTests';
@@ -39,7 +57,7 @@ const Header: FC<HeaderItems> = ({ showSidebar, menuOpen, name }) => {
             })}
             src={sortIcon}
             alt={'adminIcon'}
-            onClick={() => setOnClickSort(prevValue => !prevValue)}
+            onClick={onClickSortFunction}
           />
         </div>
       ) : (
