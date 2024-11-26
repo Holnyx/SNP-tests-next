@@ -26,12 +26,18 @@ const ModalWindow: FC<ModalWindowItems> = ({
   const router = useRouter();
   const replaceButton = router.pathname === '/admin/takeTests';
   const replaceButtonToTakeTest = router.pathname === '/admin/createTests';
+  
   const onClickHandlerButtonForTakeTest = () => {
-    if (replaceButton) {
-      router.push('/admin/testPage');
-    }
-    if (replaceButtonToTakeTest) {
+    if (replaceButtonToTakeTest && titleModalWindow.includes('save')) {
       router.push('/admin/takeTests');
+      return;
+    }
+    if (replaceButton && titleModalWindow.includes('taking')) {
+      router.push('/admin/testPage');
+      return;
+    }
+    if (replaceButton && titleModalWindow.includes('delete')) {
+      return;
     }
   };
 

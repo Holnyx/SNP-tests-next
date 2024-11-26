@@ -1,7 +1,8 @@
-import React, { FC, memo } from 'react';
+import React, { FC, memo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
+import sortIcon from '/public/img/sort-icon.svg?url';
 import adminIcon from '/public/img/admin-icon.svg?url';
 import userIcon from '/public/img/user-icon.svg?url';
 import SearchInput from '../SearchInput/SearchInput';
@@ -17,6 +18,7 @@ type HeaderItems = {
 };
 
 const Header: FC<HeaderItems> = ({ showSidebar, menuOpen, name }) => {
+  const [onClickSort, setOnClickSort] = useState(false);
   const router = useRouter();
   const isTakeTests =
     router.pathname === '/admin/takeTests' ||
@@ -28,7 +30,22 @@ const Header: FC<HeaderItems> = ({ showSidebar, menuOpen, name }) => {
         showSidebar={showSidebar}
         menuOpen={menuOpen}
       />
-      {isTakeTests ? <SearchInput /> : ''}
+      {isTakeTests ? (
+        <div className={s['search']}>
+          <SearchInput />
+          <Image
+            className={cx(s['sort-icon'], {
+              [s['sort-icon-click']]: onClickSort,
+            })}
+            src={sortIcon}
+            alt={'adminIcon'}
+            onClick={() => setOnClickSort(prevValue => !prevValue)}
+          />
+        </div>
+      ) : (
+        ''
+      )}
+
       <div className={s['profile-box']}>
         <Image
           className={s['admin-icon']}

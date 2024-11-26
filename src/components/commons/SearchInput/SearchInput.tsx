@@ -2,6 +2,7 @@ import React, { FC, memo } from 'react';
 import Image from 'next/image';
 
 import starUrl from '/public/img/loupe-icon.svg?url';
+import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
 import s from './SearchInput.module.sass';
 import cx from 'classnames';
@@ -27,6 +28,17 @@ const SearchInput: FC<SearchInputItems> = ({}) => {
         placeholder={'Search'}
         className={s.input}
       ></input>
+      <button
+        className={s['clear-button']}
+        title="Cancel"
+        // onClick={clearInput}
+      >
+        <Image
+          className={s['clear-icon']}
+          src={deleteIconUrl}
+          alt={'Clear'}
+        />
+      </button>
     </div>
   );
 };

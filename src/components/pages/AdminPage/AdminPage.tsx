@@ -1,6 +1,7 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
+import { getCookie, setCookie } from 'cookies-next';
 
 import Header from '@/components/commons/Header/Header';
 import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
@@ -11,116 +12,33 @@ import CreateTests from '../CreateTests/CreateTests';
 import TakeTestsPage from '../TakeTestsPage/TakeTestsPage';
 import TestPage from '../TestPage/TestPage';
 
-import {
-  selectedQuestionSelector,
-  selectedTestSelector,
-  testSelector,
-} from '@/store/selectors';
-import { SelectedTestItems, TestsOptionsForSelect } from '@/store/types';
+import { selectedTestSelector, testSelector } from '@/store/selectors';
+import { useActionWithPayload } from '@/hooks/useAction';
+import { initTestsFromStorage } from '@/store/testReduser';
 
 import s from './AdminPage.module.sass';
 import cx from 'classnames';
-import { useActionWithPayload } from '@/hooks/useAction';
-import { initTestsFromStorage } from '@/store/testReduser';
-import { getCookie, setCookie } from 'cookies-next';
+import { QuestionItem, TestsItem } from '@/store/types';
 
 type AdminPageItems = {
   admin?: string;
+  id?: string;
 };
 
-const AdminPage: FC<AdminPageItems> = ({ admin }) => {
+const AdminPage: FC<AdminPageItems> = ({ admin, id }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalWindowIsOpen, setModalWindowIsOpen] = useState(false);
   const [titleModalWindow, setTitleModalWindow] = useState('');
+  const [modalFunctionOnClick, setModalFunctionOnClick] = useState(false);
+
   const router = useRouter();
+
+  const allTests = useSelector(testSelector);
+  const InitTestsFromStorageAction = useActionWithPayload(initTestsFromStorage);
+
   const onClickHandler = useCallback(() => {
     setModalWindowIsOpen(prevValue => !prevValue);
   }, []);
-
-  const [modalFunctionOnClick, setModalFunctionOnClick] = useState(false);
-
-  ////////////////////////////
-  const [selectedTestId, setSelectedTestId] = useState<string>('');
-  const [selectedTestItem, setSelectedTestItem] = useState<SelectedTestItems>({
-    title: '',
-    questions: [
-      {
-        id: '',
-        title: '',
-        questionType: 'radio',
-        answer: [
-          {
-            id: '',
-            title: '',
-            name: '',
-            isTrue: false,
-          },
-        ],
-      },
-    ],
-  });
-
-  const selectedTest = useSelector(state =>
-    selectedTestSelector(state, selectedTestId)
-  );
-  const selectedQuestion = useSelector(state =>
-    selectedQuestionSelector(state, selectedTestId)
-  );
-
-  const openEditPage = useCallback(
-    (id: string) => {
-      selectedTest &&
-        setSelectedTestItem({
-          title: selectedTest.title,
-          questions: [
-            {
-              id: '',
-              title: '',
-              questionType: 'none' as TestsOptionsForSelect,
-              answer: [
-                {
-                  id: '',
-                  title: '',
-                  name: '',
-                  isTrue: false,
-                },
-              ],
-            },
-          ],
-        });
-      // setEditIsOpen(true);
-      setSelectedTestId(id);
-    },
-    [selectedTestSelector]
-  );
-
-  // Update input values
-  // useEffect(() => {
-  //   if (selectedTest) {
-  //     setSelectedTestItem({
-  //       title: selectedTest.title,
-  //       questions: selectedQuestion ? [{
-  //         id: selectedQuestion.id,
-  //         title: selectedQuestion.title,
-  //         questionType: selectedQuestion.questionType,
-  //         answer: [
-  //           {
-  //             id: '',
-  //             title: '',
-  //             name: '',
-  //             isTrue: false,
-  //           },]
-  //       }] : []
-  //     });
-  //   }
-  // }, [selectedTest, selectedTestId]);
-
-  // selectedMusicItem={selectedMusicItem}
-  // selectedMusicId={selectedMusicId}
-
-  ////////////////
-  const allTests = useSelector(testSelector);
-  const InitTestsFromStorageAction = useActionWithPayload(initTestsFromStorage);
 
   useEffect(() => {
     const storedTests = getCookie('tests');
@@ -140,6 +58,50 @@ const AdminPage: FC<AdminPageItems> = ({ admin }) => {
     }
   }, [allTests]);
 
+  const [selectedTestItem, setSelectedTestItem] = useState<TestsItem>({
+    id: '',
+    title: '',
+    date: '',
+    questions: [],
+  });
+  const selectedTest = useSelector(state => selectedTestSelector(state, id));
+
+  const editTest = useCallback(
+    (testId: string) => {
+      if (selectedTest) {
+        setSelectedTestItem({
+          id: testId,
+          title: selectedTest.title,
+          date: '',
+          questions: selectedTest.questions,
+        });
+      }
+    },
+    [selectedTest]
+  );
+
+  useEffect(() => {
+    if (id && selectedTest) {
+      setSelectedTestItem({
+        id,
+        title: selectedTest.title,
+        date: '',
+        questions: selectedTest.questions,
+      });
+    }
+  }, [id, selectedTest]);
+
+  const [creationDate, setCreationDate] = useState('');
+
+  const getCurrentDate = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Месяцы от 0 до 11
+    const day = String(now.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+  };
+console.log(getCurrentDate);
 
   return (
     <>
@@ -155,14 +117,17 @@ const AdminPage: FC<AdminPageItems> = ({ admin }) => {
           menuOpen={menuOpen}
           name={admin}
         />
-        {(router.pathname === '/admin/createTests' ||
-          router.pathname === '/admin/editTest') && (
+
+        {(router.asPath.startsWith('/admin/createTests') ||
+          router.asPath.startsWith(`/admin/editTest/${id}`)) && (
           <CreateTests
+            id={id}
             setModalWindowIsOpen={onClickHandler}
             setTitleModalWindow={setTitleModalWindow}
-            openEditPage={openEditPage}
-            selectedTestId={selectedTestId}
             modalFunctionOnClick={modalFunctionOnClick}
+            selectedTestItem={selectedTestItem}
+            setCreationDate={() => setCreationDate(getCurrentDate)}
+            creationDate={creationDate}
           />
         )}
 
@@ -171,9 +136,16 @@ const AdminPage: FC<AdminPageItems> = ({ admin }) => {
             user={'admin'}
             setModalWindowIsOpen={onClickHandler}
             setTitleModalWindow={setTitleModalWindow}
+            editTest={editTest}
+            modalFunctionOnClick={modalFunctionOnClick}
           />
         )}
-        {router.pathname === '/admin/testPage' && <TestPage user={'admin'} />}
+        {router.pathname === `/admin/testPage/${id}` && (
+          <TestPage
+            user={'admin'}
+            id={id}
+          />
+        )}
 
         <Sidebar
           showSidebar={setMenuOpen}

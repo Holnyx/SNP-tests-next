@@ -32,19 +32,27 @@ const questionSlice = createSlice({
       state,
       action: PayloadAction<{ questionId: string; answerId: string }>
     ) {
-      const question = state.find(
-        element => element.id === action.payload.questionId
-      );
-      if (question) {
-        question.answer = question.answer.filter(
-          element => element.id !== action.payload.answerId
-        );
-      }
+      return state.map(question => {
+        if (question.id === action.payload.questionId) {
+          return {
+            ...question,
+            answer: question.answer.filter(
+              element => element.id !== action.payload.answerId
+            ),
+          };
+        }
+        return question;
+      });
     },
   },
 });
 
-export const { addQuestion, removeQuestion, addAnswer, removeAnswer, removeAllQuestion } =
-  questionSlice.actions;
+export const {
+  addQuestion,
+  removeQuestion,
+  addAnswer,
+  removeAnswer,
+  removeAllQuestion,
+} = questionSlice.actions;
 
 export default questionSlice.reducer;

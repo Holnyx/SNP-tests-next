@@ -9,10 +9,8 @@ import React, {
 import { useSelector } from 'react-redux';
 import { v1 } from 'uuid';
 import { useRouter } from 'next/router';
-import { getCookie, setCookie } from 'cookies-next';
 
 import { testsOptions } from '@/components/state/testsOptions';
-
 import SelectField from '@/components/commons/SelectField/SelectField';
 import Input from '@/components/commons/Inputs/Input/Input';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
@@ -30,21 +28,25 @@ import cx from 'classnames';
 type CreateTestsItems = {
   setModalWindowIsOpen: () => void;
   setTitleModalWindow: React.Dispatch<SetStateAction<string>>;
-  openEditPage: (id: string) => void;
-  selectedTestId: string;
   modalFunctionOnClick: boolean;
+  id?: string;
+  selectedTestItem: TestsItem;
+  setCreationDate: () => void;
+  creationDate: string;
 };
 
 const CreateTests: FC<CreateTestsItems> = ({
   setModalWindowIsOpen,
   setTitleModalWindow,
-  openEditPage,
-  selectedTestId,
   modalFunctionOnClick,
+  id,
+  selectedTestItem,
+  setCreationDate,
+  creationDate,
 }) => {
   const [select, setSelect] = useState('Select question type');
   const [selectType, setSelectType] = useState('none');
-  const [testTitleValue, setTestTitleValue] = useState('');
+  const [testTitleValue, setTestTitleValue] = useState(selectedTestItem.title);
   const [inputValue, setInputValue] = useState('');
   const [errorTestTitle, setErrorTestTitle] = useState(false);
   const [error, setError] = useState(false);
@@ -61,6 +63,9 @@ const CreateTests: FC<CreateTestsItems> = ({
 
   const checkTestTitleValue =
     testTitleValue.length >= 3 && testTitleValue.trim() !== '';
+
+  const pathRouteEdit = router.asPath.startsWith(`/admin/editTest/${id}`);
+  const pathRouteCreate = router.pathname === '/admin/createTests';
 
   const cleanInputs = useCallback(() => {
     setInputValue('');
@@ -93,25 +98,32 @@ const CreateTests: FC<CreateTestsItems> = ({
 
   const onClickHandlerSaveTest = useCallback(() => {
     if (!checkTestTitleValue) {
-      setErrorTestTitle(false);
-    } else {
       setErrorTestTitle(true);
+    } else {
+      setErrorTestTitle(false);
     }
 
-    if (allQuestions.length < 2) {
+    if (allQuestions.length < 2 && selectedTestItem.questions.length < 2) {
       setErrorList(true);
     } else {
       setErrorList(false);
     }
 
-    if (checkTestTitleValue && allQuestions.length >= 2) {
+    if (
+      (checkTestTitleValue && allQuestions.length >= 2) ||
+      (pathRouteEdit && selectedTestItem.questions.length >= 2)
+    ) {
       setModalWindowIsOpen();
       changeTitleModalWindow(
         'Are you sure you want to save the changes?',
         'Are you sure you want to save the test?'
       );
     }
-  }, [checkTestTitleValue, allQuestions.length]);
+  }, [
+    checkTestTitleValue,
+    allQuestions.length,
+    selectedTestItem.questions.length,
+  ]);
 
   const addTestHandler = useCallback(
     (test: TestsItem) => {
@@ -129,14 +141,14 @@ const CreateTests: FC<CreateTestsItems> = ({
     const newTest: TestsItem = {
       id: v1(),
       title: testTitleValue,
+      date:  new Date().toISOString(),
       questions: allQuestions,
     };
     addTestHandler(newTest);
-    console.log(newTest);
   }, [addTestHandler, testTitleValue, allQuestions]);
 
   const changeTitleModalWindow = (editTitle: string, createTitle: string) => {
-    if (pathRouteEdit && error) {
+    if (pathRouteEdit) {
       setTitleModalWindow(editTitle);
     } else if (pathRouteCreate) {
       setTitleModalWindow(createTitle);
@@ -144,23 +156,30 @@ const CreateTests: FC<CreateTestsItems> = ({
   };
 
   useEffect(() => {
-    if (modalFunctionOnClick) {
-      saveTestClickHandler();
-      cleanInputs();
-      setTestTitleValue('');
-      setErrorTestTitle(false);
-      removeAllQuestionAction();
-    }
-  }, [modalFunctionOnClick]);
-
-  useEffect(() => {
     if (allQuestions.length >= 2) {
       setErrorList(false);
     }
   }, [allQuestions.length]);
 
-  const pathRouteEdit = router.pathname === '/admin/editTest';
-  const pathRouteCreate = router.pathname === '/admin/createTests';
+  useEffect(() => {
+    if (modalFunctionOnClick) {
+      saveTestClickHandler();
+      setCreationDate();
+      cleanInputs();
+      setTestTitleValue('');
+      setErrorTestTitle(false);
+      removeAllQuestionAction();
+    }
+    if (pathRouteCreate) {
+      setTestTitleValue('');
+      setInputValue('');
+      setSelectType('none');
+      setSelect('Select question type');
+    }
+    if (pathRouteEdit && selectedTestItem) {
+      setTestTitleValue(selectedTestItem.title);
+    }
+  }, [modalFunctionOnClick, pathRouteCreate, selectedTestItem]);
 
   return (
     <div className={s.container}>
@@ -184,7 +203,7 @@ const CreateTests: FC<CreateTestsItems> = ({
             type={'text'}
             name={'questionTitle'}
             leftCheck={true}
-            value={pathRouteEdit ? '11' : inputValue}
+            value={inputValue}
             setInputValue={setInputValue}
             error={error}
           />
@@ -202,18 +221,31 @@ const CreateTests: FC<CreateTestsItems> = ({
             }}
           />
         </div>
-        {allQuestions.map(q => {
-          return (
-            <QuestionBox
-              key={q.id}
-              question={q}
-              takeTest={false}
-              setModalWindowIsOpen={setModalWindowIsOpen}
-              changeTitleModalWindow={changeTitleModalWindow}
-              modalFunctionOnClick={modalFunctionOnClick}
-            />
-          );
-        })}
+        {pathRouteEdit
+          ? selectedTestItem.questions.map(q => {
+              return (
+                <QuestionBox
+                  key={q.id}
+                  question={q}
+                  takeTest={false}
+                  setModalWindowIsOpen={setModalWindowIsOpen}
+                  changeTitleModalWindow={changeTitleModalWindow}
+                  modalFunctionOnClick={modalFunctionOnClick}
+                />
+              );
+            })
+          : allQuestions.map(q => {
+              return (
+                <QuestionBox
+                  key={q.id}
+                  question={q}
+                  takeTest={false}
+                  setModalWindowIsOpen={setModalWindowIsOpen}
+                  changeTitleModalWindow={changeTitleModalWindow}
+                  modalFunctionOnClick={modalFunctionOnClick}
+                />
+              );
+            })}
         {errorList && (
           <span className={cx(s['error-message'])}>
             The list of questions should be at least two
@@ -225,12 +257,12 @@ const CreateTests: FC<CreateTestsItems> = ({
             onClick={() => {
               setModalWindowIsOpen();
               changeTitleModalWindow(
-                'Are you sure you want to cancel the changes?',
-                'Are you sure you want to delete the test?'
+                'Are you sure you want to delete the test?',
+                'Are you sure you want to cancel the changes?'
               );
             }}
           />
-          {pathRouteEdit && (
+          {router.query.id && (
             <ChangeButton
               title="Cancel Changes"
               onClick={() => {

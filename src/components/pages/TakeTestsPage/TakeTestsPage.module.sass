@@ -17,9 +17,6 @@
     font-family: Poppins
     box-sizing: border-box
 
-    @include laptop
-        padding: 0 20px 0 270px
-
     @include mobile
         max-width: 315px
         padding: 0
@@ -39,6 +36,9 @@
         justify-content: flex-start
         align-items: flex-start
         gap: 25px
+        padding: 16px 36px
+        border-radius: 16px
+        border: 1px solid rgba(255, 255, 255, 0.1)
 
         .test
             display: flex
@@ -46,3 +46,11 @@
             justify-content: center
             align-items: center
             gap: 15px
+            @include laptop
+                flex-wrap: wrap
+
+            .test-date
+                padding: 16px
+                border-radius: 16px
+                border: 1px solid rgba(255, 255, 255, 0.1)
+                @include font-style(400,12px,142%,0)

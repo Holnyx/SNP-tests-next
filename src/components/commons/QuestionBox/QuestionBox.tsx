@@ -1,4 +1,11 @@
-import React, { FC, memo, SetStateAction, useCallback, useState } from 'react';
+import React, {
+  FC,
+  memo,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { v1 } from 'uuid';
 
@@ -8,7 +15,6 @@ import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
 import Checkbox from '../Inputs/Checkbox/Checkbox';
 
 import { AnswerItem, QuestionItem } from '@/store/types';
-import { questionSelector } from '@/store/selectors';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { removeQuestion } from '@/store/questionReduser';
 import { addAnswer, removeAnswer } from '@/store/questionReduser';
@@ -35,12 +41,10 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const [inputValue, setInputValue] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
-  // const [errorAnswerList, setErrorAnswerList] = useState(false);
 
   const addAnswerAction = useActionWithPayload(addAnswer);
   const removeAnswerAction = useActionWithPayload(removeAnswer);
   const removeQuestionAction = useActionWithPayload(removeQuestion);
-  const allQuestions = useSelector(questionSelector);
 
   const checkAnswerValue =
     inputValue.length >= 3 &&
@@ -114,35 +118,40 @@ const QuestionBox: FC<QuestionBoxItems> = ({
     question.questionType === 'checkbox' ||
     (question.questionType === 'radio' && !question.answer.some(a => a.isTrue));
 
+  const hasTrueAnswer = question.answer.some(answer => answer.isTrue);
+
   return (
     <div className={s['questions-box']}>
+      <span className={s['type-question']}>{question.questionType}</span>
       <div key={question.id}>
         <h3 className={s.title}>{question.title}</h3>
         <ul className={s['answer-list']}>
-          {question.answer.map(answer => {
-            return (
-              <li
-                key={answer.id}
-                className={s['option']}
-              >
-                <Input
-                  title={answer.title}
-                  type={question.questionType}
-                  name={answer.name}
-                  leftCheck={false}
-                  setInputValue={() => {}}
-                  id={answer.id}
-                  error={error}
-                />
-                <DeleteButton
-                  onClick={() => {
-                    removeAnswerHandler(question.id, answer.id);
-                  }}
-                />
-                {answer.isTrue && <>True</>}
-              </li>
-            );
-          })}
+          {question.answer &&
+            question.answer.map(answer => {
+              return (
+                <li
+                  key={answer.id}
+                  className={s['option']}
+                >
+                  {/* <Input
+                    title={answer.title}
+                    type={question.questionType}
+                    name={answer.name}
+                    leftCheck={false}
+                    setInputValue={() => {}}
+                    id={answer.id}
+                    error={error}
+                  /> */}
+                  <span>{answer.title}</span>
+                  <DeleteButton
+                    onClick={() => {
+                      removeAnswerHandler(question.id, answer.id);
+                    }}
+                  />
+                  {answer.isTrue && <div className={s.true}>True</div>}
+                </li>
+              );
+            })}
         </ul>
       </div>
       {question && answerOption && (
@@ -176,17 +185,12 @@ const QuestionBox: FC<QuestionBoxItems> = ({
             <ChangeButton
               title="Add answer"
               onClick={() => {
-                if (
-                  !(
-                    question.questionType === 'number' &&
-                    question.answer.length === 1
-                  )
-                ) {
+                if (question.questionType === 'number') {
                   saveClickHandlerNumber();
-                  setAnswerOption(prevValue => !prevValue);
                 } else {
                   saveClickHandler();
                 }
+                setAnswerOption(prevValue => !prevValue);
               }}
             />
           </div>
@@ -210,13 +214,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
           )}
         </div>
       )}
-      {question.questionType === 'checkbox' ||
-      (question.questionType === 'radio' &&
-        !question.answer.some(a => a.isTrue)) ? (
-        <span>There must be at list one true answer</span>
-      ) : (
-        ''
-      )}
+      {!hasTrueAnswer ? <span>There must be at list one true answer</span> : ''}
     </div>
   );
 };

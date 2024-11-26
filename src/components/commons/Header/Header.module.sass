@@ -47,3 +47,21 @@
 
             @include mobile
                 width: 12px
+    .search
+        display: flex
+        align-items: center
+        justify-content: center
+        gap: 15px
+        width: 100%
+
+    .sort-icon
+        width: 40px
+        background: rgba(255, 255, 255, 0.1)
+        backdrop-filter: blur(100px)
+        border: none
+        border-radius: 50px
+        cursor: pointer
+        transition: .2s transform ease
+
+    .sort-icon-click
+        transform: scaleY(-1)

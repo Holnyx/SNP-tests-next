@@ -1,40 +1,3 @@
-// import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-// import { AnswerItem, QuestionItem, TestsItem, TestsState } from './types';
-
-// const initialState: TestsState = {
-//   testsList: [],
-//   searchQuery: '',
-//   errors: [],
-// };
-
-// const testsSlice = createSlice({
-//   name: 'tests',
-//   initialState,
-//   reducers: {
-//     updateTempTestTitle(state, action: PayloadAction<string>) {
-//       state.testsList.find(t => (t.title = action.payload));
-//     },
-//     addTempQuestion(state, action: PayloadAction<QuestionItem>) {
-//       state.testsList.map(q => q.questions.push(action.payload));
-//     },
-//     addTempAnswer(state, action: PayloadAction<AnswerItem>) {
-//       const question = state.testsList.find(t =>
-//         t.questions.find(q => q.id === action.payload.id)
-//       );
-//       if (question) {
-//         question.questions.find(q => q.answer)?.answer.push(action.payload);
-//       }
-//     },
-//     addTest(state, action: PayloadAction<TestsItem>) {
-//       state.testsList.push(action.payload);
-//     },
-//   },
-// });
-
-// export const { addTest } =
-//   testsSlice.actions;
-
-// export default testsSlice.reducer;
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TestsItem, TestsState } from './types';
 
@@ -51,13 +14,15 @@ const testSlice = createSlice({
     addTest(state, action: PayloadAction<TestsItem>) {
       state.testsList.push(action.payload);
     },
-
+    removeTest(state, action: PayloadAction<{ id: string }>) {
+      state.testsList = state.testsList.filter(test => test.id !== action.payload.id);
+    },
     initTestsFromStorage: (state, action: PayloadAction<TestsItem[]>) => {
       state.testsList = [...action.payload];
     },
   },
 });
 
-export const { addTest, initTestsFromStorage } = testSlice.actions;
+export const { addTest, initTestsFromStorage, removeTest } = testSlice.actions;
 
 export default testSlice.reducer;

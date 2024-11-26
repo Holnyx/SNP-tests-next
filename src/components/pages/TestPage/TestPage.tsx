@@ -8,28 +8,37 @@ import { testItemsStateTest } from '@/components/state/testsStateTest';
 
 import s from './TestPage.module.sass';
 import cx from 'classnames';
+import { useSelector } from 'react-redux';
+import { selectedTestSelector, testSelector } from '@/store/selectors';
 
 type TestPageItems = {
   user: string;
+  id?: string;
 };
 
-const TestPage: FC<TestPageItems> = ({ user }) => {
+const TestPage: FC<TestPageItems> = ({ user, id }) => {
   const [takeTest, setTakeTest] = useState(false);
+  
   const router = useRouter();
+  const selectedTest = useSelector(state => selectedTestSelector(state, id));
 
   return (
     <div className={s.container}>
-      {testItemsStateTest.map(test => {
-        return (
-          <div key={test.id}>
-            <h2 className={s.title}>{test.title}</h2>
-            <QuestionBox
-              question={test.questions}
-              takeTest={takeTest}
-            />
-          </div>
-        );
-      })}
+      {selectedTest &&
+        selectedTest.questions.map(test => {
+          return (
+            <div key={test.id}>
+              <h2 className={s.title}>{test.title}</h2>
+              <QuestionBox
+                question={test}
+                takeTest={takeTest}
+                changeTitleModalWindow={() => {}}
+                setModalWindowIsOpen={() => {}}
+                modalFunctionOnClick={false}
+              />
+            </div>
+          );
+        })}
 
       <div className={s['buttons-box']}>
         <ChangeButton
