@@ -44,6 +44,16 @@ const questionSlice = createSlice({
         return question;
       });
     },
+    updateAnswersOrder: (
+      state,
+      action: PayloadAction<{ questionId: string; newOrder: AnswerItem[] }>
+    ) => {
+      const { questionId, newOrder } = action.payload;
+      const question = state.find(q => q.id === questionId);
+      if (question) {
+        question.answer = newOrder;
+      }
+    },
   },
 });
 
@@ -53,6 +63,7 @@ export const {
   addAnswer,
   removeAnswer,
   removeAllQuestion,
+  updateAnswersOrder,
 } = questionSlice.actions;
 
 export default questionSlice.reducer;

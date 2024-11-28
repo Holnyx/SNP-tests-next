@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
@@ -8,14 +8,19 @@ import userIcon from '/public/img/user-icon.svg?url';
 import SearchInput from '../SearchInput/SearchInput';
 import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 
-import s from './Header.module.sass';
-import cx from 'classnames';
 import { useActionWithPayload } from '@/hooks/useAction';
 import {
+  filteredTestsByDate,
   setSearchQuery,
-  sortTestsByDateAsc,
-  sortTestsByDateDesc,
+  // sortTestsByDateAsc,
+  // sortTestsByDateDesc,
 } from '@/store/testReduser';
+
+import s from './Header.module.sass';
+import cx from 'classnames';
+import { useSelector } from 'react-redux';
+import { filterSelector, testSelector } from '@/store/selectors';
+import { FilteredTestsByDate } from '@/store/types';
 
 type HeaderItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,19 +40,27 @@ const Header: FC<HeaderItems> = ({
   const [onClickSort, setOnClickSort] = useState(false);
 
   const router = useRouter();
-
+  const test = useSelector(filterSelector);
   const setSearchQueryAction = useActionWithPayload(setSearchQuery);
-  const sortTestsByDateAscAction = useActionWithPayload(sortTestsByDateAsc);
-  const sortTestsByDateDescAction = useActionWithPayload(sortTestsByDateDesc);
 
-  const onClickSortFunction = useCallback(() => {
-    if (onClickSort) {
-      sortTestsByDateDescAction();
-    } else {
-      sortTestsByDateAscAction();
-    }
-    setOnClickSort(prevValue => !prevValue);
-  }, [onClickSort]);
+  const changeTestsFilterAction = useActionWithPayload(filteredTestsByDate);
+
+  const changeTestsFilter = useCallback((filter: FilteredTestsByDate) => {
+    changeTestsFilterAction(filter);
+  }, []);
+
+  // const onClickSortFunction = useCallback(() => {
+  //   if (onClickSort) {
+  //     sortTestsByDateDescAction();
+  //   } else {
+  //     sortTestsByDateAscAction();
+  //   }
+  //   setOnClickSort(prevValue => !prevValue);
+  // }, [onClickSort]);
+
+  useEffect(() => {
+    setOnClickSort(false);
+  }, [setOnClickSort]);
 
   const handleSearchChange = useCallback(
     (query: string) => {
@@ -67,7 +80,10 @@ const Header: FC<HeaderItems> = ({
   const isTakeTests =
     router.pathname === '/admin/takeTests' ||
     router.pathname === '/user/takeTests';
-
+    const handleSort = useCallback(() => {
+      const newSortOrder = test === 'asc' ? 'desc' : 'asc';
+      changeTestsFilter(newSortOrder);
+    }, [test, changeTestsFilter]);
   return (
     <header className={s.container}>
       <ButtonBurgerMenu
@@ -84,11 +100,11 @@ const Header: FC<HeaderItems> = ({
           />
           <Image
             className={cx(s['sort-icon'], {
-              [s['sort-icon-click']]: onClickSort,
+              [s['sort-icon-click']]: test === 'asc',
             })}
             src={sortIcon}
             alt={'adminIcon'}
-            onClick={onClickSortFunction}
+            onClick={handleSort}
           />
         </div>
       ) : (

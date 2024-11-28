@@ -14,7 +14,11 @@ import TestPage from '../TestPage/TestPage';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { TestsItem } from '@/store/types';
-import { selectedTestSelector, testSelector } from '@/store/selectors';
+import {
+  selectedTestSelector,
+  sortedTestsSelector,
+  testSelector,
+} from '@/store/selectors';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { initTestsFromStorage } from '@/store/testReduser';
 
@@ -47,6 +51,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
+  const filteredTestsByDate = useSelector(sortedTestsSelector);
   const selectedTest = useSelector(state => selectedTestSelector(state, id));
   const InitTestsFromStorageAction = useActionWithPayload(initTestsFromStorage);
 
@@ -79,10 +84,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
 
   const searchCharacters = (search: string): Promise<TestsItem[]> => {
     return new Promise<TestsItem[]>(resolve => {
-      const filteredTests = allTests.filter(test =>
-        test.title.toLowerCase().includes(search.toLowerCase())
-      );
-      resolve(filteredTests);
+      resolve(filteredTestsByDate);
     });
   };
 
@@ -90,16 +92,17 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
     if (debouncedSearchTerm) {
       setIsSearching(true);
       setTimeout(() => {
-        searchCharacters(debouncedSearchTerm).then((results: TestsItem[]) => {
-          setIsSearching(false);
-          setResults(results);
-        });
+        const filtered = filteredTestsByDate.filter(test =>
+          test.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        );
+        setIsSearching(false);
+        setResults(filtered);
       }, 500);
     } else {
-      setResults(allTests);
+      setResults(filteredTestsByDate);
       setIsSearching(false);
     }
-  }, [debouncedSearchTerm, allTests]);
+  }, [debouncedSearchTerm, filteredTestsByDate]);
 
   useEffect(() => {
     if (id && selectedTest) {

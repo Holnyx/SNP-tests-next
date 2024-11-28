@@ -23,6 +23,8 @@ export type TestsState = {
   testsList: TestsItem[];
   searchQuery: string;
   errors: string[];
+  sortOrder: FilteredTestsByDate
 };
 
+export type FilteredTestsByDate = 'desc' | 'asc'
 export type TestsOptionsForSelect = 'none' | 'radio' | 'checkbox' | 'number';

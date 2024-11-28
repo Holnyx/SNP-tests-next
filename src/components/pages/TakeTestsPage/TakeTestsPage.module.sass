@@ -35,10 +35,17 @@
         flex-direction: column
         justify-content: flex-start
         align-items: flex-start
-        gap: 25px
+        gap: 15px
         padding: 16px 36px
         border-radius: 16px
         border: 1px solid rgba(255, 255, 255, 0.1)
+
+        .questions-list
+            display: flex
+            flex-direction: column
+            justify-content: center
+            gap: 15px
+            width: 100%
 
         .test
             display: flex
@@ -54,3 +61,10 @@
                 border-radius: 16px
                 border: 1px solid rgba(255, 255, 255, 0.1)
                 @include font-style(400,12px,142%,0)
+
+            .arrow-icon
+                transform: scaleY(1)
+                cursor: pointer
+
+            .show
+                transform: scaleY(-1)

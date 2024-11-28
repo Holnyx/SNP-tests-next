@@ -4,24 +4,23 @@ import React, {
   memo,
   SetStateAction,
   useCallback,
-  useEffect,
   useState,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
+import arrowIcon from '/public/img/arrow-down.svg?url';
 import DeleteButton from '@/components/commons/Buttons/DeleteButton/DeleteButton';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
-import { removeTest } from '@/store/testReduser';
 
-import { testSelector } from '@/store/selectors';
+import { removeTest } from '@/store/testReduser';
+import { TestsItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
-import { useDebounce } from '@/hooks/useDebounce';
-import { TestsItem } from '@/store/types';
+import { setCookie } from 'cookies-next';
 
 type TakeTestsPageItems = {
   user: string;
@@ -44,9 +43,9 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   isSearching,
   results,
 }) => {
+  const [show, setShow] = useState(false);
+  const [selectedTestId, setSelectedTestId] = useState('');
   const router = useRouter();
-
-  const allTests = useSelector(testSelector);
   const removeTestAction = useActionWithPayload(removeTest);
 
   const onClickHandlerDelete = useCallback(
@@ -62,13 +61,13 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
-    return date.toLocaleDateString('ru-RU'); // Форматирует в стиле DD.MM.YYYY
+    return date.toLocaleDateString('ru-RU');
   };
 
   return (
     <div className={s.container}>
       <h2 className={s.title}> Take Test</h2>
-      {isSearching && <div className={s['search-title']}>Searching ...</div>}
+      {isSearching && <div>Searching ...</div>}
       {!isSearching &&
         results.map(test => {
           return (
@@ -103,7 +102,26 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                   }}
                 />
                 <span className={s['test-date']}>{formatDate(test.date)}</span>
+                <Image
+                  src={arrowIcon}
+                  alt={'arrow'}
+                  className={cx(s['arrow-icon'], { [s.show]: show })}
+                  onClick={() => {
+                    setShow(prevValue => !prevValue);
+                    setSelectedTestId(test.id);
+                  }}
+                />
               </div>
+              {show && (
+                <div className={s['questions-list']}>
+                  {test.questions.map(
+                    el =>
+                      selectedTestId === test.id && (
+                        <div key={el.id}>{el.title}</div>
+                      )
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
