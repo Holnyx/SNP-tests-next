@@ -1,5 +1,4 @@
-import React, { FC, memo, useCallback, useState } from 'react';
-import { useRouter } from 'next/router';
+import React, { FC, memo } from 'react';
 import Image from 'next/image';
 
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
@@ -12,7 +11,7 @@ import cx from 'classnames';
 
 type ModalWindowItems = {
   modalWindowIsOpen: boolean;
-  titleModalWindow: string;
+  titleModalWindow?: string;
   setModalWindowIsOpen: () => void;
   setModalFunctionOnClick: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -23,25 +22,8 @@ const ModalWindow: FC<ModalWindowItems> = ({
   setModalWindowIsOpen,
   setModalFunctionOnClick,
 }) => {
-  const router = useRouter();
-  const replaceButton = router.pathname === '/admin/takeTests';
-  const replaceButtonToTakeTest = router.pathname === '/admin/createTests';
-  
-  const onClickHandlerButtonForTakeTest = () => {
-    if (replaceButtonToTakeTest && titleModalWindow.includes('save')) {
-      router.push('/admin/takeTests');
-      return;
-    }
-    if (replaceButton && titleModalWindow.includes('taking')) {
-      router.push('/admin/testPage');
-      return;
-    }
-    if (replaceButton && titleModalWindow.includes('delete')) {
-      return;
-    }
-  };
-
   useBodyScrollLock(modalWindowIsOpen); //???? this work but I don't mind what this right
+
   return (
     <div
       className={cx(s.container, { [s.active]: modalWindowIsOpen })}
@@ -56,7 +38,10 @@ const ModalWindow: FC<ModalWindowItems> = ({
           <button
             className={s.closed}
             title="Cancel"
-            onClick={setModalWindowIsOpen}
+            onClick={() => {
+              setModalWindowIsOpen();
+              setModalFunctionOnClick(false);
+            }}
           >
             <Image
               className={s['closed-img']}
@@ -75,7 +60,6 @@ const ModalWindow: FC<ModalWindowItems> = ({
             <ChangeButton
               title={'Yes'}
               onClick={() => {
-                onClickHandlerButtonForTakeTest();
                 setModalWindowIsOpen();
                 setModalFunctionOnClick(true);
               }}

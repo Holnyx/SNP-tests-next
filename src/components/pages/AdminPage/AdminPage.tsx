@@ -39,7 +39,6 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<TestsItem[]>([]);
-  const [creationDate, setCreationDate] = useState('');
 
   const [selectedTestItem, setSelectedTestItem] = useState<TestsItem>({
     id: '',
@@ -73,18 +72,12 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
     [selectedTest]
   );
 
-  const getCurrentDate = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-  };
-
   const searchCharacters = (search: string): Promise<TestsItem[]> => {
     return new Promise<TestsItem[]>(resolve => {
-      resolve(filteredTestsByDate);
+      const filteredTests = allTests.filter(test =>
+        test.title.toLowerCase().includes(search.toLowerCase())
+      );
+      resolve(filteredTests);
     });
   };
 
@@ -92,11 +85,10 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
     if (debouncedSearchTerm) {
       setIsSearching(true);
       setTimeout(() => {
-        const filtered = filteredTestsByDate.filter(test =>
-          test.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-        );
-        setIsSearching(false);
-        setResults(filtered);
+        searchCharacters(debouncedSearchTerm).then((results: TestsItem[]) => {
+          setIsSearching(false);
+          setResults(results);
+        });
       }, 500);
     } else {
       setResults(filteredTestsByDate);
@@ -120,10 +112,12 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
     if (storedTests) {
       InitTestsFromStorageAction(JSON.parse(storedTests));
     }
-  }, []);
+  }, [InitTestsFromStorageAction]);
 
   useEffect(() => {
     if (allTests.length > 0) {
+      console.log(allTests);
+      
       setCookie('tests', JSON.stringify(allTests), {
         path: '/',
         sameSite: 'lax',
@@ -156,10 +150,9 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
             id={id}
             setModalWindowIsOpen={onClickHandler}
             setTitleModalWindow={setTitleModalWindow}
+            titleModalWindow={titleModalWindow}
             modalFunctionOnClick={modalFunctionOnClick}
             selectedTestItem={selectedTestItem}
-            setCreationDate={() => setCreationDate(getCurrentDate)}
-            creationDate={creationDate}
           />
         )}
 
@@ -168,6 +161,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
             user={'admin'}
             setModalWindowIsOpen={onClickHandler}
             setTitleModalWindow={setTitleModalWindow}
+            titleModalWindow={titleModalWindow}
             editTest={editTest}
             modalFunctionOnClick={modalFunctionOnClick}
             search={search}

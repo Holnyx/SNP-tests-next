@@ -4,9 +4,9 @@ import React, {
   memo,
   SetStateAction,
   useCallback,
+  useEffect,
   useState,
 } from 'react';
-import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
@@ -20,7 +20,6 @@ import { useActionWithPayload } from '@/hooks/useAction';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
-import { setCookie } from 'cookies-next';
 
 type TakeTestsPageItems = {
   user: string;
@@ -31,6 +30,7 @@ type TakeTestsPageItems = {
   search: string;
   isSearching: boolean;
   results: TestsItem[];
+  titleModalWindow: string;
 };
 
 const TakeTestsPage: FC<TakeTestsPageItems> = ({
@@ -42,22 +42,32 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   search,
   isSearching,
   results,
+  titleModalWindow,
 }) => {
   const [show, setShow] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState('');
   const router = useRouter();
   const removeTestAction = useActionWithPayload(removeTest);
 
-  const onClickHandlerDelete = useCallback(
-    (id: string) => {
-      setTitleModalWindow('Are you sure you want to delete the test?');
-      setModalWindowIsOpen();
-      if (modalFunctionOnClick) {
-        removeTestAction({ id });
-      }
-    },
-    [modalFunctionOnClick, removeTestAction]
-  );
+  const onClickHandlerDeleteTest = useCallback(() => {
+    setTitleModalWindow('Are you sure you want to delete the test?');
+    setModalWindowIsOpen();
+  }, [setModalWindowIsOpen, setTitleModalWindow]);
+
+  useEffect(() => {
+    if (
+      modalFunctionOnClick &&
+      titleModalWindow === 'Are you sure you want to delete the test?' &&
+      selectedTestId
+    ) {
+      removeTestAction({ id: selectedTestId });
+    }
+  }, [
+    modalFunctionOnClick,
+    titleModalWindow,
+    removeTestAction,
+    selectedTestId,
+  ]);
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
@@ -80,7 +90,8 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                 {user !== 'user' && (
                   <DeleteButton
                     onClick={() => {
-                      onClickHandlerDelete(test.id);
+                      onClickHandlerDeleteTest();
+                      setSelectedTestId(test.id);
                     }}
                   />
                 )}

@@ -70,19 +70,23 @@ const Input: FC<InputItems> = ({
             onChange={onValueChanged}
             value={value}
           />
-          {value === '' && error && title.includes('Title') ? (
+          {value && value.length < 3 || value === '' && error && title.includes('Title') ? (
             <span className={cx(s['error-message'])}>
-              The title must contain more than one character
+              The title must contain more than three character
             </span>
-          ) : value === '' && error && title.includes('Answer') ? (
+          ) : value && value.length < 1 || value === ''   && error && title.includes('Answer') ? (
             <span className={cx(s['error-message'])}>
               The answer must contain from 1 to 19 characters
+            </span>
+          ) : value && value.length > 19 && title.includes('Title') ? (
+            <span className={cx(s['error-message'])}>
+              The answer must not exceed 19 characters
             </span>
           ) : value && value.length > 19 && title.includes('Answer') ? (
             <span className={cx(s['error-message'])}>
               The answer must not exceed 19 characters
             </span>
-          ) : (
+          ): (
             ''
           )}
         </>

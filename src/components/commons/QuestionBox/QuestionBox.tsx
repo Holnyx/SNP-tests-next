@@ -29,6 +29,7 @@ type QuestionBoxItems = {
   changeTitleModalWindow: (editTitle: string, createTitle: string) => void;
   setModalWindowIsOpen: React.Dispatch<SetStateAction<boolean>>;
   modalFunctionOnClick: boolean;
+  titleModalWindow: string;
 };
 
 const QuestionBox: FC<QuestionBoxItems> = ({
@@ -37,6 +38,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   changeTitleModalWindow,
   setModalWindowIsOpen,
   modalFunctionOnClick,
+  titleModalWindow,
 }) => {
   const [answerOption, setAnswerOption] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -50,7 +52,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const updateAnswersOrderAction = useActionWithPayload(updateAnswersOrder);
 
   const checkAnswerValue =
-    inputValue.length >= 3 &&
+    inputValue.length >= 1 &&
     inputValue.trim() !== '' &&
     inputValue.length <= 19;
 
@@ -79,12 +81,11 @@ const QuestionBox: FC<QuestionBoxItems> = ({
         addAnswerAction({ questionId, answer });
         cleanInputs();
         setError(false);
-        // setQuestionState(prevState => [...prevState, answer]);
       } else {
         setError(true);
       }
     },
-    [addAnswerAction, checkAnswerValue, cleanInputs]
+    [addAnswerAction, checkAnswerValue, cleanInputs, setError]
   );
   const saveClickHandler = useCallback(() => {
     const newAnswer: AnswerItem = {
@@ -102,20 +103,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       'Are you sure you want to delete the question?'
     );
     setModalWindowIsOpen(true);
-    if (modalFunctionOnClick) {
-      removeQuestionHandler(question.id);
-    }
-  }, [modalFunctionOnClick]);
-
-  const addTrueAnswerChange =
-    question.questionType === 'checkbox' ||
-    (question.questionType === 'radio' && !question.answer.some(a => a.isTrue));
-
-  const hasTrueAnswer = question.answer.some(answer => answer.isTrue);
-
-  useEffect(() => {
-    setQuestionState(question.answer);
-  }, [question.answer]);
+  }, [changeTitleModalWindow, setModalWindowIsOpen]);
 
   const previousOrderRef = useRef<AnswerItem[]>(question.answer);
 
@@ -126,7 +114,30 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       previousOrderRef.current = newOrder;
     }
   };
+  
+  useEffect(() => {
+    setQuestionState(question.answer);
+    if (checkAnswerValue) {
+      setError(false);
+    }
+  }, [question.answer, checkAnswerValue]);
 
+  useEffect(() => {
+    if (
+      modalFunctionOnClick &&
+      titleModalWindow === 'Are you sure you want to delete the question?'
+    ) {
+      removeQuestionHandler(question.id);
+    }
+  }, [modalFunctionOnClick, titleModalWindow]);
+
+  const addTrueAnswerChange =
+    question.questionType === 'checkbox' ||
+    (question.questionType === 'radio' && !question.answer.some(a => a.isTrue));
+
+  const hasTrueAnswer =
+    question.answer.some(answer => answer.isTrue) &&
+    question.answer.length >= 2;
   return (
     <div className={s['questions-box']}>
       <span className={s['type-question']}>{question.questionType}</span>
@@ -183,9 +194,11 @@ const QuestionBox: FC<QuestionBoxItems> = ({
             <ChangeButton
               title="Add answer"
               onClick={() => {
-                saveClickHandler();
-                setAnswerOption(prevValue => !prevValue);
-                setQuestionState(question.answer);
+                if (!error) {
+                  saveClickHandler();
+                  setAnswerOption(prevValue => !prevValue);
+                  setQuestionState(question.answer);
+                }
               }}
             />
           </div>
@@ -209,7 +222,13 @@ const QuestionBox: FC<QuestionBoxItems> = ({
           )}
         </div>
       )}
-      {!hasTrueAnswer ? <span>There must be at list one true answer</span> : ''}
+      {!hasTrueAnswer ? (
+        <span className={s['error-answer']}>
+          The list must contain at least two answers one of them is true
+        </span>
+      ) : (
+        ''
+      )}
     </div>
   );
 };

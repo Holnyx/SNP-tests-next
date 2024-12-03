@@ -44,10 +44,7 @@ export const selectedQuestionSelector = createSelector(
 export const sortedTestsSelector = createSelector(
   [testSelector, sortOrderSelector],
   (testsList, sortOrder) => {
-    console.log('Original testsList:', testsList);
-    console.log('Sort order:', sortOrder);
-
-    return [...testsList].sort((a, b) => {
+    return [...testsList].toSorted((a, b) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
       return sortOrder === 'asc'
