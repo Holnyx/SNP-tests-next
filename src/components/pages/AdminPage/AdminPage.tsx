@@ -7,7 +7,6 @@ import Header from '@/components/commons/Header/Header';
 import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
 import Sidebar from '@/components/commons/Sidebar/Sidebar';
 import Footer from '@/components/commons/Footer/Footer';
-import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 import CreateTests from '../CreateTests/CreateTests';
 import TakeTestsPage from '../TakeTestsPage/TakeTestsPage';
 import TestPage from '../TestPage/TestPage';
@@ -33,9 +32,6 @@ type AdminPageItems = {
 
 const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [modalWindowIsOpen, setModalWindowIsOpen] = useState(false);
-  const [titleModalWindow, setTitleModalWindow] = useState('');
-  const [modalFunctionOnClick, setModalFunctionOnClick] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<TestsItem[]>([]);
@@ -54,17 +50,13 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   const selectedTest = useSelector(state => selectedTestSelector(state, id));
   const InitTestsFromStorageAction = useActionWithPayload(initTestsFromStorage);
 
-  const onClickHandler = useCallback(() => {
-    setModalWindowIsOpen(prevValue => !prevValue);
-  }, []);
-
   const editTest = useCallback(
     (testId: string) => {
       if (selectedTest) {
         setSelectedTestItem({
           id: testId,
           title: selectedTest.title,
-          date: '',
+          date: selectedTest.date,
           questions: selectedTest.questions,
         });
       }
@@ -117,7 +109,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   useEffect(() => {
     if (allTests.length > 0) {
       console.log(allTests);
-      
+
       setCookie('tests', JSON.stringify(allTests), {
         path: '/',
         sameSite: 'lax',
@@ -148,10 +140,6 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
           router.asPath.startsWith(`/admin/editTest/${id}`)) && (
           <CreateTests
             id={id}
-            setModalWindowIsOpen={onClickHandler}
-            setTitleModalWindow={setTitleModalWindow}
-            titleModalWindow={titleModalWindow}
-            modalFunctionOnClick={modalFunctionOnClick}
             selectedTestItem={selectedTestItem}
           />
         )}
@@ -159,11 +147,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
         {router.pathname === '/admin/takeTests' && (
           <TakeTestsPage
             user={'admin'}
-            setModalWindowIsOpen={onClickHandler}
-            setTitleModalWindow={setTitleModalWindow}
-            titleModalWindow={titleModalWindow}
             editTest={editTest}
-            modalFunctionOnClick={modalFunctionOnClick}
             search={search}
             isSearching={isSearching}
             results={results}
@@ -180,12 +164,6 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
           user={admin}
-        />
-        <ModalWindow
-          modalWindowIsOpen={modalWindowIsOpen}
-          setModalWindowIsOpen={onClickHandler}
-          titleModalWindow={titleModalWindow}
-          setModalFunctionOnClick={setModalFunctionOnClick}
         />
         <Footer />
       </div>

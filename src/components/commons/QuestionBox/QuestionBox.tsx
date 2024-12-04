@@ -1,7 +1,6 @@
 import React, {
   FC,
   memo,
-  SetStateAction,
   useCallback,
   useEffect,
   useRef,
@@ -26,20 +25,9 @@ import cx from 'classnames';
 type QuestionBoxItems = {
   question: QuestionItem;
   takeTest: boolean;
-  changeTitleModalWindow: (editTitle: string, createTitle: string) => void;
-  setModalWindowIsOpen: React.Dispatch<SetStateAction<boolean>>;
-  modalFunctionOnClick: boolean;
-  titleModalWindow: string;
 };
 
-const QuestionBox: FC<QuestionBoxItems> = ({
-  question,
-  takeTest,
-  changeTitleModalWindow,
-  setModalWindowIsOpen,
-  modalFunctionOnClick,
-  titleModalWindow,
-}) => {
+const QuestionBox: FC<QuestionBoxItems> = ({ question, takeTest }) => {
   const [answerOption, setAnswerOption] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isChecked, setIsChecked] = useState(false);
@@ -97,14 +85,6 @@ const QuestionBox: FC<QuestionBoxItems> = ({
     addAnswerHandler(question.id, newAnswer);
   }, [addAnswerHandler, inputValue, isChecked]);
 
-  const onClickDeleteQuestion = useCallback(() => {
-    changeTitleModalWindow(
-      'Are you sure you want to delete the question?',
-      'Are you sure you want to delete the question?'
-    );
-    setModalWindowIsOpen(true);
-  }, [changeTitleModalWindow, setModalWindowIsOpen]);
-
   const previousOrderRef = useRef<AnswerItem[]>(question.answer);
 
   const handleReorder = (newOrder: AnswerItem[]) => {
@@ -114,22 +94,13 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       previousOrderRef.current = newOrder;
     }
   };
-  
+
   useEffect(() => {
     setQuestionState(question.answer);
     if (checkAnswerValue) {
       setError(false);
     }
   }, [question.answer, checkAnswerValue]);
-
-  useEffect(() => {
-    if (
-      modalFunctionOnClick &&
-      titleModalWindow === 'Are you sure you want to delete the question?'
-    ) {
-      removeQuestionHandler(question.id);
-    }
-  }, [modalFunctionOnClick, titleModalWindow]);
 
   const addTrueAnswerChange =
     question.questionType === 'checkbox' ||
@@ -208,7 +179,9 @@ const QuestionBox: FC<QuestionBoxItems> = ({
         <div className={s.buttons}>
           <ChangeButton
             title={'Delete question'}
-            onClick={onClickDeleteQuestion}
+            onClick={() => {
+              removeQuestionHandler(question.id);
+            }}
           />
           {!(
             question.questionType === 'number' && question.answer.length === 1

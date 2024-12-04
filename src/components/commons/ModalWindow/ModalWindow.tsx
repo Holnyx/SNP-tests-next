@@ -10,38 +10,35 @@ import s from './ModalWindow.module.sass';
 import cx from 'classnames';
 
 type ModalWindowItems = {
-  modalWindowIsOpen: boolean;
-  titleModalWindow?: string;
-  setModalWindowIsOpen: () => void;
-  setModalFunctionOnClick: React.Dispatch<React.SetStateAction<boolean>>;
+  isModalWindowOpen: boolean;
+  setIsModalWindowOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onConfirm: () => void;
+  title: string;
 };
 
 const ModalWindow: FC<ModalWindowItems> = ({
-  modalWindowIsOpen,
-  titleModalWindow,
-  setModalWindowIsOpen,
-  setModalFunctionOnClick,
+  isModalWindowOpen,
+  setIsModalWindowOpen,
+  onConfirm,
+  title,
 }) => {
-  useBodyScrollLock(modalWindowIsOpen); //???? this work but I don't mind what this right
+  useBodyScrollLock(isModalWindowOpen); //???? this work but I don't mind what this right
 
   return (
     <div
-      className={cx(s.container, { [s.active]: modalWindowIsOpen })}
-      onClick={setModalWindowIsOpen}
+      className={cx(s.container, { [s.active]: isModalWindowOpen })}
+      onClick={() => setIsModalWindowOpen(false)}
     >
       <div
         className={s.window}
         onClick={e => e.stopPropagation()}
       >
-        <h3 className={s.title}>{titleModalWindow}</h3>
+        <h3 className={s.title}>{title}</h3>
         <div>
           <button
             className={s.closed}
             title="Cancel"
-            onClick={() => {
-              setModalWindowIsOpen();
-              setModalFunctionOnClick(false);
-            }}
+            onClick={() => setIsModalWindowOpen(false)}
           >
             <Image
               className={s['closed-img']}
@@ -52,16 +49,13 @@ const ModalWindow: FC<ModalWindowItems> = ({
           <div className={s['buttons_box']}>
             <ChangeButton
               title={'Cancel'}
-              onClick={() => {
-                setModalWindowIsOpen();
-                setModalFunctionOnClick(false);
-              }}
+              onClick={() => setIsModalWindowOpen(false)}
             />
             <ChangeButton
               title={'Yes'}
               onClick={() => {
-                setModalWindowIsOpen();
-                setModalFunctionOnClick(true);
+                onConfirm();
+                setIsModalWindowOpen(false);
               }}
             />
           </div>

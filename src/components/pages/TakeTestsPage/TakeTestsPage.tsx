@@ -20,54 +20,43 @@ import { useActionWithPayload } from '@/hooks/useAction';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
+import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
 type TakeTestsPageItems = {
   user: string;
-  setModalWindowIsOpen: () => void;
-  setTitleModalWindow: Dispatch<SetStateAction<string>>;
   editTest: (id: string) => void;
-  modalFunctionOnClick: boolean;
   search: string;
   isSearching: boolean;
   results: TestsItem[];
-  titleModalWindow: string;
 };
 
 const TakeTestsPage: FC<TakeTestsPageItems> = ({
   user,
-  setModalWindowIsOpen,
-  setTitleModalWindow,
   editTest,
-  modalFunctionOnClick,
   search,
   isSearching,
   results,
-  titleModalWindow,
 }) => {
   const [show, setShow] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState('');
+
+  const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
+  const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
+
   const router = useRouter();
   const removeTestAction = useActionWithPayload(removeTest);
 
   const onClickHandlerDeleteTest = useCallback(() => {
-    setTitleModalWindow('Are you sure you want to delete the test?');
-    setModalWindowIsOpen();
-  }, [setModalWindowIsOpen, setTitleModalWindow]);
+    setIsModalWindowTitle('Are you sure you want to delete the test?');
+    setIsModalWindowOpen(true);
+  }, [setIsModalWindowTitle]);
 
-  useEffect(() => {
-    if (
-      modalFunctionOnClick &&
-      titleModalWindow === 'Are you sure you want to delete the test?' &&
-      selectedTestId
-    ) {
+  const onConfirm = useCallback(() => {
+    if (isModalWindowTitle.includes('taking')) {
+    } else if (isModalWindowTitle.includes('delete')) {
       removeTestAction({ id: selectedTestId });
     }
-  }, [
-    modalFunctionOnClick,
-    titleModalWindow,
-    removeTestAction,
-    selectedTestId,
-  ]);
+  }, [isModalWindowTitle, removeTestAction, selectedTestId]);
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
@@ -90,8 +79,8 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                 {user !== 'user' && (
                   <DeleteButton
                     onClick={() => {
-                      onClickHandlerDeleteTest();
                       setSelectedTestId(test.id);
+                      onClickHandlerDeleteTest();
                     }}
                   />
                 )}
@@ -108,8 +97,8 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                 <ChangeButton
                   title={'Take the Test'}
                   onClick={() => {
-                    setTitleModalWindow('Start taking the test?');
-                    setModalWindowIsOpen();
+                    setIsModalWindowTitle('Start taking the test?');
+                    setIsModalWindowOpen(true);
                   }}
                 />
                 <span className={s['test-date']}>{formatDate(test.date)}</span>
@@ -136,6 +125,12 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
             </div>
           );
         })}
+      <ModalWindow
+        isModalWindowOpen={isModalWindowOpen}
+        setIsModalWindowOpen={setIsModalWindowOpen}
+        onConfirm={onConfirm}
+        title={isModalWindowTitle}
+      />
     </div>
   );
 };
