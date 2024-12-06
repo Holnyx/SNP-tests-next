@@ -21,11 +21,20 @@ const testSlice = createSlice({
         test => test.id !== action.payload.id
       );
     },
+    updateTests(state, action: PayloadAction<TestsItem>) {
+      const updatedTestIndex = state.testsList.findIndex(test => test.id === action.payload.id);
+      if (updatedTestIndex !== -1) {
+        state.testsList[updatedTestIndex] = {
+          ...state.testsList[updatedTestIndex],
+          ...action.payload,
+        };
+      }
+    },
     filteredTestsByDate(state, action: PayloadAction<FilteredTestsByDate>) {
       state.sortOrder = action.payload;
     },
     initTestsFromStorage: (state, action: PayloadAction<TestsItem[]>) => {
-      state.testsList = [...action.payload];
+      state.testsList = action.payload
     },
     setSearchQuery(state, action: PayloadAction<string>) {
       state.searchQuery = action.payload;
@@ -39,6 +48,7 @@ export const {
   removeTest,
   setSearchQuery,
   filteredTestsByDate,
+  updateTests,
 } = testSlice.actions;
 
 export default testSlice.reducer;

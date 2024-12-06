@@ -93,7 +93,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
       setSelectedTestItem({
         id,
         title: selectedTest.title,
-        date: '',
+        date: selectedTest.date,
         questions: selectedTest.questions,
       });
     }
@@ -107,9 +107,8 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   }, [InitTestsFromStorageAction]);
 
   useEffect(() => {
-    if (allTests.length > 0) {
+    if (allTests && allTests.length > 0) {
       console.log(allTests);
-
       setCookie('tests', JSON.stringify(allTests), {
         path: '/',
         sameSite: 'lax',

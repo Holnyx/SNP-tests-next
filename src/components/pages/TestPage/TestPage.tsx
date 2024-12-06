@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useState } from 'react';
+import React, { FC, memo, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
@@ -9,7 +9,7 @@ import { testItemsStateTest } from '@/components/state/testsStateTest';
 import s from './TestPage.module.sass';
 import cx from 'classnames';
 import { useSelector } from 'react-redux';
-import { selectedTestSelector, testSelector } from '@/store/selectors';
+import { selectedTestSelector } from '@/store/selectors';
 
 type TestPageItems = {
   user: string;
@@ -18,7 +18,7 @@ type TestPageItems = {
 
 const TestPage: FC<TestPageItems> = ({ user, id }) => {
   const [takeTest, setTakeTest] = useState(false);
-  
+
   const router = useRouter();
   const selectedTest = useSelector(state => selectedTestSelector(state, id));
 
@@ -32,9 +32,8 @@ const TestPage: FC<TestPageItems> = ({ user, id }) => {
               <QuestionBox
                 question={test}
                 takeTest={takeTest}
-                changeTitleModalWindow={() => {}}
-                setModalWindowIsOpen={() => {}}
-                modalFunctionOnClick={false}
+                testId={''}
+                setQuestions={() => {}}
               />
             </div>
           );

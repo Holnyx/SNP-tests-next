@@ -16,7 +16,11 @@ import Checkbox from '../Inputs/Checkbox/Checkbox';
 
 import { AnswerItem, QuestionItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
-import { removeQuestion, updateAnswersOrder } from '@/store/questionReduser';
+import {
+  removeAllQuestion,
+  removeQuestion,
+  updateAnswersOrder,
+} from '@/store/questionReduser';
 import { addAnswer, removeAnswer } from '@/store/questionReduser';
 
 import s from './QuestionBox.module.sass';
@@ -25,18 +29,27 @@ import cx from 'classnames';
 type QuestionBoxItems = {
   question: QuestionItem;
   takeTest: boolean;
+  setQuestions: React.Dispatch<React.SetStateAction<QuestionItem[]>>;
+  questionId: string;
 };
 
-const QuestionBox: FC<QuestionBoxItems> = ({ question, takeTest }) => {
+const QuestionBox: FC<QuestionBoxItems> = ({
+  question,
+  takeTest,
+  questionId,
+  setQuestions,
+}) => {
   const [answerOption, setAnswerOption] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
-  const [questionState, setQuestionState] = useState(question.answer);
+  const [answerState, setAnswerState] = useState(question.answer);
+  const [questionTitleValue, setQuestionTitleValue] = useState(question.title);
 
   const addAnswerAction = useActionWithPayload(addAnswer);
   const removeAnswerAction = useActionWithPayload(removeAnswer);
   const removeQuestionAction = useActionWithPayload(removeQuestion);
+  const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
   const updateAnswersOrderAction = useActionWithPayload(updateAnswersOrder);
 
   const checkAnswerValue =
@@ -47,6 +60,9 @@ const QuestionBox: FC<QuestionBoxItems> = ({ question, takeTest }) => {
   const removeQuestionHandler = useCallback(
     (questionId: string) => {
       removeQuestionAction({ questionId });
+      setQuestions(prevQuestions =>
+        prevQuestions.filter(q => q.id !== questionId)
+      );
     },
     [removeQuestionAction]
   );
@@ -54,7 +70,15 @@ const QuestionBox: FC<QuestionBoxItems> = ({ question, takeTest }) => {
   const removeAnswerHandler = useCallback(
     (questionId: string, answerId: string) => {
       removeAnswerAction({ questionId, answerId });
+      setQuestions(prevQuestions =>
+        prevQuestions.map(q =>
+          q.id === questionId
+            ? { ...q, answer: q.answer.filter(a => a.id !== answerId) }
+            : q
+        )
+      );
     },
+
     [removeAnswerAction]
   );
 
@@ -83,20 +107,25 @@ const QuestionBox: FC<QuestionBoxItems> = ({ question, takeTest }) => {
       isTrue: question.questionType === 'number' ? true : isChecked,
     };
     addAnswerHandler(question.id, newAnswer);
+    setQuestions(prevQuestions =>
+      prevQuestions.map(q =>
+        q.id === questionId ? { ...q, answer: [...q.answer, newAnswer] } : q
+      )
+    );
   }, [addAnswerHandler, inputValue, isChecked]);
 
   const previousOrderRef = useRef<AnswerItem[]>(question.answer);
 
   const handleReorder = (newOrder: AnswerItem[]) => {
     if (JSON.stringify(previousOrderRef.current) !== JSON.stringify(newOrder)) {
-      setQuestionState(newOrder);
+      setAnswerState(newOrder);
       updateAnswersOrderAction({ questionId: question.id, newOrder });
       previousOrderRef.current = newOrder;
     }
   };
 
   useEffect(() => {
-    setQuestionState(question.answer);
+    setAnswerState(question.answer);
     if (checkAnswerValue) {
       setError(false);
     }
@@ -109,17 +138,18 @@ const QuestionBox: FC<QuestionBoxItems> = ({ question, takeTest }) => {
   const hasTrueAnswer =
     question.answer.some(answer => answer.isTrue) &&
     question.answer.length >= 2;
+
   return (
     <div className={s['questions-box']}>
       <span className={s['type-question']}>{question.questionType}</span>
       <div key={question.id}>
-        <h3 className={s.title}>{question.title}</h3>
+        <h3 className={s.title}>{questionTitleValue}</h3>
         <Reorder.Group
-          values={questionState}
+          values={answerState}
           onReorder={handleReorder}
           className={s['answer-list']}
         >
-          {questionState.map(answer => (
+          {answerState.map(answer => (
             <Reorder.Item
               value={answer}
               key={answer.id}
@@ -168,7 +198,8 @@ const QuestionBox: FC<QuestionBoxItems> = ({ question, takeTest }) => {
                 if (!error) {
                   saveClickHandler();
                   setAnswerOption(prevValue => !prevValue);
-                  setQuestionState(question.answer);
+                  // setAnswerState(question.answer);
+                  removeAllQuestionAction();
                 }
               }}
             />

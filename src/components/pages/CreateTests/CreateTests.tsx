@@ -1,11 +1,4 @@
-import React, {
-  FC,
-  memo,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { v1 } from 'uuid';
 import { useRouter } from 'next/router';
@@ -19,7 +12,7 @@ import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 import { QuestionItem, TestsItem, TestsOptionsForSelect } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { addQuestion, removeAllQuestion } from '@/store/questionReduser';
-import { addTest, removeTest } from '@/store/testReduser';
+import { addTest, removeTest, updateTests } from '@/store/testReduser';
 import { questionSelector } from '@/store/selectors';
 
 import s from './CreateTests.module.sass';
@@ -35,10 +28,13 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   const [select, setSelect] = useState('Select question type');
   const [selectType, setSelectType] = useState('none');
   const [testTitleValue, setTestTitleValue] = useState(selectedTestItem.title);
+  const [testDateValue, setTestDateValue] = useState(selectedTestItem.date);
   const [inputValue, setInputValue] = useState('');
   const [errorTestTitle, setErrorTestTitle] = useState(false);
   const [error, setError] = useState(false);
   const [errorList, setErrorList] = useState(false);
+
+  const [questions, setQuestions] = useState(selectedTestItem.questions);
 
   const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
   const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
@@ -48,6 +44,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
   const addQuestionAction = useActionWithPayload(addQuestion);
   const removeTestAction = useActionWithPayload(removeTest);
+  const updateTestAction = useActionWithPayload(updateTests);
   const allQuestions = useSelector(questionSelector);
 
   const checkQuestionValue =
@@ -79,7 +76,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   }, [setIsModalWindowTitle, setIsModalWindowOpen]);
 
   const deleteTest = useCallback(() => {
-    removeTestAction({id});
+    removeTestAction({ id });
     cleanInputs();
     setTestTitleValue('');
     setErrorTestTitle(false);
@@ -108,6 +105,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
       answer: [],
     };
     addQuestionHandler(newQuestion);
+    setQuestions(prevQuestions => [newQuestion, ...prevQuestions]);
   }, [addQuestionHandler, inputValue, selectType]);
 
   const saveTestClickHandler = useCallback(() => {
@@ -143,6 +141,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     isQuestionListValid,
     hasAnswer,
     setIsModalWindowOpen,
+    setIsModalWindowTitle,
   ]);
 
   const createTest = useCallback(() => {
@@ -154,11 +153,43 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     router.push('/admin/takeTests');
   }, [saveTestClickHandler]);
 
+  const saveChange = useCallback(() => {
+    if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
+      if (selectedTestItem) {
+        const updatedTitle =
+          testTitleValue !== '' ? testTitleValue : selectedTestItem.title;
+        const updatedDate =
+          testDateValue !== '' ? testDateValue : selectedTestItem.date;
+        const updateQuestions =
+          questions.length >= 2 ? questions : selectedTestItem.questions;
+        updateTestAction({
+          id,
+          title: updatedTitle,
+          date: updatedDate,
+          questions: updateQuestions,
+        });
+        router.push('/admin/takeTests');
+      }
+    }
+  }, [
+    selectedTestItem,
+    testTitleValue,
+    testDateValue,
+    questions,
+    checkTestTitleValue,
+    isQuestionListValid,
+    hasAnswer,
+  ]);
+
   const onConfirm = useCallback(() => {
     if (isModalWindowTitle.includes('save') && pathRouteCreate) {
       createTest();
     } else if (isModalWindowTitle.includes('delete')) {
       deleteTest();
+    } else if (isModalWindowTitle.includes('cancel')) {
+      router.push('/admin/takeTests');
+    } else if (isModalWindowTitle.includes('save') && pathRouteEdit) {
+      saveChange();
     }
   }, [isModalWindowTitle]);
 
@@ -177,8 +208,10 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     }
     if (pathRouteEdit && selectedTestItem) {
       setTestTitleValue(selectedTestItem.title);
+      setTestDateValue(new Date().toISOString());
+      setQuestions(selectedTestItem.questions);
     }
-  }, [pathRouteCreate, selectedTestItem]);
+  }, [pathRouteCreate, pathRouteEdit, selectedTestItem]);
 
   return (
     <div className={s.container}>
@@ -219,24 +252,24 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
           />
         </div>
         {pathRouteEdit
-          ? selectedTestItem.questions.map(q => {
-              return (
-                <QuestionBox
-                  key={q.id}
-                  question={q}
-                  takeTest={false}
-                />
-              );
-            })
-          : allQuestions.map(q => {
-              return (
-                <QuestionBox
-                  key={q.id}
-                  question={q}
-                  takeTest={false}
-                />
-              );
-            })}
+          ? questions.map(q => (
+              <QuestionBox
+                key={q.id}
+                questionId={q.id}
+                question={q}
+                takeTest={false}
+                setQuestions={setQuestions}
+              />
+            ))
+          : allQuestions.map(q => (
+              <QuestionBox
+              questionId={q.id}
+                key={q.id}
+                question={q}
+                takeTest={false}
+                setQuestions={setQuestions}
+              />
+            ))}
         {errorList && (
           <span className={cx(s['error-message'])}>
             The list of questions should be at least two

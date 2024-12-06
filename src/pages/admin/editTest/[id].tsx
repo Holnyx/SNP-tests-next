@@ -12,8 +12,7 @@ const EditTests = ({
   return (
     <AdminPage
       admin="admin"
-      id={id}
-    />
+      id={id} search={''}    />
   );
 };
 export const getServerSideProps: GetServerSideProps = async context => {

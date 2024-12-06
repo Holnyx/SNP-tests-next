@@ -20,29 +20,21 @@ const questionSlice = createSlice({
       state,
       action: PayloadAction<{ questionId: string; answer: AnswerItem }>
     ) {
-      const question = state.find(
-        element => element.id === action.payload.questionId
-      );
-
+      const { questionId, answer } = action.payload;
+      const question = state.find(q => q.id === questionId);
       if (question) {
-        question.answer.unshift(action.payload.answer);
+        question.answer.push(answer);
       }
     },
     removeAnswer(
       state,
       action: PayloadAction<{ questionId: string; answerId: string }>
     ) {
-      return state.map(question => {
-        if (question.id === action.payload.questionId) {
-          return {
-            ...question,
-            answer: question.answer.filter(
-              element => element.id !== action.payload.answerId
-            ),
-          };
-        }
-        return question;
-      });
+      const { questionId, answerId } = action.payload;
+      const question = state.find(q => q.id === questionId);
+      if (question) {
+        question.answer = question.answer.filter(a => a.id !== answerId);
+      }
     },
     updateAnswersOrder: (
       state,

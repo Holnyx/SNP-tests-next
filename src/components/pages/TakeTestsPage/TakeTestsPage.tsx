@@ -1,12 +1,4 @@
-import React, {
-  Dispatch,
-  FC,
-  memo,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import React, { FC, memo, useCallback, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
@@ -110,6 +102,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                     setShow(prevValue => !prevValue);
                     setSelectedTestId(test.id);
                   }}
+                  title="Show answers"
                 />
               </div>
               {show && (
