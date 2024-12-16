@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AnswerItem, QuestionItem, TestsItem, TestsState } from './types';
+import { AnswerItem, QuestionItem } from './types';
+import { getQuestionsThunk } from '@/thunk/testsThunk';
+
 
 const initialState: QuestionItem[] = [];
 
@@ -11,9 +13,9 @@ const questionSlice = createSlice({
       state.unshift(action.payload);
     },
     removeQuestion(state, action: PayloadAction<{ questionId: string }>) {
-      return state.filter(element => element.id !== action.payload.questionId);
+      return state.filter((question) => question.id !== action.payload.questionId);
     },
-    removeAllQuestion(state) {
+    removeAllQuestion() {
       return [];
     },
     addAnswer(
@@ -21,7 +23,7 @@ const questionSlice = createSlice({
       action: PayloadAction<{ questionId: string; answer: AnswerItem }>
     ) {
       const { questionId, answer } = action.payload;
-      const question = state.find(q => q.id === questionId);
+      const question = state.find((q) => q.id === questionId);
       if (question) {
         question.answer.push(answer);
       }
@@ -31,21 +33,26 @@ const questionSlice = createSlice({
       action: PayloadAction<{ questionId: string; answerId: string }>
     ) {
       const { questionId, answerId } = action.payload;
-      const question = state.find(q => q.id === questionId);
+      const question = state.find((q) => q.id === questionId);
       if (question) {
-        question.answer = question.answer.filter(a => a.id !== answerId);
+        question.answer = question.answer.filter((a) => a.id !== answerId);
       }
     },
-    updateAnswersOrder: (
+    updateAnswersOrder(
       state,
       action: PayloadAction<{ questionId: string; newOrder: AnswerItem[] }>
-    ) => {
+    ) {
       const { questionId, newOrder } = action.payload;
-      const question = state.find(q => q.id === questionId);
+      const question = state.find((q) => q.id === questionId);
       if (question) {
         question.answer = newOrder;
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(getQuestionsThunk.fulfilled, (state, action: PayloadAction<QuestionItem[]>) => {
+      return action.payload;
+    });
   },
 });
 
