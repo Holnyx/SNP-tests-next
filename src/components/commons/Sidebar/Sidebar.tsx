@@ -7,6 +7,10 @@ import { sidebarLinksState } from '@/components/state/sidebarLinksState';
 import s from './Sidebar.module.sass';
 import cx from 'classnames';
 import { useRouter } from 'next/router';
+import { logoutThunk } from '@/thunk/testsThunk';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store';
+
 
 type SidebarItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,9 +20,11 @@ type SidebarItems = {
 
 const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleLinkClick = (href: string) => {
     if (href === '/signIn') {
+      dispatch(logoutThunk());
       router.replace(href);
     } else {
       router.push(href);
@@ -55,6 +61,8 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
                   href={href}
                   onClick={e => {
                     e.preventDefault();
+                    console.log(element.href);
+                    
                     handleLinkClick(href);
                   }}
                 >

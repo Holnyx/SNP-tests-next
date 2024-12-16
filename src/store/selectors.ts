@@ -4,7 +4,8 @@ import { AnswerItem, QuestionItem, TestsItem } from './types';
 
 const testsSelector = (state: AppRootStateItems) => state.tests.testsList;
 const questionsSelector = (state: AppRootStateItems) => state.questions;
-// const answersSelector = (state: AppRootStateItems) => state.answers;
+const errorsSelector = (state: AppRootStateItems) => state.tests.errors;
+const authErrorsSelector = (state: AppRootStateItems) => state.auth.errors;
 const sortOrderSelector = (state: AppRootStateItems) => state.tests.sortOrder;
 
 export const testSelector = createSelector(testsSelector, state => state);
@@ -13,8 +14,12 @@ export const questionSelector = createSelector(
   state => state
 );
 export const answerSelector = createSelector(questionsSelector, state => state);
+export const errorSelector = createSelector(errorsSelector, state => state);
+export const authErrorSelector = createSelector(
+  authErrorsSelector,
+  state => state
+);
 export const filterSelector = createSelector(sortOrderSelector, state => state);
-export const errorSelector = createSelector(testSelector, state => state);
 
 export const selectedTestSelector = createSelector(
   [testSelector, (state, selectedTestId) => selectedTestId],
@@ -31,6 +36,8 @@ export const selectedQuestionSelector = createSelector(
     );
   }
 );
+
+// const answersSelector = (state: AppRootStateItems) => state.answers;
 
 // export const selectedAnswerSelector = createSelector(
 //   [answersSelector, (state, selectedAnswerId) => selectedAnswerId],

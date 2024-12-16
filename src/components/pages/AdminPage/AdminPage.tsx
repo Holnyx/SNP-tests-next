@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { getCookie, setCookie } from 'cookies-next';
 
@@ -18,11 +18,11 @@ import {
   sortedTestsSelector,
   testSelector,
 } from '@/store/selectors';
-import { useActionWithPayload } from '@/hooks/useAction';
-import { initTestsFromStorage } from '@/store/testReduser';
+import { getAllTestsThunk } from '@/thunk/testsThunk';
 
 import s from './AdminPage.module.sass';
 import cx from 'classnames';
+import { AppDispatch } from '@/store';
 
 type AdminPageItems = {
   admin?: string;
@@ -42,13 +42,12 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
     date: '',
     questions: [],
   });
-
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
   const filteredTestsByDate = useSelector(sortedTestsSelector);
   const selectedTest = useSelector(state => selectedTestSelector(state, id));
-  const InitTestsFromStorageAction = useActionWithPayload(initTestsFromStorage);
 
   const editTest = useCallback(
     (testId: string) => {
@@ -100,19 +99,12 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   }, [id, selectedTest]);
 
   useEffect(() => {
-    const storedTests = getCookie('tests');
-    if (storedTests) {
-      InitTestsFromStorageAction(JSON.parse(storedTests));
-    }
-  }, [InitTestsFromStorageAction]);
+    dispatch(getAllTestsThunk({ page: 1, per: 10, search: '', sort: 'desc' }));
+  }, [dispatch]);
 
   useEffect(() => {
     if (allTests && allTests.length > 0) {
-      console.log(allTests);
-      setCookie('tests', JSON.stringify(allTests), {
-        path: '/',
-        sameSite: 'lax',
-      });
+      setCookie('tests', JSON.stringify(allTests));
     } else {
       setCookie('tests', '');
     }
@@ -145,7 +137,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
 
         {router.pathname === '/admin/takeTests' && (
           <TakeTestsPage
-            user={'admin'}
+            user={admin}
             editTest={editTest}
             search={search}
             isSearching={isSearching}
@@ -154,7 +146,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
         )}
         {router.pathname === `/admin/testPage/${id}` && (
           <TestPage
-            user={'admin'}
+            user={admin}
             id={id}
           />
         )}

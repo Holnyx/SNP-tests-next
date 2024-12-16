@@ -1,18 +1,17 @@
 import React, { FC, memo, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
 
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
-
-import { testItemsStateTest } from '@/components/state/testsStateTest';
+import { selectedTestSelector } from '@/store/selectors';
 
 import s from './TestPage.module.sass';
 import cx from 'classnames';
-import { useSelector } from 'react-redux';
-import { selectedTestSelector } from '@/store/selectors';
+import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
 type TestPageItems = {
-  user: string;
+  user?: string;
   id?: string;
 };
 
@@ -32,8 +31,8 @@ const TestPage: FC<TestPageItems> = ({ user, id }) => {
               <QuestionBox
                 question={test}
                 takeTest={takeTest}
-                testId={''}
                 setQuestions={() => {}}
+                questionId={''}
               />
             </div>
           );
@@ -51,6 +50,12 @@ const TestPage: FC<TestPageItems> = ({ user, id }) => {
           onClick={() => {}}
         />
       </div>
+      <ModalWindow
+        isModalWindowOpen={false}
+        setIsModalWindowOpen={() => {}}
+        onConfirm={() => setTakeTest(true)}
+        title={''}
+      />
     </div>
   );
 };

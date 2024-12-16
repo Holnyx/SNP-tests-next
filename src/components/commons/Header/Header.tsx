@@ -9,12 +9,7 @@ import SearchInput from '../SearchInput/SearchInput';
 import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 
 import { useActionWithPayload } from '@/hooks/useAction';
-import {
-  filteredTestsByDate,
-  setSearchQuery,
-  // sortTestsByDateAsc,
-  // sortTestsByDateDesc,
-} from '@/store/testReduser';
+import { filteredTestsByDate, setSearchQuery } from '@/store/testReduser';
 
 import s from './Header.module.sass';
 import cx from 'classnames';
@@ -49,15 +44,6 @@ const Header: FC<HeaderItems> = ({
     changeTestsFilterAction(filter);
   }, []);
 
-  // const onClickSortFunction = useCallback(() => {
-  //   if (onClickSort) {
-  //     sortTestsByDateDescAction();
-  //   } else {
-  //     sortTestsByDateAscAction();
-  //   }
-  //   setOnClickSort(prevValue => !prevValue);
-  // }, [onClickSort]);
-
   useEffect(() => {
     setOnClickSort(false);
   }, [setOnClickSort]);
@@ -80,10 +66,10 @@ const Header: FC<HeaderItems> = ({
   const isTakeTests =
     router.pathname === '/admin/takeTests' ||
     router.pathname === '/user/takeTests';
-    const handleSort = useCallback(() => {
-      const newSortOrder = test === 'asc' ? 'desc' : 'asc';
-      changeTestsFilter(newSortOrder);
-    }, [test, changeTestsFilter]);
+  const handleSort = useCallback(() => {
+    const newSortOrder = test === 'asc' ? 'desc' : 'asc';
+    changeTestsFilter(newSortOrder);
+  }, [test, changeTestsFilter]);
   return (
     <header className={s.container}>
       <ButtonBurgerMenu

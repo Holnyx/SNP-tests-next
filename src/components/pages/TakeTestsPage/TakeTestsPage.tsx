@@ -5,17 +5,19 @@ import Image from 'next/image';
 import arrowIcon from '/public/img/arrow-down.svg?url';
 import DeleteButton from '@/components/commons/Buttons/DeleteButton/DeleteButton';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
+import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
-import { removeTest } from '@/store/testReduser';
 import { TestsItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
+import { deleteTestThunk } from '@/thunk/testsThunk';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
-import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store';
 
 type TakeTestsPageItems = {
-  user: string;
+  user?: string;
   editTest: (id: string) => void;
   search: string;
   isSearching: boolean;
@@ -36,7 +38,9 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
 
   const router = useRouter();
-  const removeTestAction = useActionWithPayload(removeTest);
+  const dispatch = useDispatch<AppDispatch>();
+
+  // const removeTestAction = useActionWithPayload(deleteTestThunk);
 
   const onClickHandlerDeleteTest = useCallback(() => {
     setIsModalWindowTitle('Are you sure you want to delete the test?');
@@ -46,14 +50,17 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   const onConfirm = useCallback(() => {
     if (isModalWindowTitle.includes('taking')) {
     } else if (isModalWindowTitle.includes('delete')) {
-      removeTestAction({ id: selectedTestId });
+      // removeTestAction(String(selectedTestId));
+      dispatch(deleteTestThunk(selectedTestId));
     }
-  }, [isModalWindowTitle, removeTestAction, selectedTestId]);
+  }, [isModalWindowTitle, dispatch, selectedTestId]);
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
     return date.toLocaleDateString('ru-RU');
   };
+
+  const pathRouteTakeTests = router.pathname === '/admin/takeTests';
 
   return (
     <div className={s.container}>
@@ -94,16 +101,18 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                   }}
                 />
                 <span className={s['test-date']}>{formatDate(test.date)}</span>
-                <Image
-                  src={arrowIcon}
-                  alt={'arrow'}
-                  className={cx(s['arrow-icon'], { [s.show]: show })}
-                  onClick={() => {
-                    setShow(prevValue => !prevValue);
-                    setSelectedTestId(test.id);
-                  }}
-                  title="Show answers"
-                />
+                {pathRouteTakeTests && (
+                  <Image
+                    src={arrowIcon}
+                    alt={'arrow'}
+                    className={cx(s['arrow-icon'], { [s.show]: show })}
+                    onClick={() => {
+                      setShow(prevValue => !prevValue);
+                      setSelectedTestId(test.id);
+                    }}
+                    title="Show answers"
+                  />
+                )}
               </div>
               {show && (
                 <div className={s['questions-list']}>

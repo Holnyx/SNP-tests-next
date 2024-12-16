@@ -7,7 +7,6 @@ import Header from '@/components/commons/Header/Header';
 import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
 import TakeTestsPage from '../TakeTestsPage/TakeTestsPage';
 import TestPage from '../TestPage/TestPage';
-import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 import Sidebar from '@/components/commons/Sidebar/Sidebar';
 import Footer from '@/components/commons/Footer/Footer';
 
@@ -15,7 +14,7 @@ import { TestsItem } from '@/store/types';
 import { useDebounce } from '@/hooks/useDebounce';
 import { selectedTestSelector, testSelector } from '@/store/selectors';
 import { useActionWithPayload } from '@/hooks/useAction';
-import { initTestsFromStorage } from '@/store/testReduser';
+import { getAllTestsThunk } from '@/thunk/testsThunk';
 
 import s from './UserPage.module.sass';
 import cx from 'classnames';
@@ -28,9 +27,6 @@ type UserPageItems = {
 
 const UserPage: FC<UserPageItems> = ({ user, search, id }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [modalWindowIsOpen, setModalWindowIsOpen] = useState(false);
-  const [titleModalWindow, setTitleModalWindow] = useState('');
-  const [modalFunctionOnClick, setModalFunctionOnClick] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<TestsItem[]>([]);
@@ -39,11 +35,7 @@ const UserPage: FC<UserPageItems> = ({ user, search, id }) => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
   const selectedTest = useSelector(state => selectedTestSelector(state, id));
-  const InitTestsFromStorageAction = useActionWithPayload(initTestsFromStorage);
-
-  const onClickHandler = useCallback(() => {
-    setModalWindowIsOpen(prevValue => !prevValue);
-  }, []);
+  // const getAllTestsAction = useActionWithPayload(getAllTestsThunk);
 
   const searchCharacters = (search: string): Promise<TestsItem[]> => {
     return new Promise<TestsItem[]>(resolve => {
@@ -69,12 +61,9 @@ const UserPage: FC<UserPageItems> = ({ user, search, id }) => {
     }
   }, [debouncedSearchTerm, allTests]);
 
-  useEffect(() => {
-    const storedTests = getCookie('tests');
-    if (storedTests) {
-      InitTestsFromStorageAction(JSON.parse(storedTests));
-    }
-  }, []);
+  // useEffect(() => {
+  //   getAllTestsAction({ page: 1, per: 10, search: '', sort: 'desc' });
+  // }, [getAllTestsAction]);
 
   useEffect(() => {
     if (allTests.length > 0) {
@@ -99,10 +88,7 @@ const UserPage: FC<UserPageItems> = ({ user, search, id }) => {
         />
         <TakeTestsPage
           user={'user'}
-          setModalWindowIsOpen={onClickHandler}
-          setTitleModalWindow={setTitleModalWindow}
           editTest={() => {}}
-          modalFunctionOnClick={modalFunctionOnClick}
           search={search}
           isSearching={isSearching}
           results={results}
@@ -118,12 +104,6 @@ const UserPage: FC<UserPageItems> = ({ user, search, id }) => {
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
           user={user}
-        />
-        <ModalWindow
-          modalWindowIsOpen={modalWindowIsOpen}
-          setModalWindowIsOpen={onClickHandler}
-          titleModalWindow={titleModalWindow}
-          setModalFunctionOnClick={setModalFunctionOnClick}
         />
         <Footer />
       </div>

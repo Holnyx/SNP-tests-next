@@ -4,16 +4,24 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 const TakeTests = ({
   search,
+  username,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  return <AdminPage admin="admin" search={search}></AdminPage>;
+  return (
+    <AdminPage
+      admin={username}
+      search={search}
+    ></AdminPage>
+  );
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { search } = context.query;
-
+  const cookies = context.req.cookies;
+  const username = cookies.username || 'admin';
   return {
     props: {
       search: search || '',
+      username,
     },
   };
 };

@@ -1,5 +1,5 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { v1 } from 'uuid';
 import { useRouter } from 'next/router';
 
@@ -8,16 +8,21 @@ import SelectField from '@/components/commons/SelectField/SelectField';
 import Input from '@/components/commons/Inputs/Input/Input';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
+import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
 import { QuestionItem, TestsItem, TestsOptionsForSelect } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { addQuestion, removeAllQuestion } from '@/store/questionReduser';
-import { addTest, removeTest, updateTests } from '@/store/testReduser';
 import { questionSelector } from '@/store/selectors';
+import {
+  addTestThunk,
+  deleteTestThunk,
+  updateTestThunk,
+} from '@/thunk/testsThunk';
 
 import s from './CreateTests.module.sass';
 import cx from 'classnames';
-import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
+import { AppDispatch } from '@/store';
 
 type CreateTestsItems = {
   id?: string;
@@ -33,18 +38,17 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   const [errorTestTitle, setErrorTestTitle] = useState(false);
   const [error, setError] = useState(false);
   const [errorList, setErrorList] = useState(false);
-
   const [questions, setQuestions] = useState(selectedTestItem.questions);
-
   const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
   const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
 
   const router = useRouter();
-  const addTestAction = useActionWithPayload(addTest);
+  const dispatch = useDispatch<AppDispatch>();
+  // const addTestAction = useActionWithPayload(addTestThunk);
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
   const addQuestionAction = useActionWithPayload(addQuestion);
-  const removeTestAction = useActionWithPayload(removeTest);
-  const updateTestAction = useActionWithPayload(updateTests);
+  // const removeTestAction = useActionWithPayload(deleteTestThunk);
+  // const updateTestAction = useActionWithPayload(updateTestThunk);
   const allQuestions = useSelector(questionSelector);
 
   const checkQuestionValue =
@@ -76,13 +80,14 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   }, [setIsModalWindowTitle, setIsModalWindowOpen]);
 
   const deleteTest = useCallback(() => {
-    removeTestAction({ id });
+    dispatch(deleteTestThunk(String(id)));
+    // removeTestAction(String(id));
     cleanInputs();
     setTestTitleValue('');
     setErrorTestTitle(false);
     removeAllQuestionAction();
     router.push('/admin/takeTests');
-  }, [removeTestAction, id]);
+  }, [dispatch, id]);
 
   const addQuestionHandler = useCallback(
     (question: QuestionItem) => {
@@ -116,7 +121,8 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
       questions: allQuestions,
     };
     if (checkTestTitleValue) {
-      addTestAction(newTest);
+      dispatch(addTestThunk(newTest));
+      // addTestAction(newTest);
       cleanInputs();
       setError(false);
     } else {
@@ -162,12 +168,26 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
           testDateValue !== '' ? testDateValue : selectedTestItem.date;
         const updateQuestions =
           questions.length >= 2 ? questions : selectedTestItem.questions;
-        updateTestAction({
-          id,
-          title: updatedTitle,
-          date: updatedDate,
-          questions: updateQuestions,
-        });
+        dispatch(
+          updateTestThunk({
+            id: String(id),
+            updatedTest: {
+              title: updatedTitle,
+              date: updatedDate,
+              questions: updateQuestions,
+              id: String(id),
+            },
+          })
+        );
+        // updateTestAction({
+        //   id: String(id),
+        //   updatedTest: {
+        //     title: updatedTitle,
+        //     date: updatedDate,
+        //     questions: updateQuestions,
+        //     id: String(id),
+        //   },
+        // });
         router.push('/admin/takeTests');
       }
     }
@@ -263,7 +283,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
             ))
           : allQuestions.map(q => (
               <QuestionBox
-              questionId={q.id}
+                questionId={q.id}
                 key={q.id}
                 question={q}
                 takeTest={false}

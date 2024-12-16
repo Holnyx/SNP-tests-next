@@ -5,11 +5,16 @@ import Link from 'next/link';
 import leafImage from '/public/img/logIn-img.jpeg';
 import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
-import Input from '@/components/commons/Inputs/Input/Input';
+import Checkbox from '@/components/commons/Inputs/Checkbox/Checkbox';
+
+import { useActionWithPayload } from '@/hooks/useAction';
+import { signupThunk } from '@/thunk/testsThunk';
 
 import s from './Registration.module.sass';
 import cx from 'classnames';
-import Checkbox from '@/components/commons/Inputs/Checkbox/Checkbox';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store';
+import { useRouter } from 'next/router';
 
 const Registration = () => {
   const [isChecked, setIsChecked] = useState(false);
@@ -19,25 +24,62 @@ const Registration = () => {
   const [inputPasswordConfirmValue, setInputPasswordConfirmValue] =
     useState('');
 
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const authorizationAction = (data: {
+    username: string;
+    password: string;
+    password_confirmation: string;
+    auth_token: string;
+    is_admin: boolean;
+  }) => {
+    dispatch(signupThunk(data));
+  };
+
   const checkNameValue =
-    inputNameValue.length >= 3 && inputNameValue.trim() !== ''
+    inputNameValue.length >= 3 && inputNameValue.trim() !== '';
 
   const checkPasswordValue =
-    inputPasswordValue.length >= 5 && inputPasswordValue.trim() !== '';
+    inputPasswordValue.length >= 6 && inputPasswordValue.trim() !== '';
 
-  const onClickHandlerSignUp = useCallback(() => {
-    if (checkNameValue) {
-      setError(true);
+  const registrationInAction = async (data: {
+    username: string;
+    password: string;
+    password_confirmation: string;
+    auth_token: string;
+    is_admin: boolean;
+  }) => {
+    const resultAction = await authorizationAction(data); // Ваш thunk для логина
+    if (signupThunk.fulfilled.match(resultAction)) {
+      if (resultAction.payload?.token) {
+        localStorage.setItem('token', resultAction.payload.token);
+        console.log('Token saved:', resultAction.payload.token);
+      }
+      // if (resultAction.meta.requestStatus === 'fulfilled') {
+      //   router.push('/admin/takeTests');
+      // } else {
+      //   router.push('/user/takeTests');
+      // }
     } else {
       setError(true);
     }
+  };
 
-    if (checkPasswordValue) {
+  const onClickHandlerSignUp = useCallback(() => {
+    if (checkNameValue && checkPasswordValue) {
+      registrationInAction({
+        username: inputNameValue,
+        password: inputPasswordValue,
+        password_confirmation: inputPasswordConfirmValue,
+        auth_token: new Date().toISOString(),
+        is_admin: isChecked,
+      });
       setError(false);
     } else {
       setError(true);
     }
-  }, [checkNameValue, checkPasswordValue]);
+  }, [checkNameValue, checkPasswordValue, registrationInAction]);
   return (
     <div className={s.authorization}>
       <div className={s['login-form']}>
@@ -65,7 +107,7 @@ const Registration = () => {
           <InputForLogIn
             getTitle={'Password confirmation'}
             getType={'password'}
-            getName={'password-confirmation'}
+            getName={'password_confirmation'}
             error={error}
             value={inputPasswordConfirmValue}
             setInputValue={setInputPasswordConfirmValue}

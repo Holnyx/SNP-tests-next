@@ -1,10 +1,15 @@
 import React, { memo, useCallback, useState } from 'react';
+import { useRouter } from 'next/router';
+import { useDispatch } from 'react-redux';
 import Link from 'next/link';
 import Image from 'next/image';
 
 import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
 import leafImage from '/public/img/logIn-img.jpeg';
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
+
+import { AppDispatch } from '@/store';
+import { getCurrentUser, signinThunk } from '@/thunk/testsThunk';
 
 import s from './Authorization.module.sass';
 import cx from 'classnames';
@@ -13,21 +18,33 @@ const Authorization = () => {
   const [error, setError] = useState(false);
   const [inputNameValue, setInputNameValue] = useState('');
   const [inputPasswordValue, setInputPasswordValue] = useState('');
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const logInAction = async (data: { username: string; password: string }) => {
+    const resultAction = await dispatch(signinThunk(data));
+    if (signinThunk.fulfilled.match(resultAction)) {
+      const user = resultAction.payload;
+      if (user.is_admin) {
+        router.push('/admin/takeTests');
+      } else {
+        router.push('/user/takeTests');
+      }
+    } else {
+      setError(true);
+    }
+  };
 
   const checkNameValue =
     inputNameValue.length >= 3 && inputNameValue.trim() !== '';
 
   const checkPasswordValue =
-    inputPasswordValue.length >= 5 && inputPasswordValue.trim() !== '';
+    inputPasswordValue.length >= 6 && inputPasswordValue.trim() !== '';
 
   const onClickHandlerSignUp = useCallback(() => {
-    if (checkNameValue) {
-      setError(true);
-    } else {
-      setError(true);
-    }
-
-    if (checkPasswordValue) {
+    if (checkNameValue && checkPasswordValue) {
+      logInAction({ username: inputNameValue, password: inputPasswordValue });
+      dispatch(getCurrentUser())
       setError(false);
     } else {
       setError(true);
