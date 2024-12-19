@@ -20,7 +20,7 @@ const NotFoundPage = () => {
         <ChangeButton
           title={'Return home'}
           onClick={() => {
-            router.push('/');
+            router.push('/signIn');
           }}
           onMouseEnter={() => setIsHover(true)}
           onMouseLeave={() => setIsHover(false)}

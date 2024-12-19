@@ -74,6 +74,7 @@ const testApi = {
     }
   },
 
+  //удаление теста
   deleteTest: async (id: string) => {
     try {
       await api.delete(`/tests/${id}`);
@@ -93,14 +94,15 @@ const testApi = {
     }
   },
 
-  getTests: async (params: {
+  //получение тестов
+  getTests: async (data: {
     page?: number;
     per?: number;
     search?: string;
     sort?: string;
   }) => {
     try {
-      const response = await api.get('/tests', { params });
+      const response = await api.get('/tests', { data });
       return response.data;
     } catch (error) {
       console.error('Error fetching tests:', error);

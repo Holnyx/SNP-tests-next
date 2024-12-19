@@ -44,10 +44,6 @@ const Header: FC<HeaderItems> = ({
     changeTestsFilterAction(filter);
   }, []);
 
-  useEffect(() => {
-    setOnClickSort(false);
-  }, [setOnClickSort]);
-
   const handleSearchChange = useCallback(
     (query: string) => {
       if (query) {
@@ -63,13 +59,19 @@ const Header: FC<HeaderItems> = ({
     [router, setSearchQuery]
   );
 
-  const isTakeTests =
-    router.pathname === '/admin/takeTests' ||
-    router.pathname === '/user/takeTests';
   const handleSort = useCallback(() => {
     const newSortOrder = test === 'asc' ? 'desc' : 'asc';
     changeTestsFilter(newSortOrder);
   }, [test, changeTestsFilter]);
+
+  const isTakeTests =
+    router.pathname === '/admin/takeTests' ||
+    router.pathname === '/user/takeTests';
+
+  useEffect(() => {
+    setOnClickSort(false);
+  }, [setOnClickSort]);
+
   return (
     <header className={s.container}>
       <ButtonBurgerMenu

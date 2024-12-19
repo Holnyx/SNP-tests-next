@@ -1,14 +1,14 @@
 export type TestsItem = {
   id: string;
   title: string;
-  date: string;
+  created_at: string;
   questions: QuestionItem[];
 };
 
 export type QuestionItem = {
   id: string;
   title: string;
-  questionType: TestsOptionsForSelect;
+  question_type: TestsOptionsForSelect;
   answer: AnswerItem[];
 };
 
@@ -16,15 +16,16 @@ export type AnswerItem = {
   id: string;
   title: string;
   name: string;
-  isTrue: boolean;
+  is_right: boolean;
 };
 
 export type TestsState = {
   testsList: TestsItem[];
   searchQuery: string;
   errors: string[];
-  sortOrder: FilteredTestsByDate
+  sortOrder: FilteredTestsByDate;
+  test: null
 };
 
-export type FilteredTestsByDate = 'desc' | 'asc'
-export type TestsOptionsForSelect = 'none' | 'radio' | 'checkbox' | 'number';
+export type FilteredTestsByDate = 'desc' | 'asc';
+export type TestsOptionsForSelect = 'none' | 'single' | 'multiple' | 'number';

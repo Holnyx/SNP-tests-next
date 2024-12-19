@@ -6,7 +6,7 @@ export type TestsOptionsItem = {
 
 export const testsOptions: TestsOptionsItem[] = [
   { value: 'none', title: 'Select question type', disabled: true },
-  { value: 'radio', title: 'One from the list' },
-  { value: 'checkbox', title: 'Several from the list' },
+  { value: 'single', title: 'One from the list' },
+  { value: 'multiple', title: 'Several from the list' },
   { value: 'number', title: 'Numerical answer' },
 ];

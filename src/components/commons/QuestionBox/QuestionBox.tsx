@@ -10,27 +10,39 @@ import { v1 } from 'uuid';
 import { Reorder } from 'motion/react';
 
 import Input from '../Inputs/Input/Input';
-import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
+
 import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
 import Checkbox from '../Inputs/Checkbox/Checkbox';
 
 import { AnswerItem, QuestionItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
-import {
-  removeAllQuestion,
-  removeQuestion,
-  updateAnswersOrder,
-} from '@/store/questionReduser';
+import { updateAnswersOrder } from '@/store/questionReduser';
 import { addAnswer, removeAnswer } from '@/store/questionReduser';
 
 import s from './QuestionBox.module.sass';
 import cx from 'classnames';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store';
+import { createAnswerThunk, deleteAnswerThunk } from '@/thunk/testsThunk';
+import { useRouter } from 'next/router';
+import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
+import ModalWindow from '../ModalWindow/ModalWindow';
 
 type QuestionBoxItems = {
   question: QuestionItem;
   takeTest: boolean;
   setQuestions: React.Dispatch<React.SetStateAction<QuestionItem[]>>;
   questionId: string;
+  removeQuestionHandler: () => void;
+  // saveAnswerClickHandler: (
+  //   questionId: string,
+  //   inputValue: string,
+  //   isChecked: boolean,
+  //   checkAnswerValue: boolean,
+  //   question: QuestionItem,
+  //   answerState: AnswerItem[]
+  // ) => void;
+  isModalWindowTitle: string;
 };
 
 const QuestionBox: FC<QuestionBoxItems> = ({
@@ -38,82 +50,97 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   takeTest,
   questionId,
   setQuestions,
+  removeQuestionHandler,
+  // saveAnswerClickHandler,
+  isModalWindowTitle,
 }) => {
   const [answerOption, setAnswerOption] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
-  const [answerState, setAnswerState] = useState(question.answer);
+  const [answerState, setAnswerState] = useState<AnswerItem[]>(question.answer);
   const [questionTitleValue, setQuestionTitleValue] = useState(question.title);
 
+  const dispatch = useDispatch<AppDispatch>();
   const addAnswerAction = useActionWithPayload(addAnswer);
   const removeAnswerAction = useActionWithPayload(removeAnswer);
-  const removeQuestionAction = useActionWithPayload(removeQuestion);
-  const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
   const updateAnswersOrderAction = useActionWithPayload(updateAnswersOrder);
+  const router = useRouter();
+  const pathRouteCreate = router.pathname === '/admin/createTests';
+  // const pathRouteEdit = router.pathname === `/admin/editTest/${question.id}`;
 
   const checkAnswerValue =
     inputValue.length >= 1 &&
     inputValue.trim() !== '' &&
     inputValue.length <= 19;
 
-  const removeQuestionHandler = useCallback(
-    (questionId: string) => {
-      removeQuestionAction({ questionId });
-      setQuestions(prevQuestions =>
-        prevQuestions.filter(q => q.id !== questionId)
-      );
-    },
-    [removeQuestionAction]
-  );
+  const saveClickHandlerDOM = useCallback(() => {
+    const newAnswer: AnswerItem = {
+      id: v1(),
+      title: inputValue,
+      name: question.title,
+      is_right: question.question_type === 'number' ? true : isChecked,
+    };
+    if (checkAnswerValue) {
+      addAnswerAction({ questionId, newAnswer });
+      cleanInputs();
+      setError(false);
+    } else {
+      setError(true);
+    }
+  }, [addAnswerAction, inputValue, isChecked]);
 
   const removeAnswerHandler = useCallback(
     (questionId: string, answerId: string) => {
-      removeAnswerAction({ questionId, answerId });
-      setQuestions(prevQuestions =>
-        prevQuestions.map(q =>
-          q.id === questionId
-            ? { ...q, answer: q.answer.filter(a => a.id !== answerId) }
-            : q
-        )
-      );
+      if (pathRouteCreate) {
+        removeAnswerAction({ questionId, answerId });
+      } else {
+        dispatch(deleteAnswerThunk(answerId));
+      }
     },
-
-    [removeAnswerAction]
+    [removeAnswerAction, dispatch]
   );
-
   const cleanInputs = useCallback(() => {
     setInputValue('');
     setIsChecked(false);
   }, []);
 
-  const addAnswerHandler = useCallback(
-    (questionId: string, answer: AnswerItem) => {
-      if (checkAnswerValue) {
-        addAnswerAction({ questionId, answer });
-        cleanInputs();
-        setError(false);
-      } else {
-        setError(true);
+  const saveClickHandler = useCallback(async () => {
+    if (checkAnswerValue) {
+      const data = {
+        text: inputValue,
+        is_right: question.question_type === 'number' ? true : isChecked,
+      };
+      const answerResponse = await dispatch(
+        createAnswerThunk({ questionId, data })
+      ).unwrap();
+      const newAnswers = answerState.map(el => ({
+        questionId: answerResponse.id,
+        data: {
+          text: el.title,
+          is_right: el.is_right,
+        },
+      }));
+      for (const newAnswer of newAnswers) {
+        await dispatch(createAnswerThunk(newAnswer));
       }
-    },
-    [addAnswerAction, checkAnswerValue, cleanInputs, setError]
-  );
-  const saveClickHandler = useCallback(() => {
-    const newAnswer: AnswerItem = {
-      id: v1(),
-      title: inputValue,
-      name: question.title,
-      isTrue: question.questionType === 'number' ? true : isChecked,
-    };
-    addAnswerHandler(question.id, newAnswer);
-    setQuestions(prevQuestions =>
-      prevQuestions.map(q =>
-        q.id === questionId ? { ...q, answer: [...q.answer, newAnswer] } : q
-      )
-    );
-  }, [addAnswerHandler, inputValue, isChecked]);
+      cleanInputs();
+      setError(false);
 
+      setError(true);
+    } else {
+      setError(true);
+    }
+  }, [
+    dispatch,
+    questionId,
+    inputValue,
+    isChecked,
+    checkAnswerValue,
+    answerState,
+    cleanInputs,
+  ]);
+  
   const previousOrderRef = useRef<AnswerItem[]>(question.answer);
 
   const handleReorder = (newOrder: AnswerItem[]) => {
@@ -123,6 +150,15 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       previousOrderRef.current = newOrder;
     }
   };
+  const onConfirm = useCallback(() => {
+    if (isModalWindowTitle.includes('save') && pathRouteCreate) {
+      saveClickHandler();
+      cleanInputs();
+    }
+    // else if (isModalWindowTitle.includes('save') && pathRouteEdit) {
+    //   saveChange();
+    // }
+  }, []);
 
   useEffect(() => {
     setAnswerState(question.answer);
@@ -130,18 +166,20 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       setError(false);
     }
   }, [question.answer, checkAnswerValue]);
+  console.log(question);
 
   const addTrueAnswerChange =
-    question.questionType === 'checkbox' ||
-    (question.questionType === 'radio' && !question.answer.some(a => a.isTrue));
+    question.question_type === 'multiple' ||
+    (question.question_type === 'single' &&
+      !question.answer.some(a => a.is_right));
 
   const hasTrueAnswer =
-    question.answer.some(answer => answer.isTrue) &&
+    question.answer.some(answer => answer.is_right) &&
     question.answer.length >= 2;
 
   return (
     <div className={s['questions-box']}>
-      <span className={s['type-question']}>{question.questionType}</span>
+      <span className={s['type-question']}>{question.question_type}</span>
       <div key={question.id}>
         <h3 className={s.title}>{questionTitleValue}</h3>
         <Reorder.Group
@@ -159,7 +197,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
               <DeleteButton
                 onClick={() => removeAnswerHandler(question.id, answer.id)}
               />
-              {answer.isTrue && <div className={s.true}>True</div>}
+              {answer.is_right && <div className={s.true}>True</div>}
             </Reorder.Item>
           ))}
         </Reorder.Group>
@@ -168,11 +206,11 @@ const QuestionBox: FC<QuestionBoxItems> = ({
         <div className={s['test-title']}>
           <Input
             title={
-              question.questionType !== 'number'
+              question.question_type !== 'number'
                 ? 'Answer the question:'
                 : 'Correct answer'
             }
-            type={question.questionType !== 'number' ? 'text' : 'number'}
+            type={question.question_type !== 'number' ? 'text' : 'number'}
             name={'question'}
             leftCheck={true}
             setInputValue={setInputValue}
@@ -196,10 +234,11 @@ const QuestionBox: FC<QuestionBoxItems> = ({
               title="Add answer"
               onClick={() => {
                 if (!error) {
-                  saveClickHandler();
+                  // saveClickHandler();
                   setAnswerOption(prevValue => !prevValue);
+                  saveClickHandlerDOM();
                   // setAnswerState(question.answer);
-                  removeAllQuestionAction();
+                  // removeAllQuestionAction();
                 }
               }}
             />
@@ -210,12 +249,10 @@ const QuestionBox: FC<QuestionBoxItems> = ({
         <div className={s.buttons}>
           <ChangeButton
             title={'Delete question'}
-            onClick={() => {
-              removeQuestionHandler(question.id);
-            }}
+            onClick={removeQuestionHandler}
           />
           {!(
-            question.questionType === 'number' && question.answer.length === 1
+            question.question_type === 'number' && question.answer.length === 1
           ) && (
             <ChangeButton
               title={answerOption ? 'Hide' : 'Add answer'}

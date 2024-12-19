@@ -1,6 +1,7 @@
-import React, { FC, memo, useCallback, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import { useDispatch } from 'react-redux';
 
 import arrowIcon from '/public/img/arrow-down.svg?url';
 import DeleteButton from '@/components/commons/Buttons/DeleteButton/DeleteButton';
@@ -8,13 +9,11 @@ import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton
 import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
 import { TestsItem } from '@/store/types';
-import { useActionWithPayload } from '@/hooks/useAction';
 import { deleteTestThunk } from '@/thunk/testsThunk';
+import { AppDispatch } from '@/store';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/store';
 
 type TakeTestsPageItems = {
   user?: string;
@@ -40,8 +39,6 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
-  // const removeTestAction = useActionWithPayload(deleteTestThunk);
-
   const onClickHandlerDeleteTest = useCallback(() => {
     setIsModalWindowTitle('Are you sure you want to delete the test?');
     setIsModalWindowOpen(true);
@@ -50,7 +47,6 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   const onConfirm = useCallback(() => {
     if (isModalWindowTitle.includes('taking')) {
     } else if (isModalWindowTitle.includes('delete')) {
-      // removeTestAction(String(selectedTestId));
       dispatch(deleteTestThunk(selectedTestId));
     }
   }, [isModalWindowTitle, dispatch, selectedTestId]);
@@ -100,7 +96,9 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                     setIsModalWindowOpen(true);
                   }}
                 />
-                <span className={s['test-date']}>{formatDate(test.date)}</span>
+                <span className={s['test-date']}>
+                  {formatDate(test.created_at)}
+                </span>
                 {pathRouteTakeTests && (
                   <Image
                     src={arrowIcon}

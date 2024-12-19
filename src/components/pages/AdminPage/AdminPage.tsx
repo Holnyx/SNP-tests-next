@@ -19,10 +19,11 @@ import {
   testSelector,
 } from '@/store/selectors';
 import { getAllTestsThunk } from '@/thunk/testsThunk';
+import { AppDispatch } from '@/store';
 
 import s from './AdminPage.module.sass';
 import cx from 'classnames';
-import { AppDispatch } from '@/store';
+import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
 type AdminPageItems = {
   admin?: string;
@@ -39,7 +40,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   const [selectedTestItem, setSelectedTestItem] = useState<TestsItem>({
     id: '',
     title: '',
-    date: '',
+    created_at: '',
     questions: [],
   });
   const dispatch = useDispatch<AppDispatch>();
@@ -47,6 +48,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
   const filteredTestsByDate = useSelector(sortedTestsSelector);
+
   const selectedTest = useSelector(state => selectedTestSelector(state, id));
 
   const editTest = useCallback(
@@ -55,7 +57,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
         setSelectedTestItem({
           id: testId,
           title: selectedTest.title,
-          date: selectedTest.date,
+          created_at: selectedTest.created_at,
           questions: selectedTest.questions,
         });
       }
@@ -65,7 +67,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
 
   const searchCharacters = (search: string): Promise<TestsItem[]> => {
     return new Promise<TestsItem[]>(resolve => {
-      const filteredTests = allTests.filter(test =>
+      const filteredTests = filteredTestsByDate.filter(test =>
         test.title.toLowerCase().includes(search.toLowerCase())
       );
       resolve(filteredTests);
@@ -92,15 +94,11 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
       setSelectedTestItem({
         id,
         title: selectedTest.title,
-        date: selectedTest.date,
+        created_at: selectedTest.created_at,
         questions: selectedTest.questions,
       });
     }
   }, [id, selectedTest]);
-
-  useEffect(() => {
-    dispatch(getAllTestsThunk({ page: 1, per: 10, search: '', sort: 'desc' }));
-  }, [dispatch]);
 
   useEffect(() => {
     if (allTests && allTests.length > 0) {
@@ -109,6 +107,17 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
       setCookie('tests', '');
     }
   }, [allTests]);
+
+  useEffect(() => {
+    dispatch(
+      getAllTestsThunk({
+        page: 1,
+        per: 10,
+        search: '',
+        sort: 'created_at_desc',
+      })
+    );
+  }, [dispatch]);
 
   return (
     <>
@@ -158,6 +167,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
         />
         <Footer />
       </div>
+      {/* <ModalWindow isModalWindowOpen={false} setIsModalWindowOpen={()=>{}} onConfirm={} title={''}/> */}
     </>
   );
 };

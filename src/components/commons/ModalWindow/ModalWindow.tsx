@@ -22,6 +22,7 @@ const ModalWindow: FC<ModalWindowItems> = ({
   onConfirm,
   title,
 }) => {
+  
   useBodyScrollLock(isModalWindowOpen); //???? this work but I don't mind what this right
 
   return (

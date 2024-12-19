@@ -44,7 +44,6 @@ const Authorization = () => {
   const onClickHandlerSignUp = useCallback(() => {
     if (checkNameValue && checkPasswordValue) {
       logInAction({ username: inputNameValue, password: inputPasswordValue });
-      dispatch(getCurrentUser())
       setError(false);
     } else {
       setError(true);

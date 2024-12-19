@@ -4,6 +4,7 @@ import {
   addTestThunk,
   deleteTestThunk,
   getAllTestsThunk,
+  getTestByIdThunk,
   updateTestThunk,
 } from '@/thunk/testsThunk';
 
@@ -12,6 +13,7 @@ const initialState: TestsState = {
   searchQuery: '',
   errors: [],
   sortOrder: 'desc',
+  test: null,
 };
 
 const testSlice = createSlice({
@@ -37,11 +39,20 @@ const testSlice = createSlice({
       })
       .addCase(
         getAllTestsThunk.fulfilled,
-        (state, action: PayloadAction<TestsItem[]>) => {
-          state.testsList = action.payload;
+        (state, action: PayloadAction<{ tests: TestsItem[] }>) => {
+          state.testsList = action.payload.tests;
         }
       )
       .addCase(getAllTestsThunk.rejected, (state, action) => {
+        state.errors.push(action.payload as string);
+      })
+      .addCase(getTestByIdThunk.pending, state => {
+        state.errors = [];
+      })
+      .addCase(getTestByIdThunk.fulfilled, (state, action) => {
+        state.test = action.payload;
+      })
+      .addCase(getTestByIdThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
       })
       .addCase(

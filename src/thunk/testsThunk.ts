@@ -1,7 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/api/api';
 import { TestsItem } from '@/store/types';
-import testApi from '@/api/api';
 
 export const signupThunk = createAsyncThunk(
   'auth/signup',
@@ -20,12 +19,15 @@ export const signupThunk = createAsyncThunk(
   }
 );
 
-
 export const signinThunk = createAsyncThunk(
   'auth/signin',
-  async (credentials: { username: string; password: string }, { rejectWithValue }) => {
+  async (
+    credentials: { username: string; password: string },
+    { dispatch, rejectWithValue }
+  ) => {
     try {
-      const userData = await testApi.signin(credentials);
+      const userData = await api.signin(credentials);
+      dispatch(getCurrentUser());
       return userData;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
@@ -49,10 +51,12 @@ export const getCurrentUser = createAsyncThunk(
   'auth/getCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await testApi.getCurrentUser()
+      const response = await api.getCurrentUser();
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch current user');
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch current user'
+      );
     }
   }
 );
@@ -60,7 +64,7 @@ export const getCurrentUser = createAsyncThunk(
 export const getAllTestsThunk = createAsyncThunk(
   'tests',
   async (
-    params: {
+    data: {
       page?: number;
       per?: number;
       search?: string;
@@ -69,10 +73,9 @@ export const getAllTestsThunk = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await api.getTests(params);
+      const response = await api.getTests(data);
       return response;
     } catch (error) {
-      console.error('Error fetching tests:', error);
       return rejectWithValue('Error fetching tests');
     }
   }
@@ -120,6 +123,19 @@ export const updateTestThunk = createAsyncThunk(
   }
 );
 
+export const getTestByIdThunk = createAsyncThunk(
+  'tests/getTestById', 
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await api.getTestById(id);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching test by id:', error);
+      return rejectWithValue('Error fetching test');
+    }
+  }
+);
+
 export const getQuestionsThunk = createAsyncThunk(
   'questions/getAll',
   async (testId: string, { rejectWithValue }) => {
@@ -133,3 +149,101 @@ export const getQuestionsThunk = createAsyncThunk(
   }
 );
 
+export const createQuestionThunk = createAsyncThunk(
+  'questions/createQuestion',
+  async (
+    {
+      testId,
+      data,
+    }: {
+      testId: string;
+      data: { title: string; question_type: string; answer: number };
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await api.createQuestion(testId, data);
+      return response;
+    } catch (error) {
+      return rejectWithValue('Error creating question');
+    }
+  }
+);
+
+export const deleteQuestionThunk = createAsyncThunk(
+  'questions/deleteQuestion',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      await api.deleteQuestion(id);
+      return id;
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      return rejectWithValue('Ошибка при удалении вопроса');
+    }
+  }
+);
+
+
+export const createAnswerThunk = createAsyncThunk(
+  'answers/createAnswer',
+  async (
+    { questionId, data }: { questionId: string; data: { text: string; is_right: boolean } },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await api.createAnswer(questionId, data);
+      return response;
+    } catch (error) {
+      console.error('Error creating answer:', error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+// // Редактирование ответа
+// export const editAnswerThunk = createAsyncThunk(
+//   'answers/editAnswer',
+//   async (
+//     { id, data }: { id: string; data: { text: string; is_right: boolean } },
+//     { rejectWithValue }
+//   ) => {
+//     try {
+//       const response = await api.editAnswer(id, data);
+//       return response; // Возвращаем обновленные данные
+//     } catch (error) {
+//       console.error('Error editing answer:', error);
+//       return rejectWithValue(error);
+//     }
+//   }
+// );
+
+// Перемещение ответа
+export const moveAnswerThunk = createAsyncThunk(
+  'answers/moveAnswer',
+  async (
+    { id, position }: { id: string; position: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await api.moveAnswer(id, position);
+      return response; // Возвращаем результат перемещения
+    } catch (error) {
+      console.error('Error moving answer:', error);
+      return rejectWithValue(error);
+    }
+  }
+);
+
+// Удаление ответа
+export const deleteAnswerThunk = createAsyncThunk(
+  'answers/deleteAnswer',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      await api.deleteAnswer(id);
+      return id;
+    } catch (error) {
+      console.error('Error deleting answer:', error);
+      return rejectWithValue(error);
+    }
+  }
+);
