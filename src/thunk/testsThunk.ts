@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/api/api';
-import { TestsItem } from '@/store/types';
+import { AnswerItem, TestForAdd, TestsItem } from '@/store/types';
 
 export const signupThunk = createAsyncThunk(
   'auth/signup',
@@ -94,6 +94,51 @@ export const addTestThunk = createAsyncThunk(
   }
 );
 
+export const createTestFlow = createAsyncThunk(
+  'test/createTestFlow',
+  async (data: TestForAdd, { rejectWithValue }) => {
+    try {
+      const createdTest = await api.createTest({ title: data.testTitle });
+      if (!createdTest || !createdTest.id) {
+        throw new Error('Failed to create test');
+      }
+      const createdQuestions = [];
+      for (const question of data.questionList) {
+        const createdQuestion = await api.createQuestion(createdTest.id, {
+          title: question.title,
+          question_type: question.question_type,
+          answer: 0,
+        });
+        createdQuestions.push({
+          ...createdQuestion,
+          localId: question.id,
+        });
+      }
+
+      for (const question of createdQuestions) {
+        const answersForQuestion = data.answerList.filter(
+          answer => answer.questionId === question.localId
+        );
+
+        for (const answer of answersForQuestion) {
+          await api.createAnswer(question.id, {
+            text: answer.title,
+            is_right: answer.is_right,
+          });
+        }
+      }
+
+      return { createdTest, createdQuestions };
+    } catch (error: any) {
+      console.error('Error in createTestFlow:', error);
+      return rejectWithValue(
+        error.response?.data?.message ||
+          'An error occurred during test creation'
+      );
+    }
+  }
+);
+
 export const deleteTestThunk = createAsyncThunk(
   'tests/delete',
   async (testId: string, { rejectWithValue }) => {
@@ -124,7 +169,7 @@ export const updateTestThunk = createAsyncThunk(
 );
 
 export const getTestByIdThunk = createAsyncThunk(
-  'tests/getTestById', 
+  'tests/getTestById',
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await api.getTestById(id);
@@ -157,7 +202,12 @@ export const createQuestionThunk = createAsyncThunk(
       data,
     }: {
       testId: string;
-      data: { title: string; question_type: string; answer: number };
+      data: {
+        title: string;
+        question_type: string;
+        answer: number;
+        answers: AnswerItem[];
+      };
     },
     { rejectWithValue }
   ) => {
@@ -183,11 +233,13 @@ export const deleteQuestionThunk = createAsyncThunk(
   }
 );
 
-
 export const createAnswerThunk = createAsyncThunk(
   'answers/createAnswer',
   async (
-    { questionId, data }: { questionId: string; data: { text: string; is_right: boolean } },
+    {
+      questionId,
+      data,
+    }: { questionId: string; data: { text: string; is_right: boolean } },
     { rejectWithValue }
   ) => {
     try {
@@ -217,7 +269,7 @@ export const createAnswerThunk = createAsyncThunk(
 //   }
 // );
 
-// Перемещение ответа
+
 export const moveAnswerThunk = createAsyncThunk(
   'answers/moveAnswer',
   async (
@@ -226,7 +278,7 @@ export const moveAnswerThunk = createAsyncThunk(
   ) => {
     try {
       const response = await api.moveAnswer(id, position);
-      return response; // Возвращаем результат перемещения
+      return response; 
     } catch (error) {
       console.error('Error moving answer:', error);
       return rejectWithValue(error);
@@ -234,7 +286,6 @@ export const moveAnswerThunk = createAsyncThunk(
   }
 );
 
-// Удаление ответа
 export const deleteAnswerThunk = createAsyncThunk(
   'answers/deleteAnswer',
   async (id: string, { rejectWithValue }) => {

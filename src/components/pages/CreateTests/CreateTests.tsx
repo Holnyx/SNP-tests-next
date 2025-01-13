@@ -1,4 +1,11 @@
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, {
+  FC,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v1 } from 'uuid';
 import { useRouter } from 'next/router';
@@ -11,8 +18,9 @@ import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
 import {
-  AnswerItem,
+  AnswerForAdd,
   QuestionItem,
+  TestForAdd,
   TestsItem,
   TestsOptionsForSelect,
 } from '@/store/types';
@@ -24,9 +32,7 @@ import {
 } from '@/store/questionReduser';
 import { questionSelector } from '@/store/selectors';
 import {
-  addTestThunk,
-  createAnswerThunk,
-  createQuestionThunk,
+  createTestFlow,
   deleteQuestionThunk,
   deleteTestThunk,
   updateTestThunk,
@@ -61,7 +67,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   const removeQuestionAction = useActionWithPayload(removeQuestion);
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
   const addQuestionAction = useActionWithPayload(addQuestion);
-  // const updateTestAction = useActionWithPayload(updateTestThunk);
+
   const allQuestions = useSelector(questionSelector);
 
   const checkQuestionValue =
@@ -75,6 +81,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
       question.answer.length >= 2 &&
       question.answer.some(answer => answer.is_right)
   );
+
   const isQuestionListValid =
     allQuestions.length >= 2 || selectedTestItem.questions.length >= 2;
 
@@ -136,41 +143,6 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     [dispatch, removeQuestionAction, pathRouteCreate]
   );
 
-  //add test with questions
-  const saveTestClickHandler = useCallback(async () => {
-    const newTest: TestsItem = {
-      id: v1(),
-      title: testTitleValue,
-      created_at: new Date().toISOString(),
-      questions: allQuestions,
-    };
-
-    if (checkTestTitleValue) {
-      const testResponse = await dispatch(addTestThunk(newTest)).unwrap();
-      const newQuestions = questions.map(el => ({
-        testId: testResponse.id,
-        data: {
-          title: el.title,
-          question_type: el.question_type as TestsOptionsForSelect,
-          answer: 0,
-        },
-      }));
-      for (const newQuestion of newQuestions) {
-        await dispatch(createQuestionThunk(newQuestion));
-      }
-      cleanInputs();
-      setError(false);
-    } else {
-      setError(true);
-    }
-  }, [
-    dispatch,
-    checkTestTitleValue,
-    cleanInputs,
-    testTitleValue,
-    allQuestions,
-  ]);
-
   const onClickHandlerSaveTest = useCallback(() => {
     // if (!checkTestTitleValue || !isQuestionListValid) {
     //   setErrorTestTitle(true);
@@ -190,15 +162,48 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     setIsModalWindowOpen,
     setIsModalWindowTitle,
   ]);
+  const questionBoxHandlers = useRef<(() => void)[]>([]);
 
-  const createTest = useCallback(() => {
-    saveTestClickHandler();
-    cleanInputs();
-    setTestTitleValue('');
-    setErrorTestTitle(false);
-    removeAllQuestionAction();
-    router.push('/admin/takeTests');
-  }, [saveTestClickHandler]);
+  const addSaveHandler = useCallback((handler: () => void) => {
+    if (!questionBoxHandlers.current.includes(handler)) {
+      questionBoxHandlers.current.push(handler);
+    }
+  }, []);
+
+  const questionsFromStore = useSelector(questionSelector);
+
+  const createTest = useCallback(async () => {
+    if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
+      const answersData = questionsFromStore.map(question => ({
+        questionId: question.id,
+        answers: question.answer || [],
+      }));
+
+      console.log('Answers Data from Reducer:', answersData);
+
+      const testData: TestForAdd = {
+        testTitle: testTitleValue,
+        testsList: [],
+        questionList: questionsFromStore,
+        answerList: answersData.flatMap(item => item.answers),
+      };
+
+      await dispatch(createTestFlow(testData));
+
+      cleanInputs();
+      setTestTitleValue('');
+      setErrorTestTitle(false);
+      dispatch(removeAllQuestion());
+      router.push('/admin/takeTests');
+    }
+  }, [
+    dispatch,
+    testTitleValue,
+    questions,
+    checkTestTitleValue,
+    isQuestionListValid,
+    hasAnswer,
+  ]);
 
   const saveChange = useCallback(() => {
     if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
@@ -209,6 +214,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
           testDateValue !== '' ? testDateValue : selectedTestItem.created_at;
         const updateQuestions =
           questions.length >= 2 ? questions : selectedTestItem.questions;
+
         dispatch(
           updateTestThunk({
             id: String(id),
@@ -234,16 +240,24 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   ]);
 
   const onConfirm = useCallback(() => {
-    if (isModalWindowTitle.includes('save') && pathRouteCreate) {
-      createTest();
+    if (isModalWindowTitle.includes('save')) {
+      if (pathRouteCreate) {
+        createTest();
+      } else if (pathRouteEdit) {
+        saveChange();
+      }
     } else if (isModalWindowTitle.includes('delete')) {
       deleteTest();
     } else if (isModalWindowTitle.includes('cancel')) {
       router.push('/admin/takeTests');
-    } else if (isModalWindowTitle.includes('save') && pathRouteEdit) {
-      saveChange();
     }
-  }, [isModalWindowTitle]);
+  }, [
+    isModalWindowTitle,
+    pathRouteCreate,
+    pathRouteEdit,
+    createTest,
+    saveChange,
+  ]);
 
   useEffect(() => {
     if (allQuestions.length >= 2) {
@@ -264,39 +278,6 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
       setQuestions(selectedTestItem.questions);
     }
   }, [pathRouteCreate, pathRouteEdit, selectedTestItem]);
-
-  // const saveAnswerClickHandler = useCallback(
-  //   async (
-  //     questionId: string,
-  //     inputValue: string,
-  //     isChecked: boolean,
-  //     checkAnswerValue: boolean,
-  //     question: QuestionItem,
-  //     answerState: AnswerItem[]
-  //   ) => {
-  //     if (checkAnswerValue) {
-  //       const data = {
-  //         text: inputValue,
-  //         is_right: question.question_type === 'number' ? true : isChecked,
-  //       };
-  //       const answerResponse = await dispatch(
-  //         createAnswerThunk({ questionId, data })
-  //       ).unwrap();
-  //       const newAnswers = answerState.map(el => ({
-  //         questionId: answerResponse.id,
-  //         data: {
-  //           text: el.title,
-  //           is_right: el.is_right,
-  //         },
-  //       }));
-  //       for (const newAnswer of newAnswers) {
-  //         await dispatch(createAnswerThunk(newAnswer));
-  //       }
-  //       cleanInputs();
-  //     }
-  //   },
-  //   [dispatch]
-  // );
 
   return (
     <div className={s.container}>
@@ -345,8 +326,9 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                 takeTest={false}
                 setQuestions={setQuestions}
                 removeQuestionHandler={() => removeQuestionHandler(q.id)}
-                // saveAnswerClickHandler={saveAnswerClickHandler}
-                isModalWindowTitle={isModalWindowTitle}
+                onSaveHandler={addSaveHandler}
+                testTitleValue={testTitleValue}
+                questions={questions}
               />
             ))
           : allQuestions.map(q => (
@@ -357,8 +339,9 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                 takeTest={false}
                 setQuestions={setQuestions}
                 removeQuestionHandler={() => removeQuestionHandler(q.id)}
-                // saveAnswerClickHandler={saveAnswerClickHandler}
-                isModalWindowTitle={isModalWindowTitle}
+                onSaveHandler={addSaveHandler}
+                testTitleValue={testTitleValue}
+                questions={questions}
               />
             ))}
         {errorList && (

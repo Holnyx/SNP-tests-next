@@ -14,7 +14,14 @@ export const questionSelector = createSelector(
   questionsSelector,
   state => state
 );
-// export const answerSelector = createSelector(questionsSelector, state => state);
+export const answerSelector = createSelector(questionsSelector, questions => {
+  return questions.reduce(
+    (allAnswers: AnswerItem[], question: QuestionItem) => {
+      return [...allAnswers, ...question.answer];
+    },
+    []
+  );
+});
 export const errorSelector = createSelector(errorsSelector, state => state);
 export const authErrorSelector = createSelector(
   authErrorsSelector,
@@ -40,8 +47,6 @@ export const selectedQuestionSelector = createSelector(
     );
   }
 );
-
-// const answersSelector = (state: AppRootStateItems) => state.answers;
 
 // export const selectedAnswerSelector = createSelector(
 //   [answersSelector, (state, selectedAnswerId) => selectedAnswerId],

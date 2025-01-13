@@ -17,6 +17,7 @@ export type AnswerItem = {
   title: string;
   name: string;
   is_right: boolean;
+  questionId: string;
 };
 
 export type TestsState = {
@@ -24,7 +25,19 @@ export type TestsState = {
   searchQuery: string;
   errors: string[];
   sortOrder: FilteredTestsByDate;
-  test: null
+  test: null;
+};
+
+export type TestForAdd = {
+  testTitle: string;
+  testsList: TestsItem[];
+  questionList: QuestionItem[];
+  answerList: AnswerItem[];
+};
+
+export type AnswerForAdd = {
+  questionId: string; 
+  answers: AnswerItem[];
 };
 
 export type FilteredTestsByDate = 'desc' | 'asc';
