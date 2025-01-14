@@ -17,7 +17,7 @@ export const questionSelector = createSelector(
 export const answerSelector = createSelector(questionsSelector, questions => {
   return questions.reduce(
     (allAnswers: AnswerItem[], question: QuestionItem) => {
-      return [...allAnswers, ...question.answer];
+      return [...allAnswers, ...question.answers];
     },
     []
   );

@@ -1,7 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { FilteredTestsByDate, TestsItem, TestsState } from './types';
 import {
-  addTestThunk,
+  FilteredTestsByDate,
+  QuestionItem,
+  TestsItem,
+  TestsState,
+} from './types';
+import {
+  createTestFlow,
   deleteTestThunk,
   getAllTestsThunk,
   getTestByIdThunk,
@@ -10,6 +15,7 @@ import {
 
 const initialState: TestsState = {
   testsList: [],
+  questionsList: [],
   searchQuery: '',
   errors: [],
   sortOrder: 'desc',
@@ -56,9 +62,17 @@ const testSlice = createSlice({
         state.errors.push(action.payload as string);
       })
       .addCase(
-        addTestThunk.fulfilled,
-        (state, action: PayloadAction<TestsItem>) => {
-          state.testsList.push(action.payload);
+        createTestFlow.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            createdTest: TestsItem;
+            createdQuestions: QuestionItem[];
+          }>
+        ) => {
+          const { createdTest, createdQuestions } = action.payload;
+          state.testsList.push(createdTest);
+          state.questionsList.push(...createdQuestions);
         }
       )
       .addCase(

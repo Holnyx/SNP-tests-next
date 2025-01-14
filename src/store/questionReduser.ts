@@ -26,11 +26,11 @@ const questionSlice = createSlice({
       const { questionId, newAnswer } = action.payload;
       const question = state.find(q => q.id === questionId);
       if (question) {
-        if (!Array.isArray(question.answer)) {
-          question.answer = [];
+        if (!Array.isArray(question.answers)) {
+          question.answers = [];
         }
-        if (newAnswer && newAnswer.title) {
-          question.answer.push(newAnswer);
+        if (newAnswer && newAnswer.text) {
+          question.answers.push(newAnswer);
         }
       }
     },
@@ -41,7 +41,7 @@ const questionSlice = createSlice({
       const { questionId, answerId } = action.payload;
       const question = state.find(q => q.id === questionId);
       if (question) {
-        question.answer = question.answer.filter(a => a.id !== answerId);
+        question.answers = question.answers.filter(a => a.id !== answerId);
       }
     },
     updateAnswersOrder(
@@ -51,7 +51,7 @@ const questionSlice = createSlice({
       const { questionId, newOrder } = action.payload;
       const question = state.find(q => q.id === questionId);
       if (question) {
-        question.answer = newOrder;
+        question.answers = newOrder;
       }
     },
   },

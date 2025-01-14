@@ -18,7 +18,6 @@ import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
 import {
-  AnswerForAdd,
   QuestionItem,
   TestForAdd,
   TestsItem,
@@ -30,8 +29,9 @@ import {
   removeAllQuestion,
   removeQuestion,
 } from '@/store/questionReduser';
-import { questionSelector } from '@/store/selectors';
+import { questionSelector, testSelector } from '@/store/selectors';
 import {
+  createQuestionThunk,
   createTestFlow,
   deleteQuestionThunk,
   deleteTestThunk,
@@ -78,14 +78,14 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
 
   const hasAnswer = allQuestions.every(
     question =>
-      question.answer.length >= 2 &&
-      question.answer.some(answer => answer.is_right)
+      question.answers.length >= 2 &&
+      question.answers.some(answer => answer.is_right)
   );
 
   const isQuestionListValid =
     allQuestions.length >= 2 || selectedTestItem.questions.length >= 2;
 
-  const pathRouteEdit = router.asPath.startsWith(`/admin/editTest/${id}`);
+  const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
   const pathRouteCreate = router.pathname === '/admin/createTests';
 
   const cleanInputs = useCallback(() => {
@@ -108,27 +108,51 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     router.push('/admin/takeTests');
   }, [dispatch, id]);
 
-  const saveQuestionClickHandlerDOM = useCallback(() => {
+  const saveQuestionClickHandler = useCallback(() => {
     const newQuestion: QuestionItem = {
       id: v1(),
       title: inputValue,
       question_type: selectType as TestsOptionsForSelect,
-      answer: [],
+      answers: [],
     };
     if (checkQuestionValue) {
       addQuestionAction(newQuestion);
-      setQuestions(prevQuestions => [newQuestion, ...prevQuestions]);
+      if (pathRouteEdit) {
+        const questionData = {
+          testId: String(id),
+          data: {
+            title: inputValue,
+            question_type: selectType,
+            answer: 0,
+            answers: [],
+          },
+        };
+        dispatch(createQuestionThunk(questionData)).then(response => {
+          const newQuestion: QuestionItem = {
+            id: response.payload.id,
+            title: inputValue,
+            question_type: selectType as TestsOptionsForSelect,
+            answers: [],
+          };
+          setQuestions(prevQuestions => [newQuestion, ...prevQuestions]);
+          cleanInputs();
+          setError(false);
+        });
+      } else {
+        setError(true);
+      }
       cleanInputs();
       setError(false);
     } else {
       setError(true);
     }
   }, [
-    addQuestionAction,
+    checkQuestionValue,
     inputValue,
     selectType,
-    checkQuestionValue,
-    cleanInputs,
+    dispatch,
+    id,
+    pathRouteEdit,
   ]);
 
   const removeQuestionHandler = useCallback(
@@ -136,8 +160,11 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
       if (pathRouteCreate) {
         removeQuestionAction({ questionId });
       } else {
-        removeQuestionAction({ questionId });
-        dispatch(deleteQuestionThunk(questionId));
+        dispatch(deleteQuestionThunk(questionId)).then(() => {
+          setQuestions(prevState =>
+            prevState.filter(question => question.id !== questionId)
+          );
+        });
       }
     },
     [dispatch, removeQuestionAction, pathRouteCreate]
@@ -162,29 +189,17 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     setIsModalWindowOpen,
     setIsModalWindowTitle,
   ]);
-  const questionBoxHandlers = useRef<(() => void)[]>([]);
-
-  const addSaveHandler = useCallback((handler: () => void) => {
-    if (!questionBoxHandlers.current.includes(handler)) {
-      questionBoxHandlers.current.push(handler);
-    }
-  }, []);
-
-  const questionsFromStore = useSelector(questionSelector);
 
   const createTest = useCallback(async () => {
     if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
-      const answersData = questionsFromStore.map(question => ({
+      const answersData = allQuestions.map(question => ({
         questionId: question.id,
-        answers: question.answer || [],
+        answers: question.answers || [],
       }));
-
-      console.log('Answers Data from Reducer:', answersData);
-
       const testData: TestForAdd = {
         testTitle: testTitleValue,
         testsList: [],
-        questionList: questionsFromStore,
+        questionList: allQuestions,
         answerList: answersData.flatMap(item => item.answers),
       };
 
@@ -274,7 +289,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     }
     if (pathRouteEdit && selectedTestItem) {
       setTestTitleValue(selectedTestItem.title);
-      setTestDateValue(new Date().toISOString());
+      setTestDateValue(selectedTestItem.created_at);
       setQuestions(selectedTestItem.questions);
     }
   }, [pathRouteCreate, pathRouteEdit, selectedTestItem]);
@@ -314,33 +329,29 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
           />
           <ChangeButton
             title={'Add question'}
-            onClick={saveQuestionClickHandlerDOM}
+            onClick={saveQuestionClickHandler}
           />
         </div>
         {pathRouteEdit && selectedTestItem
-          ? selectedTestItem.questions.map(q => (
-              <QuestionBox
-                key={q.id}
-                questionId={q.id}
-                question={q}
-                takeTest={false}
-                setQuestions={setQuestions}
-                removeQuestionHandler={() => removeQuestionHandler(q.id)}
-                onSaveHandler={addSaveHandler}
-                testTitleValue={testTitleValue}
-                questions={questions}
-              />
-            ))
+          ? questions.map(q => {
+              return (
+                <QuestionBox
+                  key={q.id}
+                  questionId={q.id}
+                  question={q}
+                  takeTest={false}
+                  removeQuestionHandler={() => removeQuestionHandler(q.id)}
+                  questions={selectedTestItem.questions}
+                />
+              );
+            })
           : allQuestions.map(q => (
               <QuestionBox
                 questionId={q.id}
                 key={q.id}
                 question={q}
                 takeTest={false}
-                setQuestions={setQuestions}
                 removeQuestionHandler={() => removeQuestionHandler(q.id)}
-                onSaveHandler={addSaveHandler}
-                testTitleValue={testTitleValue}
                 questions={questions}
               />
             ))}
@@ -354,7 +365,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
             title="Delete Test"
             onClick={onClickHandlerDeleteTest}
           />
-          {router.query.id && (
+          {/* {router.query.id && (
             <ChangeButton
               title="Cancel Changes"
               onClick={() => {
@@ -364,7 +375,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                 );
               }}
             />
-          )}
+          )} */}
 
           <ChangeButton
             title="Save Test"

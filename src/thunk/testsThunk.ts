@@ -81,19 +81,6 @@ export const getAllTestsThunk = createAsyncThunk(
   }
 );
 
-export const addTestThunk = createAsyncThunk(
-  'tests/add',
-  async (testData: TestsItem, { rejectWithValue }) => {
-    try {
-      const response = await api.createTest(testData);
-      return response;
-    } catch (error) {
-      console.error('Error adding test:', error);
-      return rejectWithValue('Error adding test');
-    }
-  }
-);
-
 export const createTestFlow = createAsyncThunk(
   'test/createTestFlow',
   async (data: TestForAdd, { rejectWithValue }) => {
@@ -122,7 +109,7 @@ export const createTestFlow = createAsyncThunk(
 
         for (const answer of answersForQuestion) {
           await api.createAnswer(question.id, {
-            text: answer.title,
+            text: answer.text,
             is_right: answer.is_right,
           });
         }

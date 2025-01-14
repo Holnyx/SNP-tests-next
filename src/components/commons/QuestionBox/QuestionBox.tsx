@@ -6,36 +6,36 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useRouter } from 'next/router';
 import { v1 } from 'uuid';
 import { Reorder } from 'motion/react';
 
 import Input from '../Inputs/Input/Input';
-
 import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
 import Checkbox from '../Inputs/Checkbox/Checkbox';
+import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
 
 import { AnswerItem, QuestionItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { updateAnswersOrder } from '@/store/questionReduser';
 import { addAnswer, removeAnswer } from '@/store/questionReduser';
+import { questionSelector } from '@/store/selectors';
+import { AppDispatch } from '@/store';
+import {
+  createAnswerThunk,
+  deleteAnswerThunk,
+  moveAnswerThunk,
+} from '@/thunk/testsThunk';
 
 import s from './QuestionBox.module.sass';
 import cx from 'classnames';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '@/store';
-import { createTestFlow, deleteAnswerThunk } from '@/thunk/testsThunk';
-import { useRouter } from 'next/router';
-import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
-import { answerSelector, questionSelector } from '@/store/selectors';
 
 type QuestionBoxItems = {
   question: QuestionItem;
   takeTest: boolean;
-  setQuestions: React.Dispatch<React.SetStateAction<QuestionItem[]>>;
   questionId: string;
   removeQuestionHandler: () => void;
-  onSaveHandler: (handler: () => void) => void;
-  testTitleValue: string;
   questions: QuestionItem[];
 };
 
@@ -43,17 +43,16 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   question,
   takeTest,
   questionId,
-  setQuestions,
   removeQuestionHandler,
-  onSaveHandler,
-  testTitleValue,
   questions,
 }) => {
   const [answerOption, setAnswerOption] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
-  const [answerState, setAnswerState] = useState<AnswerItem[]>(question.answer);
+  const [answerState, setAnswerState] = useState<AnswerItem[]>(
+    question.answers
+  );
   const [questionTitleValue, setQuestionTitleValue] = useState(question.title);
 
   const dispatch = useDispatch<AppDispatch>();
@@ -62,44 +61,92 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const updateAnswersOrderAction = useActionWithPayload(updateAnswersOrder);
   const router = useRouter();
   const pathRouteCreate = router.pathname === '/admin/createTests';
+  const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
   const allQuestions = useSelector(questionSelector);
   const checkAnswerValue =
     inputValue.length >= 1 &&
     inputValue.trim() !== '' &&
     inputValue.length <= 19;
 
-  const saveClickHandlerDOM = useCallback(() => {
+  const cleanInputs = useCallback(() => {
+    setInputValue('');
+    setIsChecked(false);
+  }, []);
+
+  const saveClickHandler = useCallback(() => {
     const newAnswer: AnswerItem = {
       id: v1(),
-      title: inputValue,
+      text: inputValue,
       name: question.title,
       is_right: question.question_type === 'number' ? true : isChecked,
       questionId,
     };
     if (checkAnswerValue) {
       addAnswerAction({ questionId, newAnswer });
-      cleanInputs();
-      setError(false);
+      const newAnswerData = {
+        questionId,
+        data: {
+          text: inputValue,
+          is_right: question.question_type === 'number' ? true : isChecked,
+        },
+      };
+
+      if (pathRouteEdit) {
+        dispatch(createAnswerThunk(newAnswerData)).then(response => {
+          const newAnswer: AnswerItem = {
+            id: response.payload.id,
+            text: inputValue,
+            name: question.title,
+            is_right: response.payload.is_right,
+            questionId,
+          };
+          setAnswerState(prevState => [newAnswer, ...prevState]);
+          cleanInputs();
+          setError(false);
+        });
+      } else {
+        const newAnswer: AnswerItem = {
+          id: v1(),
+          text: inputValue,
+          name: question.title,
+          is_right: question.question_type === 'number' ? true : isChecked,
+          questionId,
+        };
+
+        setAnswerState(prevState => [newAnswer, ...prevState]);
+        cleanInputs();
+        setError(false);
+      }
     } else {
       setError(true);
     }
-  }, [addAnswerAction, inputValue, isChecked]);
+  }, [
+    checkAnswerValue,
+    inputValue,
+    isChecked,
+    question.title,
+    questionId,
+    question.question_type,
+    pathRouteEdit,
+    dispatch,
+    cleanInputs,
+  ]);
 
   const removeAnswerHandler = useCallback(
     (questionId: string, answerId: string) => {
       if (pathRouteCreate) {
         removeAnswerAction({ questionId, answerId });
       } else {
-        dispatch(deleteAnswerThunk(answerId));
+        removeAnswerAction({ questionId, answerId });
+        dispatch(deleteAnswerThunk(answerId)).then(() => {
+          setAnswerState(prevState =>
+            prevState.filter(answer => answer.id !== answerId)
+          );
+        });
       }
     },
-    [removeAnswerAction, dispatch]
+    [removeAnswerAction, dispatch, questionId, pathRouteCreate]
   );
-
-  const cleanInputs = useCallback(() => {
-    setInputValue('');
-    setIsChecked(false);
-  }, []);
 
   const hasTrueAnswer =
     answerState.some(answer => answer.is_right) && answerState.length >= 2;
@@ -108,27 +155,29 @@ const QuestionBox: FC<QuestionBoxItems> = ({
 
   const isQuestionListValid = allQuestions.length >= 2 || questions.length >= 2;
 
-  const previousOrderRef = useRef<AnswerItem[]>(question.answer);
+  const previousOrderRef = useRef<AnswerItem[]>(question.answers);
 
   const handleReorder = (newOrder: AnswerItem[]) => {
     if (JSON.stringify(previousOrderRef.current) !== JSON.stringify(newOrder)) {
       setAnswerState(newOrder);
       updateAnswersOrderAction({ questionId: question.id, newOrder });
+      newOrder.forEach((answer, index) => {
+        dispatch(moveAnswerThunk({ id: answer.id, position: index }));
+      });
       previousOrderRef.current = newOrder;
     }
   };
 
   useEffect(() => {
-    setAnswerState(question.answer);
+    setAnswerState(question.answers);
     if (checkAnswerValue) {
       setError(false);
     }
-  }, [question.answer]);
+  }, [question.answers]);
 
   const addTrueAnswerChange =
     question.question_type === 'multiple' ||
     (question.question_type === 'single' && !answerState.some(a => a.is_right));
-
   return (
     <div className={s['questions-box']}>
       <span className={s['type-question']}>{question.question_type}</span>
@@ -145,7 +194,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
               key={answer.id}
               className={s['option']}
             >
-              <span>{answer.title}</span>
+              <span>{answer.text}</span>
               <DeleteButton
                 onClick={() => removeAnswerHandler(question.id, answer.id)}
               />
@@ -186,11 +235,8 @@ const QuestionBox: FC<QuestionBoxItems> = ({
               title="Add answer"
               onClick={() => {
                 if (!error) {
-                  // saveClickHandler();
                   setAnswerOption(prevValue => !prevValue);
-                  saveClickHandlerDOM();
-                  setAnswerState(question.answer);
-                  // removeAllQuestionAction();
+                  saveClickHandler();
                 }
               }}
             />
@@ -204,7 +250,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
             onClick={removeQuestionHandler}
           />
           {!(
-            question.question_type === 'number' && question.answer.length === 1
+            question.question_type === 'number' && question.answers.length === 1
           ) && (
             <ChangeButton
               title={answerOption ? 'Hide' : 'Add answer'}

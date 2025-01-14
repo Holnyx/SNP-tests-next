@@ -8,13 +8,18 @@ import { TestsItem } from '@/store/types';
 const EditTests = ({
   user,
   id,
+  selectedTest,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <AdminPage
       admin="admin"
-      id={id} search={''}    />
+      id={id}
+      selectedTest={selectedTest}
+      search={''}
+    />
   );
 };
+
 export const getServerSideProps: GetServerSideProps = async context => {
   const { id } = context.query;
 
@@ -30,9 +35,11 @@ export const getServerSideProps: GetServerSideProps = async context => {
     return {
       props: {
         id,
+        selectedTest,
       },
     };
   }
+
   return {
     notFound: true,
   };

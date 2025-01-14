@@ -9,12 +9,13 @@ export type QuestionItem = {
   id: string;
   title: string;
   question_type: TestsOptionsForSelect;
-  answer: AnswerItem[];
+  answers: AnswerItem[];
+  
 };
 
 export type AnswerItem = {
   id: string;
-  title: string;
+  text: string;
   name: string;
   is_right: boolean;
   questionId: string;
@@ -22,6 +23,7 @@ export type AnswerItem = {
 
 export type TestsState = {
   testsList: TestsItem[];
+  questionsList: QuestionItem[];
   searchQuery: string;
   errors: string[];
   sortOrder: FilteredTestsByDate;

@@ -31,9 +31,10 @@ const TestPage: FC<TestPageItems> = ({ user, id }) => {
               <QuestionBox
                 question={test}
                 takeTest={takeTest}
-                setQuestions={() => {}}
-                questionId={''}
-              />
+
+                questionId={''} removeQuestionHandler={function (): void {
+                  throw new Error('Function not implemented.');
+                } } questions={[]}              />
             </div>
           );
         })}

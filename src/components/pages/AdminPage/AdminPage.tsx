@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
-import { getCookie, setCookie } from 'cookies-next';
+import { setCookie } from 'cookies-next';
 
 import Header from '@/components/commons/Header/Header';
 import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
@@ -13,43 +13,33 @@ import TestPage from '../TestPage/TestPage';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { TestsItem } from '@/store/types';
-import {
-  selectedTestSelector,
-  sortedTestsSelector,
-  testSelector,
-} from '@/store/selectors';
+import { sortedTestsSelector, testSelector } from '@/store/selectors';
 import { getAllTestsThunk } from '@/thunk/testsThunk';
 import { AppDispatch } from '@/store';
 
 import s from './AdminPage.module.sass';
 import cx from 'classnames';
-import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 
 type AdminPageItems = {
   admin?: string;
   id?: string;
   search: string;
+  selectedTest: TestsItem;
 };
 
-const AdminPage: FC<AdminPageItems> = ({ admin, id, search }) => {
+const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<TestsItem[]>([]);
 
-  const [selectedTestItem, setSelectedTestItem] = useState<TestsItem>({
-    id: '',
-    title: '',
-    created_at: '',
-    questions: [],
-  });
+  const [selectedTestItem, setSelectedTestItem] =
+    useState<TestsItem>(selectedTest);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
   const filteredTestsByDate = useSelector(sortedTestsSelector);
-
-  const selectedTest = useSelector(state => selectedTestSelector(state, id));
 
   const editTest = useCallback(
     (testId: string) => {

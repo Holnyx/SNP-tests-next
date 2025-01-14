@@ -74,7 +74,6 @@ const testApi = {
     }
   },
 
-  //удаление теста
   deleteTest: async (id: string) => {
     try {
       await api.delete(`/tests/${id}`);
@@ -94,7 +93,6 @@ const testApi = {
     }
   },
 
-  //получение тестов
   getTests: async (data: {
     page?: number;
     per?: number;
