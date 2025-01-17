@@ -15,14 +15,14 @@ const nextConfig = {
       }
     ]
   },
-  // async rewrites() {
-  //   return [
-  //     {
-  //       source: '/api/:path*',
-  //       destination: 'https://interns-test-fe.snp.agency/api/:path*',
-  //     },
-  //   ];
-  // },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://interns-test-fe.snp.agency/api/:path*',
+      },
+    ];
+  },
 
   webpack(config) {
     const fileLoaderRule = config.module.rules.find((rule) =>
