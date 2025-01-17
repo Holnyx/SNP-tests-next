@@ -14,7 +14,7 @@ const EditTests = ({
     <AdminPage
       admin="admin"
       id={id}
-      selectedTest={selectedTest}
+      selectedTest={selectedTest} 
       search={''}
     />
   );

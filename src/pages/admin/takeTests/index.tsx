@@ -9,8 +9,12 @@ const TakeTests = ({
   return (
     <AdminPage
       admin={username}
-      search={search}
-    ></AdminPage>
+      search={search} selectedTest={{
+        id: '',
+        title: '',
+        created_at: '',
+        questions: []
+      }}    ></AdminPage>
   );
 };
 

@@ -6,20 +6,24 @@ import { getCookie } from 'cookies-next';
 import { TestsItem } from '@/store/types';
 
 const TestPage = ({
-  user,
+  username,
   id,
+  selectedTest,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <AdminPage
-      admin="admin"
+      admin={username}
       id={id}
       search={''}
+      selectedTest={selectedTest}
     ></AdminPage>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { id } = context.query;
+  const cookies = context.req.cookies;
+  const username = cookies.username || 'admin';
 
   const allTestsCookie = getCookie('tests', {
     req: context.req,
@@ -33,6 +37,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
     return {
       props: {
         id,
+        selectedTest,
+        username
       },
     };
   }

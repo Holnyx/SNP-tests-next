@@ -19,6 +19,7 @@ export type AnswerItem = {
   name: string;
   is_right: boolean;
   questionId: string;
+  checked?: boolean
 };
 
 export type TestsState = {
@@ -40,6 +41,11 @@ export type TestForAdd = {
 export type AnswerForAdd = {
   questionId: string; 
   answers: AnswerItem[];
+};
+
+export type UserAnswer = {
+  questionId: string; 
+  selectedAnswers: string[];  
 };
 
 export type FilteredTestsByDate = 'desc' | 'asc';

@@ -1,11 +1,4 @@
-import React, {
-  FC,
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v1 } from 'uuid';
 import { useRouter } from 'next/router';
@@ -29,7 +22,7 @@ import {
   removeAllQuestion,
   removeQuestion,
 } from '@/store/questionReduser';
-import { questionSelector, testSelector } from '@/store/selectors';
+import { questionSelector } from '@/store/selectors';
 import {
   createQuestionThunk,
   createTestFlow,
@@ -48,45 +41,47 @@ type CreateTestsItems = {
 };
 
 const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
-  const [select, setSelect] = useState('Select question type');
-  const [selectType, setSelectType] = useState('none');
-  const [testTitleValue, setTestTitleValue] = useState(selectedTestItem.title);
   const [testDateValue, setTestDateValue] = useState(
     selectedTestItem.created_at
   );
+  const [testTitleValue, setTestTitleValue] = useState(selectedTestItem.title);
   const [inputValue, setInputValue] = useState('');
-  const [errorTestTitle, setErrorTestTitle] = useState(false);
-  const [error, setError] = useState(false);
-  const [errorList, setErrorList] = useState(false);
   const [questions, setQuestions] = useState(selectedTestItem.questions);
+  const [select, setSelect] = useState('Select question type');
+  const [selectType, setSelectType] = useState('none');
   const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
   const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
+  const [error, setError] = useState(false);
+  const [errorList, setErrorList] = useState(false);
+  const [errorTestTitle, setErrorTestTitle] = useState(false);
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+
   const removeQuestionAction = useActionWithPayload(removeQuestion);
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
   const addQuestionAction = useActionWithPayload(addQuestion);
 
   const allQuestions = useSelector(questionSelector);
 
-  const checkQuestionValue =
-    inputValue.length >= 3 && inputValue.trim() !== '' && selectType !== 'none';
-
   const checkTestTitleValue =
     testTitleValue.length >= 3 && testTitleValue.trim() !== '';
-
-  const hasAnswer = allQuestions.every(
-    question =>
-      question.answers.length >= 2 &&
-      question.answers.some(answer => answer.is_right)
-  );
-
+  const checkQuestionValue =
+    inputValue.length >= 3 && inputValue.trim() !== '' && selectType !== 'none';
   const isQuestionListValid =
     allQuestions.length >= 2 || selectedTestItem.questions.length >= 2;
+  const hasAnswer = allQuestions.every(question => {
+    const hasEnoughAnswers =
+      question.question_type === 'number'
+        ? question.answers.length === 1
+        : question.answers.length >= 2;
+    const hasCorrectAnswer = question.answers.some(answer => answer.is_right);
+    return hasEnoughAnswers && hasCorrectAnswer;
+  });
 
   const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
   const pathRouteCreate = router.pathname === '/admin/createTests';
+  const pathRouteTakeTest = router.pathname.startsWith('/admin/testPage');
 
   const cleanInputs = useCallback(() => {
     setInputValue('');
@@ -146,14 +141,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     } else {
       setError(true);
     }
-  }, [
-    checkQuestionValue,
-    inputValue,
-    selectType,
-    dispatch,
-    id,
-    pathRouteEdit,
-  ]);
+  }, [checkQuestionValue, inputValue, selectType, dispatch, id, pathRouteEdit]);
 
   const removeQuestionHandler = useCallback(
     (questionId: string) => {
@@ -171,17 +159,17 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   );
 
   const onClickHandlerSaveTest = useCallback(() => {
-    // if (!checkTestTitleValue || !isQuestionListValid) {
-    //   setErrorTestTitle(true);
-    //   setErrorList(true);
-    // } else {
-    setErrorTestTitle(false);
-    setErrorList(false);
-    // }
-    // if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
-    setIsModalWindowOpen(true);
-    setIsModalWindowTitle('Are you sure you want to save the test?');
-    // }
+    if (!checkTestTitleValue || !isQuestionListValid) {
+      setErrorTestTitle(true);
+      setErrorList(true);
+    } else {
+      setErrorTestTitle(false);
+      setErrorList(false);
+    }
+    if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
+      setIsModalWindowOpen(true);
+      setIsModalWindowTitle('Are you sure you want to save the test?');
+    }
   }, [
     checkTestTitleValue,
     isQuestionListValid,
@@ -339,9 +327,10 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                   key={q.id}
                   questionId={q.id}
                   question={q}
-                  takeTest={false}
+                  takeTest={pathRouteTakeTest}
                   removeQuestionHandler={() => removeQuestionHandler(q.id)}
                   questions={selectedTestItem.questions}
+                  onAnswerSelect={() => {}}
                 />
               );
             })
@@ -350,9 +339,10 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                 questionId={q.id}
                 key={q.id}
                 question={q}
-                takeTest={false}
+                takeTest={pathRouteTakeTest}
                 removeQuestionHandler={() => removeQuestionHandler(q.id)}
                 questions={questions}
+                onAnswerSelect={() => {}}
               />
             ))}
         {errorList && (
@@ -365,18 +355,6 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
             title="Delete Test"
             onClick={onClickHandlerDeleteTest}
           />
-          {/* {router.query.id && (
-            <ChangeButton
-              title="Cancel Changes"
-              onClick={() => {
-                setIsModalWindowOpen(true);
-                setIsModalWindowTitle(
-                  'Are you sure you want to cancel the changes?'
-                );
-              }}
-            />
-          )} */}
-
           <ChangeButton
             title="Save Test"
             onClick={onClickHandlerSaveTest}

@@ -46,6 +46,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
 
   const onConfirm = useCallback(() => {
     if (isModalWindowTitle.includes('taking')) {
+      router.push(`/${user}/testPage/${selectedTestId}`)
     } else if (isModalWindowTitle.includes('delete')) {
       dispatch(deleteTestThunk(selectedTestId));
     }
@@ -92,6 +93,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                 <ChangeButton
                   title={'Take the Test'}
                   onClick={() => {
+                    setSelectedTestId(test.id);
                     setIsModalWindowTitle('Start taking the test?');
                     setIsModalWindowOpen(true);
                   }}

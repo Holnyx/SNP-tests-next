@@ -14,7 +14,7 @@ import TestPage from '../TestPage/TestPage';
 import { useDebounce } from '@/hooks/useDebounce';
 import { TestsItem } from '@/store/types';
 import { sortedTestsSelector, testSelector } from '@/store/selectors';
-import { getAllTestsThunk } from '@/thunk/testsThunk';
+import { getAllTestsThunk, signinThunk } from '@/thunk/testsThunk';
 import { AppDispatch } from '@/store';
 
 import s from './AdminPage.module.sass';
@@ -40,6 +40,8 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
   const filteredTestsByDate = useSelector(sortedTestsSelector);
+
+
 
   const editTest = useCallback(
     (testId: string) => {
@@ -109,6 +111,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
     );
   }, [dispatch]);
 
+
   return (
     <>
       <HeadComponent title={'Admin'} />
@@ -143,10 +146,11 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
             results={results}
           />
         )}
-        {router.pathname === `/admin/testPage/${id}` && (
+        {router.asPath.startsWith(`/${admin}/testPage/${id}`) && (
           <TestPage
             user={admin}
             id={id}
+            selectedTestItem={selectedTestItem}
           />
         )}
 
@@ -157,7 +161,6 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
         />
         <Footer />
       </div>
-      {/* <ModalWindow isModalWindowOpen={false} setIsModalWindowOpen={()=>{}} onConfirm={} title={''}/> */}
     </>
   );
 };

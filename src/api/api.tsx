@@ -156,15 +156,15 @@ const testApi = {
     }
   },
 
-  // editAnswer: async (id: string, data: { text: string; is_right: boolean }) => {
-  //   try {
-  //     const response = await api.patch(`/answers/${id}`, data);
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error('Error editing answer:', error);
-  //     throw error;
-  //   }
-  // },
+  editAnswer: async (id: string, data: { text: string; is_right: boolean }) => {
+    try {
+      const response = await api.patch(`/answers/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error editing answer:', error);
+      throw error;
+    }
+  },
 
   moveAnswer: async (id: string, position: number) => {
     try {

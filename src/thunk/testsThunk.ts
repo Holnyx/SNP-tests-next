@@ -207,6 +207,23 @@ export const createQuestionThunk = createAsyncThunk(
   }
 );
 
+export const editQuestionThunk = createAsyncThunk(
+  'questions/editQuestion', 
+  async (
+    { id, data }: { id: string; data: { title: string; question_type: string; answer: number } }, 
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await api.editQuestion(id, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error editing question:', error);
+      // Возвращаем ошибку для обработки в редьюсере
+      return rejectWithValue('Unexpected error');
+    }
+  }
+);
+
 export const deleteQuestionThunk = createAsyncThunk(
   'questions/deleteQuestion',
   async (id: string, { rejectWithValue }) => {
@@ -239,22 +256,22 @@ export const createAnswerThunk = createAsyncThunk(
   }
 );
 
-// // Редактирование ответа
-// export const editAnswerThunk = createAsyncThunk(
-//   'answers/editAnswer',
-//   async (
-//     { id, data }: { id: string; data: { text: string; is_right: boolean } },
-//     { rejectWithValue }
-//   ) => {
-//     try {
-//       const response = await api.editAnswer(id, data);
-//       return response; // Возвращаем обновленные данные
-//     } catch (error) {
-//       console.error('Error editing answer:', error);
-//       return rejectWithValue(error);
-//     }
-//   }
-// );
+
+export const editAnswerThunk = createAsyncThunk(
+  'answers/editAnswer',
+  async (
+    { id, data }: { id: string; data: { text: string; is_right: boolean } },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await api.editAnswer(id, data);
+      return response; // Возвращаем обновленные данные
+    } catch (error) {
+      console.error('Error editing answer:', error);
+      return rejectWithValue(error);
+    }
+  }
+);
 
 
 export const moveAnswerThunk = createAsyncThunk(

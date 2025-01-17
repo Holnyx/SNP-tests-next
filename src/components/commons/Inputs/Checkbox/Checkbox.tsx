@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, memo } from 'react';
+import React, { ChangeEvent, FC, memo, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -6,15 +6,23 @@ import starUrl from '/public/img/checkbox-icon.svg?url';
 
 import s from './Checkbox.module.sass';
 import cx from 'classnames';
+import { AnswerItem } from '@/store/types';
 
 type CheckboxItems = {
   title: string;
   type: string;
   name: string;
   leftCheck: boolean;
-  setIsChecked: React.Dispatch<React.SetStateAction<boolean>>;
-  isChecked: boolean;
   id?: string;
+  onAnswerSelect: (
+    selectedAnswer: AnswerItem,
+    type: string,
+    inputNumberValue: number,
+    isChecked: boolean,
+    questionId: string
+  ) => void;
+  answer?: AnswerItem;
+  questionId: string
 };
 
 const Checkbox: FC<CheckboxItems> = ({
@@ -22,17 +30,37 @@ const Checkbox: FC<CheckboxItems> = ({
   type,
   name,
   leftCheck,
-  setIsChecked,
-  isChecked,
   id,
+  onAnswerSelect,
+  answer,
+  questionId
 }) => {
+  const [inputNumberValue, setInputNumberValue] = useState<number | string>('');
   const router = useRouter();
   const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
-    setIsChecked(e.currentTarget.checked);
+    if (type === 'number') {
+      setInputNumberValue(e.currentTarget.value);
+    }
+    questionId &&
+      answer &&
+      onAnswerSelect(
+        answer,
+        type,
+        Number(inputNumberValue),
+        e.currentTarget.checked,
+        questionId
+      );
   };
 
   const changeStyleAdminCheckbox = router.pathname === '/signUp';
-
+  const changeType =
+    type === 'multiple'
+      ? 'checkbox'
+      : type === 'single'
+      ? 'radio'
+      : type === 'number'
+      ? 'number'
+      : 'checkbox';
   return (
     <div
       className={cx(s.container, {
@@ -48,14 +76,19 @@ const Checkbox: FC<CheckboxItems> = ({
         </label>
       )}
       <input
-        className={cx(s['checkbox'], { [s['margin-right']]: title === '' })}
-        type={type}
+        className={cx(
+          s['input'],
+          { [s['margin-right']]: title === '' },
+          { [s['real-radio']]: type === 'single' },
+          { [s['checkbox']]: type === 'multiple' || type === 'checkbox' }
+        )}
+        type={changeType}
         id={id}
         name={name}
-        checked={isChecked}
+        value={inputNumberValue}
         onChange={onValueChanged}
       />
-      {type === 'checkbox' && (
+      {(type === 'multiple' || type.trim() === 'checkbox') && (
         <label
           htmlFor={id}
           className={cx(s['custom-checkbox'], {
@@ -70,7 +103,13 @@ const Checkbox: FC<CheckboxItems> = ({
           />
         </label>
       )}
-      {!leftCheck && title !== '' && (
+      {(type === 'single' || type.trim() === 'radio') && (
+        <label
+          className={s['custom-radio']}
+          htmlFor={id}
+        />
+      )}
+      {!leftCheck && title !== '' && type !== 'number' && (
         <label
           htmlFor={id}
           className={cx(s.label, {

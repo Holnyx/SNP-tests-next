@@ -16,6 +16,10 @@ type InputItems = {
   value?: string;
   id?: string;
   error?: boolean;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
+  autoFocus?:boolean
 };
 
 const Input: FC<InputItems> = ({
@@ -27,10 +31,17 @@ const Input: FC<InputItems> = ({
   value,
   id,
   error,
+  onKeyDown,
+  onChange,
+  onBlur,
+  autoFocus
 }) => {
   const [isChecked, setIsChecked] = useState(false);
   const router = useRouter();
   const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
+    if (onChange) {
+      onChange(e);
+    }
     setInputValue(e.currentTarget.value);
     if (type === 'checkbox') {
       setIsChecked(e.currentTarget.checked);
@@ -62,19 +73,26 @@ const Input: FC<InputItems> = ({
             </label>
           )}
           <input
-            className={cx(changeStyle, { [s['margin-right']]: title === '' })}
+            className={cx(changeStyle, 
+              // { [s['margin-right']]: title === '' }
+            )}
             type={type}
             id={id}
             name={name}
             checked={isChecked}
             onChange={onValueChanged}
             value={value}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
+            autoFocus={autoFocus}
           />
-          {value && value.length < 3 || value === '' && error && title.includes('Title') ? (
+          {(value && value.length < 3) ||
+          (value === '' && error && title.includes('Title')) ? (
             <span className={cx(s['error-message'])}>
               The title must contain more than three character
             </span>
-          ) : value && value.length < 1 || value === ''   && error && title.includes('Answer') ? (
+          ) : (value && value.length < 1) ||
+            (value === '' && error && title.includes('Answer')) ? (
             <span className={cx(s['error-message'])}>
               The answer must contain from 1 to 19 characters
             </span>
@@ -86,7 +104,7 @@ const Input: FC<InputItems> = ({
             <span className={cx(s['error-message'])}>
               The answer must not exceed 19 characters
             </span>
-          ): (
+          ) : (
             ''
           )}
         </>

@@ -9,7 +9,7 @@ import leafImage from '/public/img/logIn-img.jpeg';
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
 
 import { AppDispatch } from '@/store';
-import { getCurrentUser, signinThunk } from '@/thunk/testsThunk';
+import { signinThunk } from '@/thunk/testsThunk';
 
 import s from './Authorization.module.sass';
 import cx from 'classnames';

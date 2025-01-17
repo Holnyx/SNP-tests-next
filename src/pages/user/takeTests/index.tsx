@@ -7,22 +7,29 @@ import UserPage from '@/components/pages/UserPage/UserPage';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 const TakeTests = ({
+  username,
   search,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <UserPage
-      user="user"
-      search={search}
-    ></UserPage>
+      user={username}
+      search={search} selectedTest={{
+        id: '',
+        title: '',
+        created_at: '',
+        questions: []
+      }}    ></UserPage>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { search } = context.query;
-
+  const cookies = context.req.cookies;
+  const username = cookies.username || 'user';
   return {
     props: {
       search: search || '',
+      username,
     },
   };
 };

@@ -98,14 +98,14 @@
             width: 10px
             height: 10px
 
-.radio, .real-radio
+.real-radio
     position: absolute
     z-index: -1
     width: 0
     height: 0
     opacity: 0
 
-.radio:checked + .custom-radio::before
+.real-radio:checked + .custom-radio::before
     transform: translate(-50%, -50%) scale(1)
 
 .margin-right
@@ -122,7 +122,7 @@
 .admin-container
     gap: 20px
     width: auto
-    
+
     @include mobile
         flex-wrap: nowrap
 

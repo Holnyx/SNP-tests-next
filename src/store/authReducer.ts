@@ -1,4 +1,4 @@
-import { signinThunk, signupThunk } from '@/thunk/testsThunk';
+import { getCurrentUser, signinThunk, signupThunk } from '@/thunk/testsThunk';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
@@ -59,6 +59,20 @@ const authSlice = createSlice({
       .addCase(signinThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.errors.push(action.payload as string);
+      });
+
+      builder
+      .addCase(getCurrentUser.pending, (state) => {
+        state.isLoading = true;
+        state.errors = [];
+      })
+      .addCase(getCurrentUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(getCurrentUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.errors = [action.payload as string]
       });
   },
 });

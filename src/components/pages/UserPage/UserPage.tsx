@@ -1,6 +1,6 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { getCookie, setCookie } from 'cookies-next';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 
 import Header from '@/components/commons/Header/Header';
@@ -12,34 +12,38 @@ import Footer from '@/components/commons/Footer/Footer';
 
 import { TestsItem } from '@/store/types';
 import { useDebounce } from '@/hooks/useDebounce';
-import { selectedTestSelector, testSelector } from '@/store/selectors';
+import { selectedTestSelector, sortedTestsSelector, testSelector } from '@/store/selectors';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { getAllTestsThunk } from '@/thunk/testsThunk';
 
 import s from './UserPage.module.sass';
 import cx from 'classnames';
+import { AppDispatch } from '@/store';
 
 type UserPageItems = {
   search: string;
   user?: string;
   id?: string;
+  selectedTest: TestsItem;
 };
 
-const UserPage: FC<UserPageItems> = ({ user, search, id }) => {
+const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<TestsItem[]>([]);
+  const [selectedTestItem, setSelectedTestItem] =
+    useState<TestsItem>(selectedTest);
 
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
-  const selectedTest = useSelector(state => selectedTestSelector(state, id));
-  // const getAllTestsAction = useActionWithPayload(getAllTestsThunk);
+  const filteredTestsByDate = useSelector(sortedTestsSelector);
 
   const searchCharacters = (search: string): Promise<TestsItem[]> => {
     return new Promise<TestsItem[]>(resolve => {
-      const filteredTests = allTests.filter(test =>
+      const filteredTests = filteredTestsByDate.filter(test =>
         test.title.toLowerCase().includes(search.toLowerCase())
       );
       resolve(filteredTests);
@@ -56,25 +60,41 @@ const UserPage: FC<UserPageItems> = ({ user, search, id }) => {
         });
       }, 500);
     } else {
-      setResults(allTests);
+      setResults(filteredTestsByDate);
       setIsSearching(false);
     }
-  }, [debouncedSearchTerm, allTests]);
-
-  // useEffect(() => {
-  //   getAllTestsAction({ page: 1, per: 10, search: '', sort: 'desc' });
-  // }, [getAllTestsAction]);
+  }, [debouncedSearchTerm, filteredTestsByDate]);
 
   useEffect(() => {
-    if (allTests.length > 0) {
-      setCookie('tests', JSON.stringify(allTests), {
-        path: '/',
-        sameSite: 'lax',
+    if (id && selectedTest) {
+      setSelectedTestItem({
+        id,
+        title: selectedTest.title,
+        created_at: selectedTest.created_at,
+        questions: selectedTest.questions,
       });
+    }
+  }, [id, selectedTest]);
+
+  useEffect(() => {
+    if (allTests && allTests.length > 0) {
+      setCookie('tests', JSON.stringify(allTests));
     } else {
       setCookie('tests', '');
     }
   }, [allTests]);
+
+  useEffect(() => {
+    dispatch(
+      getAllTestsThunk({
+        page: 1,
+        per: 10,
+        search: '',
+        sort: 'created_at_desc',
+      })
+    );
+  }, [dispatch]);
+
   return (
     <>
       <HeadComponent title={user} />
@@ -86,17 +106,20 @@ const UserPage: FC<UserPageItems> = ({ user, search, id }) => {
           setSearchTerm={setSearchTerm}
           defaultSearchValue={''}
         />
-        <TakeTestsPage
-          user={'user'}
-          editTest={() => {}}
-          search={search}
-          isSearching={isSearching}
-          results={results}
-        />
-        {router.pathname === `/user/testPage/${id}` && (
+        {router.pathname === '/user/takeTests' && (
+          <TakeTestsPage
+            user={user}
+            editTest={() => {}}
+            search={search}
+            isSearching={isSearching}
+            results={results}
+          />
+        )}
+        {router.asPath.startsWith(`/${user}/testPage/${id}`) && (
           <TestPage
-            user={'user'}
+            user={user}
             id={id}
+            selectedTestItem={selectedTestItem}
           />
         )}
 

@@ -1,26 +1,29 @@
 import React, { memo } from 'react';
 
-import AdminPage from '@/components/pages/AdminPage/AdminPage';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getCookie } from 'cookies-next';
 import { TestsItem } from '@/store/types';
 import UserPage from '@/components/pages/UserPage/UserPage';
 
 const TestPage = ({
-  user,
+  username,
   id,
+  selectedTest,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <UserPage
-      user="user"
+      user={username}
       id={id}
       search={''}
+      selectedTest={selectedTest}
     ></UserPage>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { id } = context.query;
+  const cookies = context.req.cookies;
+  const username = cookies.username || 'user';
 
   const allTestsCookie = getCookie('tests', {
     req: context.req,
@@ -34,6 +37,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
     return {
       props: {
         id,
+        selectedTest,
+        username,
       },
     };
   }
