@@ -10,7 +10,6 @@ export type QuestionItem = {
   title: string;
   question_type: TestsOptionsForSelect;
   answers: AnswerItem[];
-  
 };
 
 export type AnswerItem = {
@@ -19,7 +18,7 @@ export type AnswerItem = {
   name: string;
   is_right: boolean;
   questionId: string;
-  checked?: boolean
+  checked?: boolean;
 };
 
 export type TestsState = {
@@ -31,6 +30,12 @@ export type TestsState = {
   test: null;
 };
 
+export type QuestionState = {
+  questionsList: QuestionItem[];
+  answers: AnswerItem[];
+  errors: string[];
+};
+
 export type TestForAdd = {
   testTitle: string;
   testsList: TestsItem[];
@@ -39,13 +44,13 @@ export type TestForAdd = {
 };
 
 export type AnswerForAdd = {
-  questionId: string; 
+  questionId: string;
   answers: AnswerItem[];
 };
 
 export type UserAnswer = {
-  questionId: string; 
-  selectedAnswers: string[];  
+  questionId: string;
+  selectedAnswers: string[];
 };
 
 export type FilteredTestsByDate = 'desc' | 'asc';

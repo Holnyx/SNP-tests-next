@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
 import { useDispatch } from 'react-redux';
+import Image from 'next/image';
 
 import arrowIcon from '/public/img/arrow-down.svg?url';
 import DeleteButton from '@/components/commons/Buttons/DeleteButton/DeleteButton';

@@ -15,7 +15,7 @@ export const questionSelector = createSelector(
   state => state
 );
 export const answerSelector = createSelector(questionsSelector, questions => {
-  return questions.reduce(
+  return questions.questionsList.reduce(
     (allAnswers: AnswerItem[], question: QuestionItem) => {
       return [...allAnswers, ...question.answers];
     },
@@ -41,7 +41,7 @@ export const selectedTestSelector = createSelector(
 export const selectedQuestionSelector = createSelector(
   [questionSelector, (state, selectedQuestionId) => selectedQuestionId],
   (allQuestions, selectedQuestionId) => {
-    return allQuestions.find(
+    return allQuestions.questionsList.find(
       (question: QuestionItem) =>
         String(question.id) === String(selectedQuestionId)
     );

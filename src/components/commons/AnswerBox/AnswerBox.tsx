@@ -41,15 +41,7 @@ const AnswerBox: FC<AnswerBoxItems> = ({
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-
   const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
-
-  const changeAnswerTitleEvent = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setAnswerTitleValue(e.currentTarget.value);
-    },
-    [setAnswerTitleValue]
-  );
 
   const cancelChangeAnswerTitle = () => {
     setIsHiddenInputAnswer(!isHiddenInputAnswer);
@@ -81,6 +73,13 @@ const AnswerBox: FC<AnswerBoxItems> = ({
     }
   };
 
+  const changeAnswerTitleEvent = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setAnswerTitleValue(e.currentTarget.value);
+    },
+    [setAnswerTitleValue]
+  );
+
   return (
     <Reorder.Item
       value={answer}
@@ -96,8 +95,7 @@ const AnswerBox: FC<AnswerBoxItems> = ({
           id={answer.id}
           questionId={question.id}
           onAnswerSelect={onAnswerSelect}
-          answer={answer}
-        />
+          answer={answer} setIsChecked={()=>{}}        />
       )}
       {!takeTest &&
         (!isHiddenInputAnswer ? (

@@ -7,7 +7,7 @@ const Footer = () => {
   return (
     <footer className={s.footer}>
       <small className={s.small}>
-        © 2024 Anastasia Smirnova, All Rights Reserved.
+        © 2025 Anastasia Smirnova, All Rights Reserved.
       </small>
     </footer>
   );

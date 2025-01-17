@@ -38,6 +38,8 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
       setNextHref(null);
     }
     if (isModalWindowTitle.includes('complete')) {
+      console.log(userSelectedAnswers);
+      
       let correctUserAnswers = 0;
       userSelectedAnswers.forEach(userAnswer => {
         const correctAnswer = correctAnswers.find(
@@ -70,7 +72,6 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
     correctAnswers,
     isModalWindowTitle,
   ]);
-  console.log(user);
 
   const handleAnswerSelect = (
     selectedAnswer: AnswerItem,

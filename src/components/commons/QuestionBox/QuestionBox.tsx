@@ -15,7 +15,7 @@ import { v1 } from 'uuid';
 import Input from '../Inputs/Input/Input';
 import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
 import Checkbox from '../Inputs/Checkbox/Checkbox';
-import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
+import AnswerBox from '../AnswerBox/AnswerBox';
 
 import { AnswerItem, QuestionItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
@@ -31,7 +31,6 @@ import {
 
 import s from './QuestionBox.module.sass';
 import cx from 'classnames';
-import AnswerBox from '../AnswerBox/AnswerBox';
 
 type QuestionBoxItems = {
   question: QuestionItem;
@@ -46,7 +45,6 @@ type QuestionBoxItems = {
     isChecked: boolean,
     questionId: string
   ) => void;
-  // testId: string
 };
 
 const QuestionBox: FC<QuestionBoxItems> = ({
@@ -56,7 +54,6 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   removeQuestionHandler,
   questions,
   onAnswerSelect,
-  // testId
 }) => {
   const [answerOption, setAnswerOption] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -237,7 +234,9 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   return (
     <div className={s['questions-box']}>
       {!takeTest && (
-        <span className={cx(s['type-question'], { [s['hide']]: isHidden })}>{question.question_type}</span>
+        <span className={cx(s['type-question'], { [s['hide']]: isHidden })}>
+          {question.question_type}
+        </span>
       )}
       <div key={question.id}>
         {!takeTest &&
@@ -304,7 +303,8 @@ const QuestionBox: FC<QuestionBoxItems> = ({
               leftCheck={false}
               id={question.id}
               onAnswerSelect={() => {}}
-              questionId={''}
+              questionId={questionId}
+              setIsChecked={setIsChecked}
             />
           )}
 

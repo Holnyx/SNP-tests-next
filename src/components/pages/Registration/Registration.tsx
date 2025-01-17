@@ -1,4 +1,6 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { useDispatch, useSelector } from 'react-redux';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -7,14 +9,11 @@ import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
 import Checkbox from '@/components/commons/Inputs/Checkbox/Checkbox';
 
-import { useActionWithPayload } from '@/hooks/useAction';
 import { signupThunk } from '@/thunk/testsThunk';
+import { AppDispatch, AppRootStateItems } from '@/store';
 
 import s from './Registration.module.sass';
 import cx from 'classnames';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/store';
-import { useRouter } from 'next/router';
 
 const Registration = () => {
   const [isChecked, setIsChecked] = useState(false);
@@ -23,6 +22,7 @@ const Registration = () => {
   const [inputPasswordValue, setInputPasswordValue] = useState('');
   const [inputPasswordConfirmValue, setInputPasswordConfirmValue] =
     useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -50,17 +50,9 @@ const Registration = () => {
     auth_token: string;
     is_admin: boolean;
   }) => {
-    const resultAction = await authorizationAction(data); // Ваш thunk для логина
+    const resultAction = await authorizationAction(data);
     if (signupThunk.fulfilled.match(resultAction)) {
-      if (resultAction.payload?.token) {
-        localStorage.setItem('token', resultAction.payload.token);
-        console.log('Token saved:', resultAction.payload.token);
-      }
-      // if (resultAction.meta.requestStatus === 'fulfilled') {
-      //   router.push('/admin/takeTests');
-      // } else {
-      //   router.push('/user/takeTests');
-      // }
+      setSuccessMessage('Registration was successful');
     } else {
       setError(true);
     }
@@ -80,66 +72,87 @@ const Registration = () => {
       setError(true);
     }
   }, [checkNameValue, checkPasswordValue, registrationInAction]);
+
   return (
     <div className={s.authorization}>
       <div className={s['login-form']}>
         <h2 className={s.title}>Sign Up</h2>
-        <span className={s.info}>
-          Enter your Credentials to access your account
-        </span>
-        <div className={s.form}>
-          <InputForLogIn
-            getTitle={'User name'}
-            getType={'text'}
-            getName={'username'}
-            error={error}
-            value={inputNameValue}
-            setInputValue={setInputNameValue}
-          />
-          <InputForLogIn
-            getTitle={'Password'}
-            getType={'password'}
-            getName={'password'}
-            error={error}
-            value={inputPasswordValue}
-            setInputValue={setInputPasswordValue}
-          />
-          <InputForLogIn
-            getTitle={'Password confirmation'}
-            getType={'password'}
-            getName={'password_confirmation'}
-            error={error}
-            value={inputPasswordConfirmValue}
-            setInputValue={setInputPasswordConfirmValue}
-            inputPasswordValue={inputPasswordValue}
-          />
-          <Checkbox
-            title={'Create an admin account'}
-            type={'checkbox'}
-            name={'selectTrue'}
-            leftCheck={false}
-            setIsChecked={setIsChecked}
-            isChecked={isChecked}
-            id={'1'}
-          />
-          <div className={s['button-box']}>
-            <ButtonLog
-              getTitle={'Sign up'}
-              getClassName={s.button}
-              onClick={onClickHandlerSignUp}
+        {successMessage ? (
+          <span className={s.info}>{successMessage}</span>
+        ) : (
+          <span className={s.info}>
+            Enter your Credentials to access your account
+          </span>
+        )}
+        {!successMessage && (
+          <div className={s.form}>
+            <InputForLogIn
+              getTitle={'User name'}
+              getType={'text'}
+              getName={'username'}
+              error={error}
+              value={inputNameValue}
+              setInputValue={setInputNameValue}
             />
-            <span className={s['sign-up']}>
-              Do you have an account?{' '}
-              <Link
-                href="/signIn"
-                className={s.link}
-              >
-                Sign In
-              </Link>
-            </span>
+            <InputForLogIn
+              getTitle={'Password'}
+              getType={'password'}
+              getName={'password'}
+              error={error}
+              value={inputPasswordValue}
+              setInputValue={setInputPasswordValue}
+            />
+            <InputForLogIn
+              getTitle={'Password confirmation'}
+              getType={'password'}
+              getName={'password_confirmation'}
+              error={error}
+              value={inputPasswordConfirmValue}
+              setInputValue={setInputPasswordConfirmValue}
+              inputPasswordValue={inputPasswordValue}
+            />
+            <Checkbox
+              title={'Create an admin account'}
+              type={'checkbox'}
+              name={'selectTrue'}
+              leftCheck={false}
+              id={'1'}
+              onAnswerSelect={() => {}}
+              questionId={''}
+              setIsChecked={setIsChecked}
+            />
+            <div className={s['button-box']}>
+              <ButtonLog
+                getTitle={'Sign up'}
+                getClassName={s.button}
+                onClick={() => {
+                  onClickHandlerSignUp();
+                }}
+              />
+              <span className={s['sign-up']}>
+                Do you have an account?{' '}
+                <Link
+                  href="/signIn"
+                  className={s.link}
+                >
+                  Sign In
+                </Link>
+              </span>
+            </div>
           </div>
-        </div>
+        )}
+        {successMessage && (
+          <div className={s['button-box-signin']}>
+            <Link
+              href="/signIn"
+              className={s.button}
+            >
+              Sign In
+            </Link>
+          </div>
+        )}
       </div>
+
       <div className={s['image-box']}>
         <Image
           className={s.image}

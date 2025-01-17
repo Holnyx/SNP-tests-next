@@ -1,5 +1,5 @@
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import { getCookie, setCookie } from 'cookies-next';
+import React, { FC, memo, useEffect, useState } from 'react';
+import { setCookie } from 'cookies-next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 
@@ -12,13 +12,12 @@ import Footer from '@/components/commons/Footer/Footer';
 
 import { TestsItem } from '@/store/types';
 import { useDebounce } from '@/hooks/useDebounce';
-import { selectedTestSelector, sortedTestsSelector, testSelector } from '@/store/selectors';
-import { useActionWithPayload } from '@/hooks/useAction';
+import { sortedTestsSelector, testSelector } from '@/store/selectors';
 import { getAllTestsThunk } from '@/thunk/testsThunk';
+import { AppDispatch } from '@/store';
 
 import s from './UserPage.module.sass';
 import cx from 'classnames';
-import { AppDispatch } from '@/store';
 
 type UserPageItems = {
   search: string;

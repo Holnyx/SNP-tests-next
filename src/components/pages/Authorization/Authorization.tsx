@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import Link from 'next/link';
@@ -20,6 +20,13 @@ const Authorization = () => {
   const [inputPasswordValue, setInputPasswordValue] = useState('');
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+
+  const inputNameRef = useRef(inputNameValue);
+  const inputPasswordRef = useRef(inputPasswordValue);
+
+  // Обновляем ref при изменении состояния
+  inputNameRef.current = inputNameValue;
+  inputPasswordRef.current = inputPasswordValue;
 
   const logInAction = async (data: { username: string; password: string }) => {
     const resultAction = await dispatch(signinThunk(data));
@@ -43,7 +50,10 @@ const Authorization = () => {
 
   const onClickHandlerSignUp = useCallback(() => {
     if (checkNameValue && checkPasswordValue) {
-      logInAction({ username: inputNameValue, password: inputPasswordValue });
+      logInAction({
+        username: inputNameRef.current,
+        password: inputPasswordRef.current,
+      });
       setError(false);
     } else {
       setError(true);

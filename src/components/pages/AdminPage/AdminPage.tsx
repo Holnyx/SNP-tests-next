@@ -14,7 +14,7 @@ import TestPage from '../TestPage/TestPage';
 import { useDebounce } from '@/hooks/useDebounce';
 import { TestsItem } from '@/store/types';
 import { sortedTestsSelector, testSelector } from '@/store/selectors';
-import { getAllTestsThunk, signinThunk } from '@/thunk/testsThunk';
+import { getAllTestsThunk } from '@/thunk/testsThunk';
 import { AppDispatch } from '@/store';
 
 import s from './AdminPage.module.sass';

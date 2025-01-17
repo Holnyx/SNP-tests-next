@@ -6,7 +6,7 @@ import {
   TestsState,
 } from './types';
 import {
-  createTestFlow,
+  createTestThunk,
   deleteTestThunk,
   getAllTestsThunk,
   getTestByIdThunk,
@@ -61,8 +61,11 @@ const testSlice = createSlice({
       .addCase(getTestByIdThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
       })
+      .addCase(createTestThunk.pending, state => {
+        state.errors = [];
+      })
       .addCase(
-        createTestFlow.fulfilled,
+        createTestThunk.fulfilled,
         (
           state,
           action: PayloadAction<{
@@ -75,6 +78,12 @@ const testSlice = createSlice({
           state.questionsList.push(...createdQuestions);
         }
       )
+      .addCase(createTestThunk.rejected, (state, action) => {
+        state.errors.push(action.payload as string);
+      })
+      .addCase(deleteTestThunk.pending, state => {
+        state.errors = [];
+      })
       .addCase(
         deleteTestThunk.fulfilled,
         (state, action: PayloadAction<string>) => {
@@ -83,6 +92,12 @@ const testSlice = createSlice({
           );
         }
       )
+      .addCase(deleteTestThunk.rejected, (state, action) => {
+        state.errors.push(action.payload as string);
+      })
+      .addCase(updateTestThunk.pending, state => {
+        state.errors = [];
+      })
       .addCase(
         updateTestThunk.fulfilled,
         (state, action: PayloadAction<TestsItem>) => {
@@ -93,7 +108,10 @@ const testSlice = createSlice({
             state.testsList[index] = action.payload;
           }
         }
-      );
+      )
+      .addCase(updateTestThunk.rejected, (state, action) => {
+        state.errors.push(action.payload as string);
+      });
   },
 });
 

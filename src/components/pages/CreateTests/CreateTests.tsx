@@ -25,7 +25,7 @@ import {
 import { questionSelector } from '@/store/selectors';
 import {
   createQuestionThunk,
-  createTestFlow,
+  createTestThunk,
   deleteQuestionThunk,
   deleteTestThunk,
   updateTestThunk,
@@ -69,8 +69,8 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   const checkQuestionValue =
     inputValue.length >= 3 && inputValue.trim() !== '' && selectType !== 'none';
   const isQuestionListValid =
-    allQuestions.length >= 2 || selectedTestItem.questions.length >= 2;
-  const hasAnswer = allQuestions.every(question => {
+    allQuestions.questionsList.length >= 2 || selectedTestItem.questions.length >= 2;
+  const hasAnswer = allQuestions.questionsList.every(question => {
     const hasEnoughAnswers =
       question.question_type === 'number'
         ? question.answers.length === 1
@@ -180,18 +180,18 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
 
   const createTest = useCallback(async () => {
     if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
-      const answersData = allQuestions.map(question => ({
+      const answersData = allQuestions.questionsList.map(question => ({
         questionId: question.id,
         answers: question.answers || [],
       }));
       const testData: TestForAdd = {
         testTitle: testTitleValue,
         testsList: [],
-        questionList: allQuestions,
+        questionList: allQuestions.questionsList,
         answerList: answersData.flatMap(item => item.answers),
       };
 
-      await dispatch(createTestFlow(testData));
+      await dispatch(createTestThunk(testData));
 
       cleanInputs();
       setTestTitleValue('');
@@ -263,10 +263,10 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   ]);
 
   useEffect(() => {
-    if (allQuestions.length >= 2) {
+    if (allQuestions.questionsList.length >= 2) {
       setErrorList(false);
     }
-  }, [allQuestions.length]);
+  }, [allQuestions.questionsList.length]);
 
   useEffect(() => {
     if (pathRouteCreate) {
@@ -334,7 +334,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                 />
               );
             })
-          : allQuestions.map(q => (
+          : allQuestions.questionsList.map(q => (
               <QuestionBox
                 questionId={q.id}
                 key={q.id}

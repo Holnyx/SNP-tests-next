@@ -4,9 +4,10 @@ import { useRouter } from 'next/router';
 
 import starUrl from '/public/img/checkbox-icon.svg?url';
 
+import { AnswerItem } from '@/store/types';
+
 import s from './Checkbox.module.sass';
 import cx from 'classnames';
-import { AnswerItem } from '@/store/types';
 
 type CheckboxItems = {
   title: string;
@@ -22,7 +23,8 @@ type CheckboxItems = {
     questionId: string
   ) => void;
   answer?: AnswerItem;
-  questionId: string
+  questionId: string;
+  setIsChecked: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const Checkbox: FC<CheckboxItems> = ({
@@ -33,23 +35,28 @@ const Checkbox: FC<CheckboxItems> = ({
   id,
   onAnswerSelect,
   answer,
-  questionId
+  questionId,
+  setIsChecked,
 }) => {
   const [inputNumberValue, setInputNumberValue] = useState<number | string>('');
   const router = useRouter();
   const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.currentTarget.value;
+
     if (type === 'number') {
-      setInputNumberValue(e.currentTarget.value);
+      setInputNumberValue(value);
     }
     questionId &&
       answer &&
       onAnswerSelect(
         answer,
         type,
-        Number(inputNumberValue),
+        type === 'number' ? Number(value) : 0,
         e.currentTarget.checked,
         questionId
       );
+
+    setIsChecked(e.currentTarget.checked);
   };
 
   const changeStyleAdminCheckbox = router.pathname === '/signUp';
