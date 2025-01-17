@@ -32,7 +32,7 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
 
   const handleLinkClick = (href: string) => {
-    if (router.pathname === '/admin/createTests' && allQuestions.length > 0) {
+    if (router.pathname === '/admin/createTests' && allQuestions.questionsList.length > 0) {
       setNextHref(href);
       setIsModalWindowOpen(true);
     } else if (href === '/signIn') {
