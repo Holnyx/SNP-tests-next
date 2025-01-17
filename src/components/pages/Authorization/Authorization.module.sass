@@ -1,0 +1,185 @@
+@import '../../../styles/color'
+@import '../../../styles/mixins'
+
+.authorization
+    position: relative
+    max-width: 100vw
+    height: 100vh
+    display: flex
+    align-items: center
+    justify-content: center
+    font-family: Poppins
+
+    .image-box
+        position: absolute
+        right: 0
+        width: 56%
+        height: 100%
+        overflow: hidden
+
+        .image
+            position: relative
+            width: 100%
+            height: 100%
+            object-fit: cover
+            -webkit-mask-image: linear-gradient(to right, transparent, #181818 30%)
+            mask-image: linear-gradient(to right, transparent, #181818 30%)
+
+    @include laptop
+        position: relative
+        z-index: 2
+        display: flex
+        justify-content: center
+        flex-direction: column
+        align-items: center
+        width: 100%
+        min-height: 836px
+        height: 100%
+        margin: 0 auto
+        padding: 80px 0 0
+        background-color: transparent
+        box-sizing: border-box
+
+        .image-box
+            display: none
+
+        &::before
+            content: ''
+            position: absolute
+            z-index: -3
+            top: 0
+            width: 100vw
+            height: 100%
+            background-image: url('/img/logIn-img.jpeg')
+            background-repeat: no-repeat
+            background-attachment: fixed
+            background-position: center center
+            background-size: cover
+            object-fit: cover
+            filter: blur(13px)
+
+        &::after
+            content: ''
+            position: absolute
+            z-index: -1
+            top: 0
+            width: 100vw
+            height: 100%
+            background: rgba(27, 26, 26, 0.551)
+
+    .login-form
+        position: absolute
+        left: 0
+        width: 50%
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+
+        @include laptop
+            width: 100%
+
+        .title
+            font-size: 32px
+            font-weight: 500
+            margin-bottom: 20px
+            background-size: 400% 400%
+            color: $color-white
+
+        .info
+            margin-bottom: 30px
+            color: $color-light-green
+            @include font-style(500,16px,142%,0)
+
+            @include mobile
+                width: 283px
+                @include font-style(500,14px,142%,0)
+
+        .form
+            position: relative
+            display: flex
+            flex-direction: column
+            align-items: flex-start
+            justify-content: center
+            gap: 15px
+            width: 320px
+            height: fit-content
+            padding: 40px
+            font-family: Poppins
+            font-size: 15px
+            background-color: #181818
+            border-radius: 28px
+
+            @include mobile
+                width: auto
+
+            &::after, &::before
+                content: ''
+                position: absolute
+                top: 50%
+                left: 50%
+                z-index: -1
+                height: 100%
+                width: 100%
+                padding: 4px
+                border-radius: 30px
+                background-image: conic-gradient(from var(--angle),rgba(0,40,2,1) 26%, #008a08 50%, rgba(0,40,2,1) 74%)
+                translate: -50% -50%
+                animation: 10s spin linear infinite
+            &::before
+                filter: blur(1.5rem)
+                opacity: 0.5
+
+            .input
+                width: -webkit-fill-available
+                padding: 20px 10px
+                background-color: $color-gray
+                color: $color-white
+                font-size: 16px
+                border: none
+                border-radius: 50px
+
+                &:focus
+                    background-color: #414141
+                    outline: none
+
+            .button-box
+                display: flex
+                flex-direction: column
+                width: 100%
+                align-items: flex-end
+                gap: 12px
+                margin-top: 20px
+                font-size: 16px
+
+                .sign-up
+                    font-size: 12px
+
+                .button
+                    width: 100%
+                    padding: 20px 10px
+                    background-color: $color-white
+                    cursor: pointer
+                    transition: 0.5s background-color ease-in-out
+                    font-family: Poppins
+                    border: none
+                    border-radius: 50px
+
+                    &:hover
+                        background-color: $color-green
+                        color: $color-white
+
+                .link
+                    color: $color-green
+                    text-decoration: underline
+
+@property --angle
+    syntax: "<angle>"
+    initial-value: 0deg
+    inherits: false
+
+@keyframes spin
+    from
+        --angle: 0deg
+    to
+        --angle: 360deg

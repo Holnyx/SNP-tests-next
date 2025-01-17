@@ -1,0 +1,48 @@
+@import '../../../styles/mixins'
+@import '../../../styles/color'
+
+.errors-boxes
+    position: absolute
+    z-index: 999
+    right: 0
+    bottom: 0
+
+.error-box
+    position: relative
+    width: fit-content
+    padding: 25px
+    margin: 0px 20px 20px
+    opacity: 1
+    border-radius: 10px
+    background: $color-gray
+    box-shadow: 0 0 10px 0px $color-red
+    color: $color-red
+    transition: opacity 1s ease, transform 1s ease
+    transition-delay: 1s
+
+    .button
+        position: absolute
+        right: 0
+        top: 0
+        display: flex
+        justify-content: center
+        padding: 4px
+        background: $color-gray
+        border: none
+        border-radius: 50%
+        cursor: pointer
+
+        .delete-icon
+            filter: invert(150%) sepia(100%) saturate(1000%) hue-rotate(0deg) brightness(100%) contrast(100%)
+
+.show
+    animation: fadeIn 1s ease forwards
+
+@keyframes fadeIn
+    0%
+        opacity: 0
+        transform: translateY(30px)
+
+    100%
+        opacity: 1
+        transform: translateY(0)

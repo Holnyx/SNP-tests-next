@@ -1,0 +1,104 @@
+@import '../../../styles/color'
+@import '../../../styles/mixins'
+
+.container
+    position: fixed
+    z-index: 1000
+    top: 0
+    left: 0
+    display: flex
+    justify-content: center
+    align-items: center
+    width: 100%
+    height: 100%
+    background-color: rgba(0, 0, 0, 0.5)
+    backdrop-filter: blur(10px)
+    transform: scale(0)
+
+    .window
+        position: relative
+        display: flex
+        flex-direction: column
+        justify-content: space-between
+        max-width: 480px
+        width: 100%
+        height: 370px
+        padding: 38px 62px
+        background: $color-black
+        background: linear-gradient(to top, #1b1a1adb, #1b1a1ae9), linear-gradient(to top, #181818 , #00690e)
+        background-clip: padding-box, border-box
+        background-origin: padding-box, border-box
+        border: 2px solid transparent
+        border-radius: 14px
+        backdrop-filter: blur(100px)
+        box-shadow: 0 0 60px 0 rgba(0, 0, 0, 0.62)
+        box-sizing: border-box
+        font-family: Poppins
+
+        @include mobile
+            max-width: 330px
+            width: 100%
+            height: 290px
+            padding: 28px 42px
+            margin: 0 20px
+
+        .title
+            display: flex
+            align-items: center
+            height: 100%
+            font-weight: 700
+            font-size: 30px
+            line-height: 150%
+            text-transform: uppercase
+
+            @include mobile
+                font-size: 20px
+
+.closed
+    position: absolute
+    right: 22px
+    top: 20px
+    display: flex
+    justify-content: center
+    align-items: center
+    width: 34px
+    padding: 3px
+    color: $color-green
+    font-weight: 100
+    font-size: 37px
+    text-transform: capitalize
+    text-align: center
+    background: $color-gray
+    border: none
+    border-radius: 6px
+    cursor: pointer
+    transition: 0.5s background ease
+
+    .closed-img
+        width: 27px
+        height: 27px
+
+        @include mobile
+            width: 17px
+            height: 17px
+
+    &:hover
+        background-color: $color-green
+
+        .closed-img
+            filter: invert(150%) sepia(100%) saturate(1000%) hue-rotate(0deg) brightness(0%) contrast(80%)
+
+    @include mobile
+        width: 24px
+        height: 24px
+
+.buttons_box
+    display: flex
+    justify-content: space-between
+
+    @include mobile
+        justify-content: space-around
+        gap: 26px
+
+.active
+    transform: scale(1)
