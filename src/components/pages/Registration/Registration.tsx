@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -24,7 +23,6 @@ const Registration = () => {
     useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
   const authorizationAction = (data: {

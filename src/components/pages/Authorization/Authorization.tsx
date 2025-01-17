@@ -24,7 +24,6 @@ const Authorization = () => {
   const inputNameRef = useRef(inputNameValue);
   const inputPasswordRef = useRef(inputPasswordValue);
 
-  // Обновляем ref при изменении состояния
   inputNameRef.current = inputNameValue;
   inputPasswordRef.current = inputPasswordValue;
 
