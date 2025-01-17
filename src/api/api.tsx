@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
 const api: AxiosInstance = axios.create({
-  baseURL: 'https://interns-test-fe.snp.agency/api/v1/',
+  baseURL: '/api/v1/',
   headers: {
     'scope-key': 'ey9NVu',
   },
