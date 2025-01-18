@@ -1,0 +1,48 @@
+@import '../../../styles/color'
+@import '../../../styles/mixins'
+
+.container
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: 22px
+
+    @include mobile
+        gap: 14px
+
+
+    .title
+        font-size: 20px
+
+        @include mobile
+            font-size: 16px
+            margin-bottom: 10px
+            margin-top: 10px
+
+    .loader
+        width: 80px
+        aspect-ratio: 1
+        border-radius: 50%
+        background: radial-gradient(farthest-side,#03ae00 94%,#0000) top/12px 12px no-repeat,conic-gradient(#0000 30%,#03ae00)
+        -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 12px),#000 0)
+        animation: l13 2s infinite linear
+        @include mobile
+            width: 40px
+            background: radial-gradient(farthest-side,#03ae00 94%,#0000) top/6px 6px no-repeat,conic-gradient(#0000 30%,#03ae00)
+            -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 6px),#000 0)
+
+    .delete-test
+        width: 50px
+        aspect-ratio: 1
+        border-radius: 50%
+        background: radial-gradient(farthest-side,#03ae00 94%,#0000) top/8px 8px no-repeat,conic-gradient(#0000 30%,#03ae00)
+        -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 8px),#000 0)
+        animation: l13 2s infinite linear
+        @include mobile
+            width: 40px
+            background: radial-gradient(farthest-side,#03ae00 94%,#0000) top/6px 6px no-repeat,conic-gradient(#0000 30%,#03ae00)
+            -webkit-mask: radial-gradient(farthest-side,#0000 calc(100% - 6px),#000 0)
+
+@keyframes l13
+    100%
+        transform: rotate(1turn)

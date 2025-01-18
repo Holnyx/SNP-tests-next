@@ -19,7 +19,8 @@ type InputItems = {
   onKeyDown?: (e: React.KeyboardEvent) => void;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onBlur?: () => void;
-  autoFocus?:boolean
+  autoFocus?: boolean;
+  isHidden?: boolean;
 };
 
 const Input: FC<InputItems> = ({
@@ -34,7 +35,8 @@ const Input: FC<InputItems> = ({
   onKeyDown,
   onChange,
   onBlur,
-  autoFocus
+  autoFocus,
+  isHidden,
 }) => {
   const [isChecked, setIsChecked] = useState(false);
   const router = useRouter();
@@ -60,6 +62,7 @@ const Input: FC<InputItems> = ({
     <div
       className={cx(s.container, {
         [s['admin-container']]: changeStyleAdminCheckbox,
+        [s['change-title']]: isHidden,
       })}
     >
       {type !== 'radio' && (
@@ -73,9 +76,7 @@ const Input: FC<InputItems> = ({
             </label>
           )}
           <input
-            className={cx(changeStyle, 
-              // { [s['margin-right']]: title === '' }
-            )}
+            className={cx(changeStyle)}
             type={type}
             id={id}
             name={name}
@@ -86,23 +87,23 @@ const Input: FC<InputItems> = ({
             onKeyDown={onKeyDown}
             autoFocus={autoFocus}
           />
-          {(value && value.length < 3) ||
+          {(value && value.length < 1) ||
           (value === '' && error && title.includes('Title')) ? (
             <span className={cx(s['error-message'])}>
-              The title must contain more than three character
+              The title must contain more than 1 character
             </span>
           ) : (value && value.length < 1) ||
             (value === '' && error && title.includes('Answer')) ? (
             <span className={cx(s['error-message'])}>
-              The answer must contain from 1 to 19 characters
+              The answer must contain from 1 to 30 characters
             </span>
-          ) : value && value.length > 19 && title.includes('Title') ? (
+          ) : value && value.length > 30 && title.includes('Title') ? (
             <span className={cx(s['error-message'])}>
-              The answer must not exceed 19 characters
+              The answer must not exceed 30 characters
             </span>
-          ) : value && value.length > 19 && title.includes('Answer') ? (
+          ) : value && value.length > 30 && title.includes('Answer') ? (
             <span className={cx(s['error-message'])}>
-              The answer must not exceed 19 characters
+              The answer must not exceed 30 characters
             </span>
           ) : (
             ''

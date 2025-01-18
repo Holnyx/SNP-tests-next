@@ -5,34 +5,38 @@ import { useSelector } from 'react-redux';
 
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
-import s from './ErrorMessage.module.sass';
-import cx from 'classnames';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { clearError } from '@/store/testReduser';
-import { AppRootStateItems } from '@/store';
 import { removeError } from '@/store/authReducer';
-import { useRouter } from 'next/router';
+
+import s from './ErrorMessage.module.sass';
+import cx from 'classnames';
 
 const ErrorMessage = () => {
-  const router = useRouter();
   const testsErrors = useSelector(errorSelector);
   const authErrors = useSelector(authErrorSelector);
-  const deleteError = useActionWithPayload(removeError);
+  const deleteAuthError = useActionWithPayload(removeError);
+  const deleteTestsError = useActionWithPayload(clearError);
 
   //auth errors
   useEffect(() => {
-    if (authErrors.length > 0) {
+    if (authErrors.length > 0 || testsErrors.length > 0) {
       const timer = setTimeout(() => {
-        deleteError(0);
+        if (authErrors.length > 0) {
+          deleteAuthError(0);
+        }
+        if (testsErrors.length > 0) {
+          deleteTestsError(0);
+        }
       }, 5000);
+
       return () => clearTimeout(timer);
     }
-  }, [authErrors, deleteError]);
+  }, [authErrors, testsErrors, deleteAuthError, deleteTestsError]);
 
-  const test = router.pathname === '/signUp' || '/signIn';
   return (
     <div className={s['errors-boxes']}>
-      {(test ? authErrors : testsErrors).map((error, index) => (
+      {[...authErrors, ...testsErrors].map((error, index) => (
         <div
           key={index}
           className={cx(s['error-box'], { [s.show]: error })}
@@ -40,7 +44,9 @@ const ErrorMessage = () => {
           {error}
           <button
             className={s.button}
-            onClick={() => deleteError(index)}
+            onClick={() => {
+              deleteAuthError(index), deleteTestsError(index);
+            }}
           >
             <Image
               src={deleteIconUrl}

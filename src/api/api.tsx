@@ -100,7 +100,17 @@ const testApi = {
     sort?: string;
   }) => {
     try {
-      const response = await api.get('/tests', { data });
+      const timestamp = new Date().getTime();
+      const response = await api.get('/tests', {
+        params: {
+          ...data,
+          timestamp,
+        },
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching tests:', error);

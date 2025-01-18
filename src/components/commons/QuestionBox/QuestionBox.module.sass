@@ -23,13 +23,18 @@
         border-radius: 12px
         @include font-style(400,12px,142%,0)
         color: $color-light-gray
-    
+
     .hide
         opacity: 0
 
     .title
         margin-bottom: 20px
         word-break: break-word
+        @include mobile
+            width: calc(13ch)
+            white-space: normal
+            overflow-wrap: anywhere
+            line-height: 142%
 
     .margin-top
         margin-top: 18px

@@ -9,6 +9,7 @@ import Input from '@/components/commons/Inputs/Input/Input';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
+import Loader from '@/components/commons/Loader/Loader';
 
 import {
   QuestionItem,
@@ -22,7 +23,7 @@ import {
   removeAllQuestion,
   removeQuestion,
 } from '@/store/questionReduser';
-import { questionSelector } from '@/store/selectors';
+import { loadingSelector, questionSelector } from '@/store/selectors';
 import {
   createQuestionThunk,
   createTestThunk,
@@ -63,13 +64,15 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   const addQuestionAction = useActionWithPayload(addQuestion);
 
   const allQuestions = useSelector(questionSelector);
+  const loading = useSelector(loadingSelector);
 
   const checkTestTitleValue =
     testTitleValue.length >= 3 && testTitleValue.trim() !== '';
   const checkQuestionValue =
     inputValue.length >= 3 && inputValue.trim() !== '' && selectType !== 'none';
   const isQuestionListValid =
-    allQuestions.questionsList.length >= 2 || selectedTestItem.questions.length >= 2;
+    allQuestions.questionsList.length >= 2 ||
+    selectedTestItem.questions.length >= 2;
   const hasAnswer = allQuestions.questionsList.every(question => {
     const hasEnoughAnswers =
       question.question_type === 'number'
@@ -286,80 +289,92 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     <div className={s.container}>
       <h2 className={s.title}>{pathRouteEdit ? 'Edit Test' : 'Create Test'}</h2>
       <div className={s.form}>
-        <div className={cx(s['test-title'])}>
-          <Input
-            title={'Test Title:'}
-            type={'text'}
-            name={'name'}
-            leftCheck={true}
-            setInputValue={setTestTitleValue}
-            error={errorTestTitle}
-            value={testTitleValue}
-          />
-        </div>
-
-        <div className={cx(s['test-title'])}>
-          <Input
-            title={'Question Title:'}
-            type={'text'}
-            name={'questionTitle'}
-            leftCheck={true}
-            value={inputValue}
-            setInputValue={setInputValue}
-            error={error}
-          />
-          <SelectField
-            defaultValue={select}
-            directionOptions={testsOptions}
-            setSelect={setSelect}
-            onChange={setSelectType}
-            error={error}
-          />
-          <ChangeButton
-            title={'Add question'}
-            onClick={saveQuestionClickHandler}
-          />
-        </div>
-        {pathRouteEdit && selectedTestItem
-          ? questions.map(q => {
-              return (
-                <QuestionBox
-                  key={q.id}
-                  questionId={q.id}
-                  question={q}
-                  takeTest={pathRouteTakeTest}
-                  removeQuestionHandler={() => removeQuestionHandler(q.id)}
-                  questions={selectedTestItem.questions}
-                  onAnswerSelect={() => {}}
-                />
-              );
-            })
-          : allQuestions.questionsList.map(q => (
-              <QuestionBox
-                questionId={q.id}
-                key={q.id}
-                question={q}
-                takeTest={pathRouteTakeTest}
-                removeQuestionHandler={() => removeQuestionHandler(q.id)}
-                questions={questions}
-                onAnswerSelect={() => {}}
-              />
-            ))}
-        {errorList && (
-          <span className={cx(s['error-message'])}>
-            The list of questions should be at least two
-          </span>
+        {loading && (
+          <>
+            <Loader />
+            {allQuestions.questionsList.length !== 0 && (
+              <div>test is created</div>
+            )}
+          </>
         )}
-        <div className={s.buttons}>
-          <ChangeButton
-            title="Delete Test"
-            onClick={onClickHandlerDeleteTest}
-          />
-          <ChangeButton
-            title="Save Test"
-            onClick={onClickHandlerSaveTest}
-          />
-        </div>
+        {!loading && (
+          <>
+            <div className={cx(s['test-title'])}>
+              <Input
+                title={'Test Title:'}
+                type={'text'}
+                name={'name'}
+                leftCheck={true}
+                setInputValue={setTestTitleValue}
+                error={errorTestTitle}
+                value={testTitleValue}
+              />
+            </div>
+
+            <div className={cx(s['test-title'])}>
+              <Input
+                title={'Question Title:'}
+                type={'text'}
+                name={'questionTitle'}
+                leftCheck={true}
+                value={inputValue}
+                setInputValue={setInputValue}
+                error={error}
+              />
+              <SelectField
+                defaultValue={select}
+                directionOptions={testsOptions}
+                setSelect={setSelect}
+                onChange={setSelectType}
+                error={error}
+              />
+              <ChangeButton
+                title={'Add question'}
+                onClick={saveQuestionClickHandler}
+              />
+            </div>
+            {pathRouteEdit && selectedTestItem
+              ? questions.map(q => {
+                  return (
+                    <QuestionBox
+                      key={q.id}
+                      questionId={q.id}
+                      question={q}
+                      takeTest={pathRouteTakeTest}
+                      removeQuestionHandler={() => removeQuestionHandler(q.id)}
+                      questions={selectedTestItem.questions}
+                      onAnswerSelect={() => {}}
+                    />
+                  );
+                })
+              : allQuestions.questionsList.map(q => (
+                  <QuestionBox
+                    questionId={q.id}
+                    key={q.id}
+                    question={q}
+                    takeTest={pathRouteTakeTest}
+                    removeQuestionHandler={() => removeQuestionHandler(q.id)}
+                    questions={questions}
+                    onAnswerSelect={() => {}}
+                  />
+                ))}
+            {errorList && (
+              <span className={cx(s['error-message'])}>
+                The list of questions should be at least two
+              </span>
+            )}
+            <div className={s.buttons}>
+              <ChangeButton
+                title="Delete Test"
+                onClick={onClickHandlerDeleteTest}
+              />
+              <ChangeButton
+                title="Save Test"
+                onClick={onClickHandlerSaveTest}
+              />
+            </div>
+          </>
+        )}
       </div>
       <ModalWindow
         isModalWindowOpen={isModalWindowOpen}

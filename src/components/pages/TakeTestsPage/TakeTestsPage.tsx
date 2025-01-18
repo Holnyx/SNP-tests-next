@@ -1,16 +1,18 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Image from 'next/image';
 
 import arrowIcon from '/public/img/arrow-down.svg?url';
 import DeleteButton from '@/components/commons/Buttons/DeleteButton/DeleteButton';
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
+import Loader from '@/components/commons/Loader/Loader';
 
-import { TestsItem } from '@/store/types';
-import { deleteTestThunk } from '@/thunk/testsThunk';
 import { AppDispatch } from '@/store';
+import { TestsItem } from '@/store/types';
+import { deleteTestThunk, getAllTestsThunk } from '@/thunk/testsThunk';
+import { deleteLoadingSelector, loadingSelector } from '@/store/selectors';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
@@ -32,36 +34,93 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
 }) => {
   const [show, setShow] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState('');
-
   const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
   const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
-  const onClickHandlerDeleteTest = useCallback(() => {
-    setIsModalWindowTitle('Are you sure you want to delete the test?');
-    setIsModalWindowOpen(true);
-  }, [setIsModalWindowTitle]);
-
-  const onConfirm = useCallback(() => {
-    if (isModalWindowTitle.includes('taking')) {
-      router.push(`/${user}/testPage/${selectedTestId}`)
-    } else if (isModalWindowTitle.includes('delete')) {
-      dispatch(deleteTestThunk(selectedTestId));
-    }
-  }, [isModalWindowTitle, dispatch, selectedTestId]);
+  const loading = useSelector(loadingSelector);
+  const deleteLoading = useSelector(deleteLoadingSelector);
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
     return date.toLocaleDateString('ru-RU');
   };
 
+  const loadMoreTests = () => {
+    if (currentPage <= totalPages) {
+      setCurrentPage(prevPage => prevPage + 1);
+      dispatch(
+        getAllTestsThunk({
+          page: currentPage + 1,
+          per: 5,
+          search: '',
+          sort: 'created_at_desc',
+        })
+      );
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
+  };
+
+  const onClickHandlerDeleteTest = useCallback(() => {
+    setIsModalWindowTitle('Are you sure you want to delete the test?');
+    setIsModalWindowOpen(true);
+  }, [setIsModalWindowTitle]);
+
+  const onConfirm = useCallback(async () => {
+    if (isModalWindowTitle.includes('delete')) {
+      await dispatch(deleteTestThunk(selectedTestId));
+      const response = await dispatch(
+        getAllTestsThunk({
+          page: currentPage,
+          per: 5,
+          search: '',
+          sort: 'created_at_desc',
+        })
+      );
+      if (response.payload?.meta?.total_pages) {
+        setTotalPages(response.payload.meta.total_pages);
+      }
+    } else if (isModalWindowTitle.includes('taking')) {
+      router.push(`/${user}/testPage/${selectedTestId}`);
+    }
+  }, [isModalWindowTitle, dispatch, selectedTestId, currentPage, router, user]);
+
+  useEffect(() => {
+    const fetchTests = async () => {
+      const response = await dispatch(
+        getAllTestsThunk({
+          page: currentPage,
+          per: 5,
+          search: '',
+          sort: 'created_at_desc',
+        })
+      );
+      if (response.payload?.meta?.total_pages) {
+        setTotalPages(response.payload.meta.total_pages);
+      }
+    };
+    fetchTests();
+  }, [currentPage, dispatch]);
+
   const pathRouteTakeTests = router.pathname === '/admin/takeTests';
 
   return (
     <div className={s.container}>
       <h2 className={s.title}> Take Test</h2>
+      {loading && (
+        <>
+          <Loader />
+        </>
+      )}
       {isSearching && <div>Searching ...</div>}
       {!isSearching &&
         results.map(test => {
@@ -110,8 +169,13 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                       setShow(prevValue => !prevValue);
                       setSelectedTestId(test.id);
                     }}
-                    title="Show answers"
+                    title="Show questions"
                   />
+                )}
+                {deleteLoading && selectedTestId === test.id && (
+                  <>
+                    <Loader />
+                  </>
                 )}
               </div>
               {show && (
@@ -127,6 +191,21 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
             </div>
           );
         })}
+      {totalPages > 1 && (
+        <div className={s.pages}>
+          <ChangeButton
+            title={'Previous'}
+            onClick={prevPage}
+            disabled={currentPage === 1}
+          />
+          <span>Page {currentPage}</span>
+          <ChangeButton
+            title={'Next'}
+            onClick={loadMoreTests}
+            disabled={currentPage >= totalPages}
+          />
+        </div>
+      )}
       <ModalWindow
         isModalWindowOpen={isModalWindowOpen}
         setIsModalWindowOpen={setIsModalWindowOpen}

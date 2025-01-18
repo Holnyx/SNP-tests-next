@@ -43,12 +43,9 @@ const authSlice = createSlice({
       .addCase(signupThunk.rejected, (state, action) => {
         state.isLoading = false;
         if (action.payload) {
-          // Используем action.payload для получения сообщения об ошибке
           state.errors.push(action.payload as string);
-          console.log('Ошибка:', action.payload);
         } else {
-          // Если action.payload отсутствует, используем action.error.message
-          state.errors.push(action.error.message || 'Неизвестная ошибка');
+          state.errors.push(action.error.message || 'Unknown error');
         }
       })
       .addCase(signinThunk.pending, state => {

@@ -9,11 +9,11 @@ import TakeTestsPage from '../TakeTestsPage/TakeTestsPage';
 import TestPage from '../TestPage/TestPage';
 import Sidebar from '@/components/commons/Sidebar/Sidebar';
 import Footer from '@/components/commons/Footer/Footer';
+import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 
 import { TestsItem } from '@/store/types';
 import { useDebounce } from '@/hooks/useDebounce';
 import { sortedTestsSelector, testSelector } from '@/store/selectors';
-import { getAllTestsThunk } from '@/thunk/testsThunk';
 import { AppDispatch } from '@/store';
 
 import s from './UserPage.module.sass';
@@ -83,20 +83,23 @@ const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest }) => {
     }
   }, [allTests]);
 
-  useEffect(() => {
-    dispatch(
-      getAllTestsThunk({
-        page: 1,
-        per: 10,
-        search: '',
-        sort: 'created_at_desc',
-      })
-    );
-  }, [dispatch]);
+  const pathRouteEdit = router.pathname.startsWith('/user/editTest');
+  const pathRouteCreate = router.pathname === '/user/createTests';
+  const pathRouteTestsList = router.pathname === '/user/takeTests';
+  const pathRouteTakeTest = router.pathname.startsWith('/user/testPage');
+  const headTitle = pathRouteEdit
+    ? 'Edit test'
+    : pathRouteCreate
+    ? 'Create test'
+    : pathRouteTakeTest
+    ? selectedTestItem.title
+    : pathRouteTestsList
+    ? 'Tests list'
+    : user;
 
   return (
     <>
-      <HeadComponent title={user} />
+      <HeadComponent title={headTitle} />
       <div className={s.background}>
         <Header
           showSidebar={setMenuOpen}
@@ -129,6 +132,7 @@ const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest }) => {
         />
         <Footer />
       </div>
+      <ErrorMessage />
     </>
   );
 };

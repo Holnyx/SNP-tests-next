@@ -8,6 +8,7 @@ type ChangeButtonItems = {
   onClick: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  disabled?: boolean;
 };
 
 const ChangeButton: FC<ChangeButtonItems> = ({
@@ -15,12 +16,13 @@ const ChangeButton: FC<ChangeButtonItems> = ({
   onClick,
   onMouseEnter,
   onMouseLeave,
+  disabled,
 }) => {
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
-      onClick()
+      onClick();
     }
-  }
+  };
   const notFoundStyle = { [s['return-home']]: title.includes('Return home') };
   return (
     <button
@@ -36,6 +38,7 @@ const ChangeButton: FC<ChangeButtonItems> = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onKeyDown={onKeyDown}
+      disabled={disabled}
     >
       {title}
     </button>

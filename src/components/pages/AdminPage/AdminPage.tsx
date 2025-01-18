@@ -10,11 +10,11 @@ import Footer from '@/components/commons/Footer/Footer';
 import CreateTests from '../CreateTests/CreateTests';
 import TakeTestsPage from '../TakeTestsPage/TakeTestsPage';
 import TestPage from '../TestPage/TestPage';
+import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { TestsItem } from '@/store/types';
 import { sortedTestsSelector, testSelector } from '@/store/selectors';
-import { getAllTestsThunk } from '@/thunk/testsThunk';
 import { AppDispatch } from '@/store';
 
 import s from './AdminPage.module.sass';
@@ -32,7 +32,6 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<TestsItem[]>([]);
-
   const [selectedTestItem, setSelectedTestItem] =
     useState<TestsItem>(selectedTest);
   const dispatch = useDispatch<AppDispatch>();
@@ -40,8 +39,6 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
   const filteredTestsByDate = useSelector(sortedTestsSelector);
-
-
 
   const editTest = useCallback(
     (testId: string) => {
@@ -100,21 +97,33 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
     }
   }, [allTests]);
 
-  useEffect(() => {
-    dispatch(
-      getAllTestsThunk({
-        page: 1,
-        per: 10,
-        search: '',
-        sort: 'created_at_desc',
-      })
-    );
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(
+  //     getAllTestsThunk({
+  //       page: currentPage,
+  //       per: 5,
+  //       search: '',
+  //       sort: 'created_at_desc',
+  //     })
+  //   );
+  // }, [currentPage, dispatch]);
 
-
+  const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
+  const pathRouteCreate = router.pathname === '/admin/createTests';
+  const pathRouteTestsList = router.pathname === '/admin/takeTests';
+  const pathRouteTakeTest = router.pathname.startsWith('/admin/testPage');
+  const headTitle = pathRouteEdit
+    ? 'Edit test'
+    : pathRouteCreate
+    ? 'Create test'
+    : pathRouteTakeTest
+    ? selectedTestItem.title
+    : pathRouteTestsList
+    ? 'Tests list'
+    : 'Admin';
   return (
     <>
-      <HeadComponent title={'Admin'} />
+      <HeadComponent title={headTitle} />
       <div
         className={s.background}
         onClick={() => {
@@ -161,6 +170,7 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
         />
         <Footer />
       </div>
+      <ErrorMessage />
     </>
   );
 };

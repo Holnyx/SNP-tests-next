@@ -28,12 +28,15 @@ export type TestsState = {
   errors: string[];
   sortOrder: FilteredTestsByDate;
   test: null;
+  loading: boolean
+  deleteLoading: boolean
 };
 
 export type QuestionState = {
   questionsList: QuestionItem[];
   answers: AnswerItem[];
   errors: string[];
+  loading: boolean
 };
 
 export type TestForAdd = {

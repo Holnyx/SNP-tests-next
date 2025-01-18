@@ -20,6 +20,8 @@ const initialState: TestsState = {
   errors: [],
   sortOrder: 'desc',
   test: null,
+  loading: false,
+  deleteLoading: false,
 };
 
 const testSlice = createSlice({
@@ -42,27 +44,34 @@ const testSlice = createSlice({
     builder
       .addCase(getAllTestsThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(
         getAllTestsThunk.fulfilled,
         (state, action: PayloadAction<{ tests: TestsItem[] }>) => {
           state.testsList = action.payload.tests;
+          state.loading = false;
         }
       )
       .addCase(getAllTestsThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(getTestByIdThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(getTestByIdThunk.fulfilled, (state, action) => {
         state.test = action.payload;
+        state.loading = false;
       })
       .addCase(getTestByIdThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(createTestThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(
         createTestThunk.fulfilled,
@@ -76,13 +85,16 @@ const testSlice = createSlice({
           const { createdTest, createdQuestions } = action.payload;
           state.testsList.push(createdTest);
           state.questionsList.push(...createdQuestions);
+          state.loading = false;
         }
       )
       .addCase(createTestThunk.rejected, (state, action) => {
+        state.loading = false;
         state.errors.push(action.payload as string);
       })
       .addCase(deleteTestThunk.pending, state => {
         state.errors = [];
+        state.deleteLoading = true;
       })
       .addCase(
         deleteTestThunk.fulfilled,
@@ -90,13 +102,16 @@ const testSlice = createSlice({
           state.testsList = state.testsList.filter(
             test => test.id !== action.payload
           );
+          state.deleteLoading = false;
         }
       )
       .addCase(deleteTestThunk.rejected, (state, action) => {
-        state.errors.push(action.payload as string);
+        action.payload && state.errors.push(action.payload as string);
+        state.deleteLoading = false;
       })
       .addCase(updateTestThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(
         updateTestThunk.fulfilled,
@@ -107,10 +122,12 @@ const testSlice = createSlice({
           if (index !== -1) {
             state.testsList[index] = action.payload;
           }
+          state.loading = false;
         }
       )
       .addCase(updateTestThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       });
   },
 });
