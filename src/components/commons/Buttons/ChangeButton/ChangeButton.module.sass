@@ -12,10 +12,15 @@
     box-sizing: border-box
     border: none
     border-radius: 50px
-    transition: 1s background ease,  1s color ease
+    transition: 1s background ease, 1s color ease
     cursor: pointer
     &:hover
         background: rgba(149, 255, 0, 0.175)
+
+    &:disabled
+        color: rgba(138, 138, 138, 0.365)
+        background:  rgba(0, 0, 0, 0.216)
+        cursor: default
 
 .delete-button
     color: $color-red

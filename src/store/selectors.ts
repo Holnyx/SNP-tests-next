@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
 import { AppRootStateItems } from '.';
-import { AnswerItem, QuestionItem, TestsItem } from './types';
+import { AnswerItem, QuestionItem } from './types';
 
 const testsSelector = (state: AppRootStateItems) => state.tests.testsList;
-
+const loadingsSelector = (state: AppRootStateItems) => state.tests.loading;
+const deleteLoadingsSelector = (state: AppRootStateItems) => state.tests.deleteLoading;
 const questionsSelector = (state: AppRootStateItems) => state.questions;
 const errorsSelector = (state: AppRootStateItems) => state.tests.errors;
 const authErrorsSelector = (state: AppRootStateItems) => state.auth.errors;
@@ -27,35 +28,9 @@ export const authErrorSelector = createSelector(
   authErrorsSelector,
   state => state
 );
+export const loadingSelector = createSelector(loadingsSelector, state => state);
+export const deleteLoadingSelector = createSelector(deleteLoadingsSelector, state => state);
 export const filterSelector = createSelector(sortOrderSelector, state => state);
-
-export const selectedTestSelector = createSelector(
-  [testSelector, (state, selectedTestId) => selectedTestId],
-  (allTests, selectedTestId) => {
-    return [...allTests].find(
-      (test: TestsItem) => String(test.id) === String(selectedTestId)
-    );
-  }
-);
-
-export const selectedQuestionSelector = createSelector(
-  [questionSelector, (state, selectedQuestionId) => selectedQuestionId],
-  (allQuestions, selectedQuestionId) => {
-    return allQuestions.questionsList.find(
-      (question: QuestionItem) =>
-        String(question.id) === String(selectedQuestionId)
-    );
-  }
-);
-
-// export const selectedAnswerSelector = createSelector(
-//   [answersSelector, (state, selectedAnswerId) => selectedAnswerId],
-//   (allAnswers, selectedAnswerId) => {
-//     return allAnswers.find(
-//       (answer: AnswerItem) => answer.id === selectedAnswerId
-//     );
-//   }
-// );
 
 export const sortedTestsSelector = createSelector(
   [testSelector, sortOrderSelector],

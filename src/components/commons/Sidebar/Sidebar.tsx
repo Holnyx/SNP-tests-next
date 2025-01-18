@@ -5,8 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 import ModalWindow from '../ModalWindow/ModalWindow';
-import { sidebarLinksState } from '@/components/state/sidebarLinksState';
 
+import { sidebarLinksState } from '@/components/state/sidebarLinksState';
 import { questionSelector } from '@/store/selectors';
 import { logoutThunk } from '@/thunk/testsThunk';
 import { AppDispatch } from '@/store';
@@ -32,7 +32,10 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
 
   const handleLinkClick = (href: string) => {
-    if (router.pathname === '/admin/createTests' && allQuestions.questionsList.length > 0) {
+    if (
+      router.pathname === '/admin/createTests' &&
+      allQuestions.questionsList.length > 0
+    ) {
       setNextHref(href);
       setIsModalWindowOpen(true);
     } else if (href === '/signIn') {
@@ -68,51 +71,53 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
   }, [router]);
 
   return (
-    <aside
-      className={cx(s.container, { [s.show]: menuOpen })}
-      onClick={e => e.stopPropagation()}
-    >
-      <ButtonBurgerMenu
-        menuOpen={menuOpen}
-        showSidebar={() => showSidebar(!menuOpen)}
-      />
-      <h3 className={s.title}>Test Management</h3>
-      <ul className={s.menu}>
-        {sidebarLinksState
-          .filter(
-            element => !(element.title === 'Create Tests' && user === 'user')
-          )
-          .map((element, i) => {
-            const href =
-              element.title !== 'Log Out'
-                ? `/${user}${element.href}`
-                : '/signIn';
+    <>
+      <aside
+        className={cx(s.container, { [s.show]: menuOpen })}
+        onClick={e => e.stopPropagation()}
+      >
+        <ButtonBurgerMenu
+          menuOpen={menuOpen}
+          showSidebar={() => showSidebar(!menuOpen)}
+        />
+        <h3 className={s.title}>Test Management</h3>
+        <ul className={s.menu}>
+          {sidebarLinksState
+            .filter(
+              element => !(element.title === 'Create Tests' && user === 'user')
+            )
+            .map((element, i) => {
+              const href =
+                element.title !== 'Log Out'
+                  ? `/${user}${element.href}`
+                  : '/signIn';
 
-            return (
-              <li key={i}>
-                <Link
-                  className={cx(s.link, {
-                    [s['log-out']]: element.title === 'Log Out',
-                  })}
-                  href={href}
-                  onClick={e => {
-                    e.preventDefault();
-                    handleLinkClick(href);
-                  }}
-                >
-                  {element.title}
-                </Link>
-              </li>
-            );
-          })}
-      </ul>
+              return (
+                <li key={i}>
+                  <Link
+                    className={cx(s.link, {
+                      [s['log-out']]: element.title === 'Log Out',
+                    })}
+                    href={href}
+                    onClick={e => {
+                      e.preventDefault();
+                      handleLinkClick(href);
+                    }}
+                  >
+                    {element.title}
+                  </Link>
+                </li>
+              );
+            })}
+        </ul>
+      </aside>
       <ModalWindow
         isModalWindowOpen={isModalWindowOpen}
         setIsModalWindowOpen={setIsModalWindowOpen}
         onConfirm={onConfirm}
         title={'Are you sure you want to leave without saving?'}
       />
-    </aside>
+    </>
   );
 };
 

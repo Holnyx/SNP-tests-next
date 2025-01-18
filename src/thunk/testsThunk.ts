@@ -1,25 +1,29 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import api from '@/api/api';
-import { AnswerItem, TestForAdd, TestsItem } from '@/store/types';
 import axios from 'axios';
+
+import api from '@/api/api';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { AnswerItem, TestForAdd, TestsItem } from '@/store/types';
 
 export const signupThunk = createAsyncThunk(
   'auth/signup',
-  async (userData: {
-    username: string;
-    password: string;
-    password_confirmation: string;
-    is_admin: boolean;
-  },{rejectWithValue}) => {
+  async (
+    userData: {
+      username: string;
+      password: string;
+      password_confirmation: string;
+      is_admin: boolean;
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await api.signup(userData);
       return response.data;
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
-        // Возвращаем ошибку от сервера
-        return rejectWithValue(error.response?.data.message || 'Registration error');
+        return rejectWithValue(
+          error.response?.data.message || 'Registration error'
+        );
       } else {
-        // Другие ошибки
         return rejectWithValue('Unknown error');
       }
     }
@@ -75,6 +79,7 @@ export const getAllTestsThunk = createAsyncThunk(
       per?: number;
       search?: string;
       sort?: string;
+      timestamp?: number;
     } = {},
     { rejectWithValue }
   ) => {
@@ -138,9 +143,11 @@ export const deleteTestThunk = createAsyncThunk(
     try {
       await api.deleteTest(testId);
       return testId;
-    } catch (error) {
-      console.error('Error deleting test:', error);
-      return rejectWithValue('Error deleting test');
+    } catch (error: any) {
+      console.error('Error in deleteTestThunk:', error);
+      return rejectWithValue(
+        error.response?.data?.message || 'Error deleting test'
+      );
     }
   }
 );
@@ -155,7 +162,7 @@ export const updateTestThunk = createAsyncThunk(
       const response = await api.updateTest(id, updatedTest);
       return response;
     } catch (error) {
-      console.error('Error updating test:', error);
+      console.error('Error in updateTestThunk:', error);
       return rejectWithValue('Error updating test');
     }
   }
@@ -168,7 +175,7 @@ export const getTestByIdThunk = createAsyncThunk(
       const response = await api.getTestById(id);
       return response.data;
     } catch (error) {
-      console.error('Error fetching test by id:', error);
+      console.error('Error in getTestByIdThunk:', error);
       return rejectWithValue('Error fetching test');
     }
   }
@@ -181,7 +188,7 @@ export const getQuestionsThunk = createAsyncThunk(
       const response = await api.getQuestions(testId);
       return response;
     } catch (error) {
-      console.error('Error fetching questions:', error);
+      console.error('Error in getQuestionsThunk:', error);
       return rejectWithValue('Error fetching questions');
     }
   }
@@ -208,6 +215,7 @@ export const createQuestionThunk = createAsyncThunk(
       const response = await api.createQuestion(testId, data);
       return response;
     } catch (error) {
+      console.error('Error in createQuestionThunk:', error);
       return rejectWithValue('Error creating question');
     }
   }
@@ -229,7 +237,8 @@ export const editQuestionThunk = createAsyncThunk(
       const response = await api.editQuestion(id, data);
       return response.data;
     } catch (error) {
-      return rejectWithValue('Unexpected error');
+      console.error('Error in editQuestionThunk:', error);
+      return rejectWithValue('Error editing question');
     }
   }
 );
@@ -241,8 +250,8 @@ export const deleteQuestionThunk = createAsyncThunk(
       await api.deleteQuestion(id);
       return id;
     } catch (error) {
-      console.error('Error deleting question:', error);
-      return rejectWithValue('Ошибка при удалении вопроса');
+      console.error('Error in deleteQuestionThunk:', error);
+      return rejectWithValue('Error deleting question');
     }
   }
 );
@@ -260,8 +269,8 @@ export const createAnswerThunk = createAsyncThunk(
       const response = await api.createAnswer(questionId, data);
       return response;
     } catch (error) {
-      console.error('Error creating answer:', error);
-      return rejectWithValue(error);
+      console.error('Error in createAnswerThunk:', error);
+      return rejectWithValue('Error creating answer');
     }
   }
 );
@@ -274,10 +283,10 @@ export const editAnswerThunk = createAsyncThunk(
   ) => {
     try {
       const response = await api.editAnswer(id, data);
-      return response; // Возвращаем обновленные данные
+      return response;
     } catch (error) {
-      console.error('Error editing answer:', error);
-      return rejectWithValue(error);
+      console.error('Error in editAnswerThunk:', error);
+      return rejectWithValue('Error editing answer');
     }
   }
 );
@@ -289,8 +298,8 @@ export const deleteAnswerThunk = createAsyncThunk(
       await api.deleteAnswer(id);
       return id;
     } catch (error) {
-      console.error('Error deleting answer:', error);
-      return rejectWithValue(error);
+      console.error('Error in deleteAnswerThunk:', error);
+      return rejectWithValue('Error deleting answer');
     }
   }
 );
@@ -305,8 +314,8 @@ export const moveAnswerThunk = createAsyncThunk(
       const response = await api.moveAnswer(id, position);
       return response;
     } catch (error) {
-      console.error('Error moving answer:', error);
-      return rejectWithValue(error);
+      console.error('Error in moveAnswerThunk:', error);
+      return rejectWithValue('Error moving answer');
     }
   }
 );

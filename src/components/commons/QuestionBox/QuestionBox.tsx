@@ -81,7 +81,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const checkAnswerValue =
     inputValue.length >= 1 &&
     inputValue.trim() !== '' &&
-    inputValue.length <= 19;
+    inputValue.length <= 30;
 
   const cleanInputs = useCallback(() => {
     setInputValue('');
@@ -238,48 +238,47 @@ const QuestionBox: FC<QuestionBoxItems> = ({
           {question.question_type}
         </span>
       )}
-      <div key={question.id}>
-        {!takeTest &&
-          (!isHidden ? (
-            <h3
-              className={s.title}
-              onDoubleClick={changeQuestionTitleHandler}
-            >
-              {questionTitleValue}
-            </h3>
-          ) : (
-            <Input
-              title={''}
-              type={'text'}
-              name={''}
-              leftCheck={false}
-              value={questionTitleValue}
-              setInputValue={setQuestionTitleValue}
-              onKeyDown={keyDownHandler}
-              onChange={changeTitleHandler}
-              onBlur={changeQuestionTitleHandler}
-              autoFocus={true}
+      {!takeTest &&
+        (!isHidden ? (
+          <h3
+            className={s.title}
+            onDoubleClick={changeQuestionTitleHandler}
+          >
+            {questionTitleValue}
+          </h3>
+        ) : (
+          <Input
+            title={''}
+            type={'text'}
+            name={''}
+            leftCheck={false}
+            value={questionTitleValue}
+            setInputValue={setQuestionTitleValue}
+            onKeyDown={keyDownHandler}
+            onChange={changeTitleHandler}
+            onBlur={changeQuestionTitleHandler}
+            autoFocus={true}
+            isHidden={isHidden}
+          />
+        ))}
+      <Reorder.Group
+        values={answerState}
+        onReorder={takeTest ? () => {} : handleReorder}
+        className={cx(s['answer-list'], { [s['margin-top']]: isHidden })}
+      >
+        {answerState.map(answer => {
+          return (
+            <AnswerBox
+              key={answer.id}
+              question={question}
+              takeTest={takeTest}
+              onAnswerSelect={onAnswerSelect}
+              answer={answer}
+              removeAnswerHandler={removeAnswerHandler}
             />
-          ))}
-        <Reorder.Group
-          values={answerState}
-          onReorder={takeTest ? () => {} : handleReorder}
-          className={cx(s['answer-list'], { [s['margin-top']]: isHidden })}
-        >
-          {answerState.map(answer => {
-            return (
-              <AnswerBox
-                key={answer.id}
-                question={question}
-                takeTest={takeTest}
-                onAnswerSelect={onAnswerSelect}
-                answer={answer}
-                removeAnswerHandler={removeAnswerHandler}
-              />
-            );
-          })}
-        </Reorder.Group>
-      </div>
+          );
+        })}
+      </Reorder.Group>
       {question && answerOption && (
         <div className={s['test-title']}>
           <Input

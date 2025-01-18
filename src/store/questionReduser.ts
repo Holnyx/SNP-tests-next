@@ -10,10 +10,12 @@ import {
   getQuestionsThunk,
   moveAnswerThunk,
 } from '@/thunk/testsThunk';
+
 const initialState: QuestionState = {
   questionsList: [],
   answers: [],
   errors: [],
+  loading: false,
 };
 
 const questionSlice = createSlice({
@@ -69,24 +71,31 @@ const questionSlice = createSlice({
     builder
       .addCase(getQuestionsThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(getQuestionsThunk.fulfilled, (state, action) => {
         state.questionsList = action.payload;
+        state.loading = false;
       })
       .addCase(getQuestionsThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(createQuestionThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(createQuestionThunk.fulfilled, (state, action) => {
         state.questionsList.push(action.payload);
+        state.loading = false;
       })
       .addCase(createQuestionThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(editQuestionThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(editQuestionThunk.fulfilled, (state, action) => {
         const index = state.questionsList.findIndex(
@@ -95,62 +104,79 @@ const questionSlice = createSlice({
         if (index !== -1) {
           state.questionsList[index] = action.payload;
         }
+        state.loading = false;
       })
       .addCase(editQuestionThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(deleteQuestionThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(deleteQuestionThunk.fulfilled, (state, action) => {
         state.questionsList = state.questionsList.filter(
           q => q.id !== action.payload
         );
+        state.loading = false;
       })
       .addCase(deleteQuestionThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(createAnswerThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(createAnswerThunk.fulfilled, (state, action) => {
         state.answers.push(action.payload);
+        state.loading = false;
       })
       .addCase(createAnswerThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(editAnswerThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(editAnswerThunk.fulfilled, (state, action) => {
         const index = state.answers.findIndex(a => a.id === action.payload.id);
         if (index !== -1) {
           state.answers[index] = action.payload;
         }
+        state.loading = false;
       })
       .addCase(editAnswerThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(deleteAnswerThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(deleteAnswerThunk.fulfilled, (state, action) => {
         state.answers = state.answers.filter(a => a.id !== action.payload);
+        state.loading = false;
       })
       .addCase(deleteAnswerThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       })
       .addCase(moveAnswerThunk.pending, state => {
         state.errors = [];
+        state.loading = true;
       })
       .addCase(moveAnswerThunk.fulfilled, (state, action) => {
         const index = state.answers.findIndex(a => a.id === action.payload.id);
         if (index !== -1) {
           state.answers[index] = action.payload;
         }
+        state.loading = false;
       })
       .addCase(moveAnswerThunk.rejected, (state, action) => {
         state.errors.push(action.payload as string);
+        state.loading = false;
       });
   },
 });
