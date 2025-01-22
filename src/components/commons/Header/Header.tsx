@@ -1,6 +1,7 @@
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
+import { useDispatch, useSelector } from 'react-redux';
 
 import sortIcon from '/public/img/sort-icon.svg?url';
 import adminIcon from '/public/img/admin-icon.svg?url';
@@ -9,20 +10,25 @@ import SearchInput from '../SearchInput/SearchInput';
 import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 
 import { useActionWithPayload } from '@/hooks/useAction';
-import { filteredTestsByDate, setSearchQuery } from '@/store/testReduser';
+import { filteredTestsByDate, setSearchQuery } from '@/store/testReducer';
+import { filterSelector } from '@/store/selectors';
+import { FilteredTestsByDate } from '@/store/types';
+import { useDebounce } from '@/hooks/useDebounce';
+import { AppDispatch } from '@/store';
+import { getAllTestsThunk } from '@/thunk/testsThunk';
 
 import s from './Header.module.sass';
 import cx from 'classnames';
-import { useSelector } from 'react-redux';
-import { filterSelector, testSelector } from '@/store/selectors';
-import { FilteredTestsByDate } from '@/store/types';
 
 type HeaderItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   menuOpen: boolean;
   name?: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-  defaultSearchValue: string;
+  searchTerm: string;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  currentPage: number;
+  pathRouteTestsList: boolean;
 };
 
 const Header: FC<HeaderItems> = ({
@@ -30,47 +36,55 @@ const Header: FC<HeaderItems> = ({
   menuOpen,
   name,
   setSearchTerm,
-  defaultSearchValue,
+  searchTerm,
+  setCurrentPage,
+  currentPage,
+  pathRouteTestsList,
 }) => {
-  const [onClickSort, setOnClickSort] = useState(false);
-
   const router = useRouter();
-  const test = useSelector(filterSelector);
-  const setSearchQueryAction = useActionWithPayload(setSearchQuery);
+  const dispatch = useDispatch<AppDispatch>();
 
+  const filterAction = useSelector(filterSelector);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const setSearchQueryAction = useActionWithPayload(setSearchQuery);
   const changeTestsFilterAction = useActionWithPayload(filteredTestsByDate);
 
   const changeTestsFilter = useCallback((filter: FilteredTestsByDate) => {
-    changeTestsFilterAction(filter);
-  }, []);
+    dispatch(
+      getAllTestsThunk({
+        page: currentPage,
+        per: 5,
+        search: debouncedSearchTerm,
+        sort: filter,
+      })
+    ).then(() => changeTestsFilterAction(filter));
+  }, [dispatch]);
 
   const handleSearchChange = useCallback(
     (query: string) => {
       if (query) {
         setSearchQueryAction(query);
-        router.push({
-          pathname: router.pathname,
-          query: { ...router.query, search: query },
-        });
+        router.replace(
+          {
+            pathname: router.pathname,
+            query: { ...router.query, search: query },
+          },
+          undefined,
+          { shallow: true }
+        );
       } else {
-        router.push(router.pathname);
+        router.replace(router.pathname, undefined, { shallow: true });
       }
     },
-    [router, setSearchQuery]
+    [router, setSearchQueryAction]
   );
 
   const handleSort = useCallback(() => {
-    const newSortOrder = test === 'asc' ? 'desc' : 'asc';
+    const newSortOrder =
+      filterAction === 'created_at_asc' ? 'created_at_desc' : 'created_at_asc';
     changeTestsFilter(newSortOrder);
-  }, [test, changeTestsFilter]);
-
-  const isTakeTests =
-    router.pathname === '/admin/takeTests' ||
-    router.pathname === '/user/takeTests';
-
-  useEffect(() => {
-    setOnClickSort(false);
-  }, [setOnClickSort]);
+    setCurrentPage(1);
+  }, [filterAction, changeTestsFilter]);
 
   return (
     <header className={s.container}>
@@ -78,17 +92,17 @@ const Header: FC<HeaderItems> = ({
         showSidebar={showSidebar}
         menuOpen={menuOpen}
       />
-      {isTakeTests ? (
+      {pathRouteTestsList ? (
         <div className={s['search']}>
           <SearchInput
             setSearchTerm={setSearchTerm}
-            defaultValue={defaultSearchValue}
+            defaultValue={debouncedSearchTerm}
             onSearchChange={handleSearchChange}
             clearSearchInput={setSearchQueryAction}
           />
           <Image
             className={cx(s['sort-icon'], {
-              [s['sort-icon-click']]: test === 'asc',
+              [s['sort-icon-click']]: filterAction === 'created_at_asc',
             })}
             src={sortIcon}
             alt={'adminIcon'}

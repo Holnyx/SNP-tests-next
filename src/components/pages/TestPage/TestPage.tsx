@@ -2,10 +2,11 @@ import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
-import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
+import QuestionsForTest from '@/components/commons/QuestionsForTest/QuestionsForTest';
 
-import { AnswerItem, TestsItem } from '@/store/types';
+import { AnswerItem, OnAnswerSelectArgs, TestsItem } from '@/store/types';
+import { useModal } from '@/hooks/useModal';
 
 import s from './TestPage.module.sass';
 import cx from 'classnames';
@@ -13,80 +14,65 @@ import cx from 'classnames';
 type TestPageItems = {
   user?: string;
   id?: string;
-  selectedTestItem: TestsItem;
+  selectedTestItem: TestsItem | null;
 };
 
 const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
-  const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
-  const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
   const [nextHref, setNextHref] = useState<string | null>(null);
-  const [questions, setQuestions] = useState(selectedTestItem.questions);
-  const [correctAnswers, setCorrectAnswers] = useState<AnswerItem[]>([]);
+  const [correctAnswers, setCorrectAnswers] = useState<
+    AnswerItem[] | undefined
+  >([]);
   const [userSelectedAnswers, setUserSelectedAnswers] = useState<AnswerItem[]>(
     []
   );
   const [completeTest, setCompleteTest] = useState(false);
   const [correctUserAnswers, setCorrectUserAnswers] = useState(0);
+  const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
 
   const router = useRouter();
-  const pathRouteTakeTest = router.pathname.startsWith(`/${user}/testPage`);
+  const pathRouteTakeTest = router.pathname.startsWith(`/${user}/test-page`);
 
   const onConfirm = useCallback(() => {
-    setIsModalWindowOpen(false);
+    closeModal();
     if (nextHref) {
-      router.push(nextHref);
+      router.replace(nextHref);
       setNextHref(null);
     }
-    if (isModalWindowTitle.includes('complete')) {
-      console.log(userSelectedAnswers);
-      
+    if (modalTitle.includes('complete')) {
       let correctUserAnswers = 0;
       userSelectedAnswers.forEach(userAnswer => {
-        const correctAnswer = correctAnswers.find(
+        const correctAnswer = correctAnswers?.find(
           answer => answer.id === userAnswer.id
         );
         if (correctAnswer) {
-          // For number answers
-          if (isNaN(Number(correctAnswer.text))) {
-            // For other answers
-            if (correctAnswer.id === userAnswer.id) {
-              correctUserAnswers++;
-            }
-          } else {
-            // For number answers check for have`value` in userAnswer
-            if ('value' in userAnswer) {
-              if (Number(correctAnswer.text) === (userAnswer as any).value) {
-                correctUserAnswers++;
-              }
-            }
+          if (
+            correctAnswer.is_right === userAnswer.is_right &&
+            !('value' in userAnswer)
+          ) {
+            correctUserAnswers++;
+          }
+          // For number answers check for have`value` in userAnswer
+          else if (
+            'value' in userAnswer &&
+            userAnswer.value === Number(correctAnswer.text)
+          ) {
+            correctUserAnswers++;
           }
         }
       });
       setCompleteTest(true);
       setCorrectUserAnswers(correctUserAnswers);
     }
-  }, [
-    nextHref,
-    router,
-    userSelectedAnswers,
-    correctAnswers,
-    isModalWindowTitle,
-  ]);
+  }, [nextHref, router, userSelectedAnswers, correctAnswers, modalTitle]);
 
-  const handleAnswerSelect = (
-    selectedAnswer: AnswerItem,
-    type: string,
-    inputNumberValue: number,
-    isChecked: boolean,
-    questionId: string
-  ) => {
+  const handleAnswerSelect = (args: OnAnswerSelectArgs) => {
     setUserSelectedAnswers(prevSelectedAnswers => {
-      if (type === 'number') {
+      if (args.type === 'number') {
         const isAnswerCorrect =
-          Number(selectedAnswer.text) === inputNumberValue;
+          Number(args.selectedAnswer.text) === args.inputNumberValue;
         const updatedAnswer = {
-          ...selectedAnswer,
-          value: inputNumberValue,
+          ...args.selectedAnswer,
+          value: args.inputNumberValue,
           isCorrect: isAnswerCorrect,
         };
 
@@ -97,74 +83,72 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
               answer.id === updatedAnswer.id ? updatedAnswer : answer
             )
           : [...prevSelectedAnswers, updatedAnswer];
-      } else if (type === 'multiple') {
+      } else if (args.type === 'multiple') {
         // For checkbox
-        if (isChecked) {
-          return [...prevSelectedAnswers, selectedAnswer];
+        if (args.isChecked) {
+          return [...prevSelectedAnswers, args.selectedAnswer];
         } else {
           return prevSelectedAnswers.filter(
-            answer => answer.id !== selectedAnswer.id
+            answer => answer.id !== args.selectedAnswer.id
           );
         }
-      } else if (type === 'single') {
+      } else if (args.type === 'single') {
         // For radio
         return [
           ...prevSelectedAnswers.filter(
-            answer => answer.questionId !== questionId
+            answer => answer.questionId !== args.questionId
           ),
-          { ...selectedAnswer, questionId },
+          { ...args.selectedAnswer, questionId: args.questionId },
         ];
       } else {
         // For other answers
         return prevSelectedAnswers.some(
-          answer => answer.id === selectedAnswer.id
+          answer => answer.id === args.selectedAnswer.id
         )
           ? prevSelectedAnswers
-          : [...prevSelectedAnswers, selectedAnswer];
+          : [...prevSelectedAnswers, args.selectedAnswer];
       }
     });
   };
+
   const handleLinkClick = useCallback(
     (href: string) => {
       if (!completeTest && pathRouteTakeTest) {
         setNextHref(href);
-        setIsModalWindowOpen(true);
+        openModal(
+          'Are you sure you want to leave the page without complete the test?'
+        );
       }
       if (completeTest && pathRouteTakeTest) {
-        router.push(href);
+        router.replace(href);
       }
     },
     [completeTest, pathRouteTakeTest]
   );
 
   const onClickHandlerCompleteTest = useCallback(() => {
-    setIsModalWindowTitle('Are you sure you want to complete the test?');
-    setIsModalWindowOpen(true);
-  }, [setIsModalWindowTitle, setIsModalWindowOpen]);
+    openModal('Are you sure you want to complete the test?');
+  }, [openModal]);
 
   useEffect(() => {
-    const correct = questions.flatMap(question =>
+    const correct = selectedTestItem?.questions.flatMap(question =>
       question.answers.filter(answer => answer.is_right)
     );
     setCorrectAnswers(correct);
-    setQuestions(selectedTestItem.questions);
-  }, [questions]);
+  }, [selectedTestItem?.questions]);
 
   return (
     <div className={s.container}>
-      <div className={s['test-title']}> {selectedTestItem.title}</div>
+      <div className={s['test-title']}> {selectedTestItem?.title}</div>
       {!completeTest &&
         selectedTestItem &&
         selectedTestItem.questions.map(test => {
           return (
             <div key={test.id}>
               <h2 className={s.title}>{test.title}</h2>
-              <QuestionBox
+              <QuestionsForTest
                 question={test}
                 takeTest={pathRouteTakeTest}
-                questionId={''}
-                removeQuestionHandler={() => {}}
-                questions={selectedTestItem.questions}
                 onAnswerSelect={handleAnswerSelect}
               />
             </div>
@@ -174,7 +158,7 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
         <>
           <div>Correct answers:</div>
           <div>
-            {correctUserAnswers} from {correctAnswers.length}
+            {correctUserAnswers} from {correctAnswers?.length}
           </div>
         </>
       )}
@@ -186,7 +170,7 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
             <ChangeButton
               title={'Go Back'}
               onClick={() => {
-                handleLinkClick(`/${user}/takeTests`);
+                handleLinkClick(`/${user}/take-tests`);
               }}
             />
             <ChangeButton
@@ -201,7 +185,7 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
             <ChangeButton
               title={'Go Back'}
               onClick={() => {
-                handleLinkClick(`/${user}/takeTests`);
+                handleLinkClick(`/${user}/take-tests`);
               }}
             />
             <ChangeButton
@@ -215,12 +199,10 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
       </div>
 
       <ModalWindow
-        isModalWindowOpen={isModalWindowOpen}
-        setIsModalWindowOpen={setIsModalWindowOpen}
+        isModalWindowOpen={isModalOpen}
         onConfirm={onConfirm}
-        title={
-          'Are you sure you want to leave the page without complete the test?'
-        }
+        title={modalTitle}
+        onClose={closeModal}
       />
     </div>
   );

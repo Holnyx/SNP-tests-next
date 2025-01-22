@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
 import { useActionWithPayload } from '@/hooks/useAction';
-import { clearError } from '@/store/testReduser';
+import { clearError } from '@/store/testReducer';
 import { removeError } from '@/store/authReducer';
 
 import s from './ErrorMessage.module.sass';

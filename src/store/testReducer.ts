@@ -18,7 +18,7 @@ const initialState: TestsState = {
   questionsList: [],
   searchQuery: '',
   errors: [],
-  sortOrder: 'desc',
+  sortOrder: 'created_at_desc',
   test: null,
   loading: false,
   deleteLoading: false,

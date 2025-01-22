@@ -1,7 +1,13 @@
-/** @type {import('next').NextConfig} */
+const sassOptions = {
+  additionalData: `
+    @import "src/styles/color.sass"
+    @import "src/styles/mixins.sass"
+  `,
+  implementation: 'sass-embedded',
+};
 const nextConfig = {
   reactStrictMode: true,
-
+  sassOptions,
   async headers() {
     return [
       {
@@ -19,7 +25,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://interns-test-fe.snp.agency/api/:path*',
+        destination: `${process.env.NEXT_BASE_URL}/api/:path*`,
       },
     ];
   },
@@ -43,6 +49,26 @@ const nextConfig = {
       },
     );
     fileLoaderRule.exclude = /\.svg$/i;
+
+    // config.module.rules.push(
+    //   {
+    //     test: /\.scss$/,
+    //     use: ['style-loader', 'css-loader', 'sass-loader'],
+    //     include: path.resolve(__dirname, './'),
+    //   },
+    //   {
+    //     test: /\.s[ac]ss$/i,
+    //     use: {
+    //       loader: 'sass-loader',
+    //       options: {
+    //         sassOptions: {
+    //           additionalData: '@import "src/styles/color.sass"',
+    //         }
+    //       },
+    //     },
+    //   }
+    // );
+
 
     return config;
   },

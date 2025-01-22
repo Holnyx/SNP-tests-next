@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, memo, useState } from 'react';
+import React, { ChangeEvent, FC, memo, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -12,7 +12,7 @@ type InputItems = {
   type: string;
   name: string;
   leftCheck: boolean;
-  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  setInputValue: React.Dispatch<React.SetStateAction<string | undefined>>;
   value?: string;
   id?: string;
   error?: boolean;
@@ -39,6 +39,8 @@ const Input: FC<InputItems> = ({
   isHidden,
 }) => {
   const [isChecked, setIsChecked] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const router = useRouter();
   const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
     if (onChange) {
@@ -49,6 +51,28 @@ const Input: FC<InputItems> = ({
       setIsChecked(e.currentTarget.checked);
     }
   };
+
+  useEffect(() => {
+    setErrorMessage('');
+    if (
+      (!value && error) ||
+      (value && value.length < 3 && title.includes('Title'))
+    ) {
+      setErrorMessage('The title must contain more than 2 characters');
+    } else if (
+      (value && value.length < 1) ||
+      (value === '' && error && title.includes('Answer'))
+    ) {
+      setErrorMessage('The answer must contain from 1 to 30 characters');
+    } else if (
+      value &&
+      value.length > 30 &&
+      (title.includes('Title') || title.includes('Answer'))
+    ) {
+      setErrorMessage('The answer must not exceed 30 characters');
+    }
+  }, [value, error, title]);
+
   const changeStyle =
     type === 'checkbox'
       ? s['checkbox']
@@ -56,7 +80,7 @@ const Input: FC<InputItems> = ({
       ? s['radio']
       : s.input;
 
-  const changeStyleAdminCheckbox = router.pathname === '/signUp';
+  const changeStyleAdminCheckbox = router.pathname === '/sign-up';
 
   return (
     <div
@@ -87,26 +111,8 @@ const Input: FC<InputItems> = ({
             onKeyDown={onKeyDown}
             autoFocus={autoFocus}
           />
-          {(value && value.length < 1) ||
-          (value === '' && error && title.includes('Title')) ? (
-            <span className={cx(s['error-message'])}>
-              The title must contain more than 1 character
-            </span>
-          ) : (value && value.length < 1) ||
-            (value === '' && error && title.includes('Answer')) ? (
-            <span className={cx(s['error-message'])}>
-              The answer must contain from 1 to 30 characters
-            </span>
-          ) : value && value.length > 30 && title.includes('Title') ? (
-            <span className={cx(s['error-message'])}>
-              The answer must not exceed 30 characters
-            </span>
-          ) : value && value.length > 30 && title.includes('Answer') ? (
-            <span className={cx(s['error-message'])}>
-              The answer must not exceed 30 characters
-            </span>
-          ) : (
-            ''
+          {errorMessage && (
+            <span className={cx(s['error-message'])}>{errorMessage}</span>
           )}
         </>
       )}

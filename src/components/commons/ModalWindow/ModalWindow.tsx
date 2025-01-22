@@ -11,24 +11,23 @@ import cx from 'classnames';
 
 type ModalWindowItems = {
   isModalWindowOpen: boolean;
-  setIsModalWindowOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onConfirm: () => void;
   title: string;
+  onClose: () => void;
 };
 
 const ModalWindow: FC<ModalWindowItems> = ({
   isModalWindowOpen,
-  setIsModalWindowOpen,
   onConfirm,
   title,
+  onClose,
 }) => {
-  
   useBodyScrollLock(isModalWindowOpen); //???? this work but I don't mind what this right
 
   return (
     <div
       className={cx(s.container, { [s.active]: isModalWindowOpen })}
-      onClick={() => setIsModalWindowOpen(false)}
+      onClick={onClose}
     >
       <div
         className={s.window}
@@ -39,7 +38,7 @@ const ModalWindow: FC<ModalWindowItems> = ({
           <button
             className={s.closed}
             title="Cancel"
-            onClick={() => setIsModalWindowOpen(false)}
+            onClick={onClose}
           >
             <Image
               className={s['closed-img']}
@@ -50,13 +49,13 @@ const ModalWindow: FC<ModalWindowItems> = ({
           <div className={s['buttons_box']}>
             <ChangeButton
               title={'Cancel'}
-              onClick={() => setIsModalWindowOpen(false)}
+              onClick={onClose}
             />
             <ChangeButton
               title={'Yes'}
               onClick={() => {
                 onConfirm();
-                setIsModalWindowOpen(false);
+                onClose
               }}
             />
           </div>

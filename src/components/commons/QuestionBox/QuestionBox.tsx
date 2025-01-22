@@ -7,8 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useRouter } from 'next/router';
+import { useDispatch } from 'react-redux';
 import { Reorder } from 'motion/react';
 import { v1 } from 'uuid';
 
@@ -17,10 +16,10 @@ import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
 import Checkbox from '../Inputs/Checkbox/Checkbox';
 import AnswerBox from '../AnswerBox/AnswerBox';
 
-import { AnswerItem, QuestionItem } from '@/store/types';
+import { AnswerItem, OnAnswerSelectArgs, QuestionItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
-import { updateAnswersOrder } from '@/store/questionReduser';
-import { addAnswer, removeAnswer } from '@/store/questionReduser';
+import { updateAnswersOrder } from '@/store/questionReducer';
+import { addAnswer, removeAnswer } from '@/store/questionReducer';
 import { AppDispatch } from '@/store';
 import {
   createAnswerThunk,
@@ -37,14 +36,10 @@ type QuestionBoxItems = {
   takeTest: boolean;
   questionId: string;
   removeQuestionHandler: () => void;
-  questions: QuestionItem[];
-  onAnswerSelect: (
-    selectedAnswer: AnswerItem,
-    type: string,
-    inputNumberValue: number,
-    isChecked: boolean,
-    questionId: string
-  ) => void;
+  questions: QuestionItem[] | undefined;
+  onAnswerSelect: (args: OnAnswerSelectArgs) => void;
+  pathRouteEdit: boolean;
+  pathRouteCreate: boolean;
 };
 
 const QuestionBox: FC<QuestionBoxItems> = ({
@@ -52,11 +47,12 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   takeTest,
   questionId,
   removeQuestionHandler,
-  questions,
   onAnswerSelect,
+  pathRouteEdit,
+  pathRouteCreate,
 }) => {
   const [answerOption, setAnswerOption] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState<string | undefined>('');
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -64,21 +60,18 @@ const QuestionBox: FC<QuestionBoxItems> = ({
     question.answers
   );
   const [questionTitleValue, setQuestionTitleValue] = useState(question.title);
-  const [oldQuestionTitle, setOldQuestionTitle] = useState('');
-
+  const [oldQuestionTitle, setOldQuestionTitle] = useState<string | undefined>(
+    ''
+  );
   const previousOrderRef = useRef<AnswerItem[]>(question.answers);
 
-  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-
   const addAnswerAction = useActionWithPayload(addAnswer);
   const removeAnswerAction = useActionWithPayload(removeAnswer);
   const updateAnswersOrderAction = useActionWithPayload(updateAnswersOrder);
 
-  const pathRouteCreate = router.pathname === '/admin/createTests';
-  const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
-
   const checkAnswerValue =
+    inputValue &&
     inputValue.length >= 1 &&
     inputValue.trim() !== '' &&
     inputValue.length <= 30;
@@ -91,7 +84,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const saveClickHandler = useCallback(() => {
     const newAnswer: AnswerItem = {
       id: v1(),
-      text: inputValue,
+      text: String(inputValue),
       name: question.title,
       is_right: question.question_type === 'number' ? true : isChecked,
       questionId,
@@ -191,8 +184,21 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const changeQuestionTitleHandler = () => {
     setIsHidden(!isHidden);
     if (isHidden) {
-      questionTitleValue.trim() === '' &&
+      questionTitleValue &&
+        questionTitleValue.trim() === '' &&
         setQuestionTitleValue(questionTitleValue.trim());
+      if (pathRouteEdit) {
+        dispatch(
+          editQuestionThunk({
+            id: question.id,
+            data: {
+              title: String(questionTitleValue),
+              question_type: question.question_type,
+              answer: 0,
+            },
+          })
+        );
+      }
     }
     setOldQuestionTitle(questionTitleValue);
   };
@@ -207,7 +213,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
           editQuestionThunk({
             id: question.id,
             data: {
-              title: questionTitleValue,
+              title: String(questionTitleValue),
               question_type: question.question_type,
               answer: 0,
             },
@@ -275,6 +281,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
               onAnswerSelect={onAnswerSelect}
               answer={answer}
               removeAnswerHandler={removeAnswerHandler}
+              pathRouteEdit={pathRouteEdit}
             />
           );
         })}

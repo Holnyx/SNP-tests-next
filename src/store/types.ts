@@ -1,13 +1,13 @@
 export type TestsItem = {
   id: string;
   title: string;
-  created_at: string;
+  created_at: string | undefined;
   questions: QuestionItem[];
 };
 
 export type QuestionItem = {
   id: string;
-  title: string;
+  title: string | undefined;
   question_type: TestsOptionsForSelect;
   answers: AnswerItem[];
 };
@@ -15,7 +15,7 @@ export type QuestionItem = {
 export type AnswerItem = {
   id: string;
   text: string;
-  name: string;
+  name: string| undefined;
   is_right: boolean;
   questionId: string;
   checked?: boolean;
@@ -56,5 +56,14 @@ export type UserAnswer = {
   selectedAnswers: string[];
 };
 
-export type FilteredTestsByDate = 'desc' | 'asc';
+export type FilteredTestsByDate = 'created_at_desc' | 'created_at_asc';
 export type TestsOptionsForSelect = 'none' | 'single' | 'multiple' | 'number';
+
+
+export type OnAnswerSelectArgs = {
+  selectedAnswer: AnswerItem;
+  type: string;
+  inputNumberValue: number;
+  isChecked: boolean;
+  questionId: string;
+};

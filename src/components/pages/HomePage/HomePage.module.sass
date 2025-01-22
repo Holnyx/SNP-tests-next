@@ -1,0 +1,111 @@
+.home-page
+    position: relative
+    z-index: 2
+    display: inline-flex
+    flex-direction: column
+    justify-content: center
+    align-items: center
+    width: 100%
+    height: 100vh
+    color: #000
+    font-weight: 700
+    font-family: "Poppins"
+    background: #6d6d6d
+
+    &::before
+        content: ''
+        position: absolute
+        z-index: -3
+        top: 0
+        width: 100vw
+        height: 100%
+        background-image: url('/img/logIn-img.jpeg')
+        background-repeat: no-repeat
+        background-attachment: fixed
+        background-position: center center
+        background-size: cover
+        object-fit: cover
+        filter: blur(10px)
+        transition: 1s filter ease
+
+    &::after
+        content: ''
+        position: absolute
+        z-index: -1
+        top: 0
+        width: 100vw
+        height: 100%
+        background: rgba(27, 26, 26, 0.551)
+
+    .info
+        position: relative
+        display: flex
+        flex-direction: column
+        align-items: center
+        z-index: 2
+        color: #fff
+
+        .home-page__title
+            font-size: 60px
+            text-transform: uppercase
+            line-height: 66%
+            margin-bottom: 51px
+
+        .home-page__info
+            font-size: 36px
+            line-height: 164%
+            text-transform: uppercase
+
+            &:nth-last-child(2)
+                margin-bottom: 51px
+
+        .link-home
+            position: relative
+            top: 0
+            left: 0
+            z-index: 2
+            padding: 5px 30px
+            color: #fff
+            font-size: 48px
+            text-transform: uppercase
+            background: rgba(255, 255, 255, 0.1)
+            border-radius: 999px
+            box-shadow: inset -1px 2px 0 0 rgba(255, 255, 255, 0.25), 0 0 52px 0 rgba(0, 0, 0, 0.25)
+
+            &::before
+                position: absolute
+                z-index: -1
+                content: ''
+                top: 0
+                left: 0
+                width: 374px
+                height: 78px
+                background: rgba(255, 255, 255, 0.1)
+                border-radius: 999px
+                backdrop-filter: blur(100px)
+
+// .not-found-page.hover
+//     &::before
+//         filter: blur(5px) grayscale(0%)
+
+.button-box-signin
+    position: relative
+    display: flex
+    gap: 20px
+    width: 320px
+    font-size: 16px
+
+    .button
+        width: 100%
+        padding: 20px 10px
+        background-color: $color-white
+        cursor: pointer
+        transition: 0.5s background-color ease-in-out
+        font-family: Poppins
+        border: none
+        border-radius: 50px
+        color: $color-green
+
+        &:hover
+            background-color: $color-green
+            color: $color-white

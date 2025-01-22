@@ -1,6 +1,6 @@
 import { applyMiddleware, combineReducers, legacy_createStore } from 'redux';
-import questionReducer from './questionReduser';
-import testReducer from './testReduser';
+import questionReducer from './questionReducer';
+import testReducer from './testReducer';
 import { thunk } from 'redux-thunk';
 import authReducer from './authReducer';
 

@@ -18,11 +18,12 @@ import {
   TestsOptionsForSelect,
 } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
+import { useModal } from '@/hooks/useModal';
 import {
   addQuestion,
   removeAllQuestion,
   removeQuestion,
-} from '@/store/questionReduser';
+} from '@/store/questionReducer';
 import { loadingSelector, questionSelector } from '@/store/selectors';
 import {
   createQuestionThunk,
@@ -38,41 +39,61 @@ import cx from 'classnames';
 
 type CreateTestsItems = {
   id?: string;
-  selectedTestItem: TestsItem;
+  selectedTestItem: TestsItem | null;
+  pathRouteEdit: boolean;
+  pathRouteCreate: boolean;
+  pathRouteTakeTest: boolean;
 };
 
-const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
-  const [testDateValue, setTestDateValue] = useState(
-    selectedTestItem.created_at
+const CreateTests: FC<CreateTestsItems> = ({
+  id,
+  selectedTestItem,
+  pathRouteEdit,
+  pathRouteCreate,
+  pathRouteTakeTest,
+}) => {
+  const [testDateValue, setTestDateValue] = useState<string | undefined>(
+    selectedTestItem?.created_at
   );
-  const [testTitleValue, setTestTitleValue] = useState(selectedTestItem.title);
-  const [inputValue, setInputValue] = useState('');
-  const [questions, setQuestions] = useState(selectedTestItem.questions);
+  const [testTitleValue, setTestTitleValue] = useState<string | undefined>(
+    selectedTestItem?.title
+  );
+  const [inputValue, setInputValue] = useState<string | undefined>('');
+  const [questions, setQuestions] = useState<QuestionItem[] | undefined>(
+    selectedTestItem?.questions
+  );
   const [select, setSelect] = useState('Select question type');
   const [selectType, setSelectType] = useState('none');
-  const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
-  const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
   const [error, setError] = useState(false);
   const [errorList, setErrorList] = useState(false);
   const [errorTestTitle, setErrorTestTitle] = useState(false);
+  const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+
+  const allQuestions = useSelector(questionSelector);
+  const loading = useSelector(loadingSelector);
 
   const removeQuestionAction = useActionWithPayload(removeQuestion);
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
   const addQuestionAction = useActionWithPayload(addQuestion);
 
-  const allQuestions = useSelector(questionSelector);
-  const loading = useSelector(loadingSelector);
-
   const checkTestTitleValue =
-    testTitleValue.length >= 3 && testTitleValue.trim() !== '';
+    testTitleValue &&
+    testTitleValue.length >= 3 &&
+    testTitleValue.trim() !== '';
+
   const checkQuestionValue =
-    inputValue.length >= 3 && inputValue.trim() !== '' && selectType !== 'none';
+    inputValue &&
+    inputValue.length >= 3 &&
+    inputValue.trim() !== '' &&
+    selectType !== 'none';
+
   const isQuestionListValid =
     allQuestions.questionsList.length >= 2 ||
-    selectedTestItem.questions.length >= 2;
+    (selectedTestItem && selectedTestItem.questions.length >= 2);
+
   const hasAnswer = allQuestions.questionsList.every(question => {
     const hasEnoughAnswers =
       question.question_type === 'number'
@@ -82,10 +103,6 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     return hasEnoughAnswers && hasCorrectAnswer;
   });
 
-  const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
-  const pathRouteCreate = router.pathname === '/admin/createTests';
-  const pathRouteTakeTest = router.pathname.startsWith('/admin/testPage');
-
   const cleanInputs = useCallback(() => {
     setInputValue('');
     setSelectType('none');
@@ -93,17 +110,18 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   }, []);
 
   const onClickHandlerDeleteTest = useCallback(() => {
-    setIsModalWindowTitle('Are you sure you want to delete the test?');
-    setIsModalWindowOpen(true);
-  }, [setIsModalWindowTitle, setIsModalWindowOpen]);
+    openModal('Are you sure you want to delete the test?');
+  }, [openModal]);
 
   const deleteTest = useCallback(() => {
-    dispatch(deleteTestThunk(String(id)));
+    if (!pathRouteCreate) {
+      dispatch(deleteTestThunk(String(id)));
+    }
     cleanInputs();
     setTestTitleValue('');
     setErrorTestTitle(false);
     removeAllQuestionAction();
-    router.push('/admin/takeTests');
+    router.replace('/admin/take-tests');
   }, [dispatch, id]);
 
   const saveQuestionClickHandler = useCallback(() => {
@@ -132,7 +150,9 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
             question_type: selectType as TestsOptionsForSelect,
             answers: [],
           };
-          setQuestions(prevQuestions => [newQuestion, ...prevQuestions]);
+          setQuestions(
+            prevQuestions => prevQuestions && [newQuestion, ...prevQuestions]
+          );
           cleanInputs();
           setError(false);
         });
@@ -153,7 +173,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
       } else {
         dispatch(deleteQuestionThunk(questionId)).then(() => {
           setQuestions(prevState =>
-            prevState.filter(question => question.id !== questionId)
+            prevState?.filter(question => question.id !== questionId)
           );
         });
       }
@@ -162,27 +182,30 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   );
 
   const onClickHandlerSaveTest = useCallback(() => {
-    if (!checkTestTitleValue || !isQuestionListValid) {
+    if (!checkTestTitleValue || !isQuestionListValid || !testTitleValue) {
       setErrorTestTitle(true);
       setErrorList(true);
     } else {
       setErrorTestTitle(false);
       setErrorList(false);
     }
-    if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
-      setIsModalWindowOpen(true);
-      setIsModalWindowTitle('Are you sure you want to save the test?');
+    if (
+      checkTestTitleValue &&
+      isQuestionListValid &&
+      hasAnswer &&
+      testTitleValue
+    ) {
+      openModal('Are you sure you want to save the test?');
     }
-  }, [
-    checkTestTitleValue,
-    isQuestionListValid,
-    hasAnswer,
-    setIsModalWindowOpen,
-    setIsModalWindowTitle,
-  ]);
+  }, [checkTestTitleValue, isQuestionListValid, hasAnswer, openModal]);
 
   const createTest = useCallback(async () => {
-    if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
+    if (
+      checkTestTitleValue &&
+      isQuestionListValid &&
+      hasAnswer &&
+      testTitleValue
+    ) {
       const answersData = allQuestions.questionsList.map(question => ({
         questionId: question.id,
         answers: question.answers || [],
@@ -200,7 +223,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
       setTestTitleValue('');
       setErrorTestTitle(false);
       dispatch(removeAllQuestion());
-      router.push('/admin/takeTests');
+      router.replace('/admin/take-tests');
     }
   }, [
     dispatch,
@@ -212,14 +235,21 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   ]);
 
   const saveChange = useCallback(() => {
-    if (checkTestTitleValue && isQuestionListValid && hasAnswer) {
+    if (
+      checkTestTitleValue &&
+      isQuestionListValid &&
+      hasAnswer &&
+      testTitleValue
+    ) {
       if (selectedTestItem) {
         const updatedTitle =
           testTitleValue !== '' ? testTitleValue : selectedTestItem.title;
         const updatedDate =
           testDateValue !== '' ? testDateValue : selectedTestItem.created_at;
         const updateQuestions =
-          questions.length >= 2 ? questions : selectedTestItem.questions;
+          questions && questions.length >= 2
+            ? questions
+            : selectedTestItem.questions;
 
         dispatch(
           updateTestThunk({
@@ -232,7 +262,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
             },
           })
         );
-        router.push('/admin/takeTests');
+        router.replace('/admin/take-tests');
       }
     }
   }, [
@@ -246,24 +276,19 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   ]);
 
   const onConfirm = useCallback(() => {
-    if (isModalWindowTitle.includes('save')) {
+    if (modalTitle.includes('save')) {
       if (pathRouteCreate) {
         createTest();
       } else if (pathRouteEdit) {
         saveChange();
       }
-    } else if (isModalWindowTitle.includes('delete')) {
+    } else if (modalTitle.includes('delete')) {
       deleteTest();
-    } else if (isModalWindowTitle.includes('cancel')) {
-      router.push('/admin/takeTests');
+    } else if (modalTitle.includes('cancel')) {
+      router.replace('/admin/take-tests');
     }
-  }, [
-    isModalWindowTitle,
-    pathRouteCreate,
-    pathRouteEdit,
-    createTest,
-    saveChange,
-  ]);
+    closeModal();
+  }, [modalTitle, pathRouteCreate, pathRouteEdit, createTest, saveChange]);
 
   useEffect(() => {
     if (allQuestions.questionsList.length >= 2) {
@@ -334,7 +359,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
               />
             </div>
             {pathRouteEdit && selectedTestItem
-              ? questions.map(q => {
+              ? questions?.map(q => {
                   return (
                     <QuestionBox
                       key={q.id}
@@ -344,6 +369,8 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                       removeQuestionHandler={() => removeQuestionHandler(q.id)}
                       questions={selectedTestItem.questions}
                       onAnswerSelect={() => {}}
+                      pathRouteEdit={pathRouteEdit}
+                      pathRouteCreate={pathRouteCreate}
                     />
                   );
                 })
@@ -356,9 +383,11 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                     removeQuestionHandler={() => removeQuestionHandler(q.id)}
                     questions={questions}
                     onAnswerSelect={() => {}}
+                    pathRouteEdit={pathRouteEdit}
+                    pathRouteCreate={pathRouteCreate}
                   />
                 ))}
-            {errorList && (
+            {errorList && !isQuestionListValid && (
               <span className={cx(s['error-message'])}>
                 The list of questions should be at least two
               </span>
@@ -377,10 +406,10 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
         )}
       </div>
       <ModalWindow
-        isModalWindowOpen={isModalWindowOpen}
-        setIsModalWindowOpen={setIsModalWindowOpen}
+        isModalWindowOpen={isModalOpen}
+        onClose={closeModal}
         onConfirm={onConfirm}
-        title={isModalWindowTitle}
+        title={modalTitle}
       />
     </div>
   );

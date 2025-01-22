@@ -1,13 +1,14 @@
 import React, { ChangeEvent, FC, memo, useCallback, useState } from 'react';
 import { Reorder } from 'motion/react';
-import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
+import Image from 'next/image';
 
 import Input from '../Inputs/Input/Input';
 import Checkbox from '../Inputs/Checkbox/Checkbox';
 import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
+import dotsIcon from '/public/img/dots.svg?url';
 
-import { AnswerItem, QuestionItem } from '@/store/types';
+import { AnswerItem, OnAnswerSelectArgs, QuestionItem } from '@/store/types';
 import { AppDispatch } from '@/store';
 import { editAnswerThunk } from '@/thunk/testsThunk';
 
@@ -17,15 +18,10 @@ import cx from 'classnames';
 type AnswerBoxItems = {
   question: QuestionItem;
   takeTest: boolean;
-  onAnswerSelect: (
-    selectedAnswer: AnswerItem,
-    type: string,
-    inputNumberValue: number,
-    isChecked: boolean,
-    questionId: string
-  ) => void;
+  onAnswerSelect: (args: OnAnswerSelectArgs) => void;
   answer: AnswerItem;
-  removeAnswerHandler: (questionId: string, answerId: string) => void;
+  removeAnswerHandler?: (questionId: string, answerId: string) => void;
+  pathRouteEdit: boolean;
 };
 
 const AnswerBox: FC<AnswerBoxItems> = ({
@@ -34,14 +30,15 @@ const AnswerBox: FC<AnswerBoxItems> = ({
   onAnswerSelect,
   answer,
   removeAnswerHandler,
+  pathRouteEdit,
 }) => {
-  const [answerTitleValue, setAnswerTitleValue] = useState(answer.text);
+  const [answerTitleValue, setAnswerTitleValue] = useState<string | undefined>(
+    answer.text
+  );
   const [oldAnswerTitle, setOldAnswerTitle] = useState('');
   const [isHiddenInputAnswer, setIsHiddenInputAnswer] = useState(false);
 
-  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
 
   const cancelChangeAnswerTitle = () => {
     setIsHiddenInputAnswer(!isHiddenInputAnswer);
@@ -50,11 +47,24 @@ const AnswerBox: FC<AnswerBoxItems> = ({
 
   const changeAnswerTitleHandler = () => {
     setIsHiddenInputAnswer(!isHiddenInputAnswer);
-    if (isHiddenInputAnswer) {
-      answerTitleValue.trim() === '' &&
-        setAnswerTitleValue(answerTitleValue.trim());
+    if (answerTitleValue) {
+      if (isHiddenInputAnswer) {
+        answerTitleValue.trim() === '' &&
+          setAnswerTitleValue(answerTitleValue.trim());
+        if (pathRouteEdit) {
+          dispatch(
+            editAnswerThunk({
+              id: answer.id,
+              data: {
+                text: String(answerTitleValue),
+                is_right: answer.is_right,
+              },
+            })
+          );
+        }
+      }
+      setOldAnswerTitle(answerTitleValue);
     }
-    setOldAnswerTitle(answerTitleValue);
   };
 
   const keyDownAnswerHandler = (event: React.KeyboardEvent) => {
@@ -66,7 +76,7 @@ const AnswerBox: FC<AnswerBoxItems> = ({
         dispatch(
           editAnswerThunk({
             id: answer.id,
-            data: { text: answerTitleValue, is_right: answer.is_right },
+            data: { text: String(answerTitleValue), is_right: answer.is_right },
           })
         );
       }
@@ -95,7 +105,9 @@ const AnswerBox: FC<AnswerBoxItems> = ({
           id={answer.id}
           questionId={question.id}
           onAnswerSelect={onAnswerSelect}
-          answer={answer} setIsChecked={()=>{}}        />
+          answer={answer}
+          setIsChecked={() => {}}
+        />
       )}
       {!takeTest &&
         (!isHiddenInputAnswer ? (
@@ -118,10 +130,19 @@ const AnswerBox: FC<AnswerBoxItems> = ({
         ))}
       {!takeTest && (
         <DeleteButton
-          onClick={() => removeAnswerHandler(question.id, answer.id)}
+          onClick={() =>
+            removeAnswerHandler && removeAnswerHandler(question.id, answer.id)
+          }
         />
       )}
       {!takeTest && answer.is_right && <div className={s.true}>True</div>}
+      {!takeTest && (
+        <Image
+          className={s['dots-icon']}
+          alt={'dots'}
+          src={dotsIcon}
+        />
+      )}
     </Reorder.Item>
   );
 };

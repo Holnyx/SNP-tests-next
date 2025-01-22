@@ -3,7 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 const api: AxiosInstance = axios.create({
   baseURL: '/api/v1/',
   headers: {
-    'scope-key': 'ey9NVu',
+    'scope-key': process.env.NEXT_PUBLIC_SCOPE_KEY,
   },
 });
 

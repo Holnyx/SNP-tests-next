@@ -1,10 +1,10 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { setCookie } from 'cookies-next';
 
 import Header from '@/components/commons/Header/Header';
-import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
+import SeoTags from '@/components/commons/SeoTags/SeoTags';
 import Sidebar from '@/components/commons/Sidebar/Sidebar';
 import Footer from '@/components/commons/Footer/Footer';
 import CreateTests from '../CreateTests/CreateTests';
@@ -15,26 +15,36 @@ import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 import { useDebounce } from '@/hooks/useDebounce';
 import { TestsItem } from '@/store/types';
 import { sortedTestsSelector, testSelector } from '@/store/selectors';
-import { AppDispatch } from '@/store';
 
-import s from './AdminPage.module.sass';
+import s from './TestsListPage.module.sass';
 import cx from 'classnames';
 
-type AdminPageItems = {
-  admin?: string;
+type TestsListPageItems = {
+  user?: string;
   id?: string;
   search: string;
-  selectedTest: TestsItem;
+  selectedTest: TestsItem | null;
+  username: string;
+  role: boolean;
 };
 
-const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
+const TestsListPage: FC<TestsListPageItems> = ({
+  user,
+  id,
+  search,
+  selectedTest,
+  username,
+  role,
+}) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<TestsItem[]>([]);
-  const [selectedTestItem, setSelectedTestItem] =
-    useState<TestsItem>(selectedTest);
-  const dispatch = useDispatch<AppDispatch>();
+  const [selectedTestItem, setSelectedTestItem] = useState<TestsItem | null>(
+    selectedTest
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
@@ -97,33 +107,35 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
     }
   }, [allTests]);
 
-  // useEffect(() => {
-  //   dispatch(
-  //     getAllTestsThunk({
-  //       page: currentPage,
-  //       per: 5,
-  //       search: '',
-  //       sort: 'created_at_desc',
-  //     })
-  //   );
-  // }, [currentPage, dispatch]);
+  const userRole = role === true ? 'admin' : 'user';
+  const pathRouteEdit = router.pathname.startsWith(`/${userRole}/edit-test`);
+  const pathRouteCreate = router.pathname === `/${userRole}/create-tests`;
+  const pathRouteTestsList = router.pathname === `/${userRole}/take-tests`;
+  const pathRouteTakeTest = router.asPath.startsWith(
+    `/${userRole}/test-page/${id}`
+  );
 
-  const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
-  const pathRouteCreate = router.pathname === '/admin/createTests';
-  const pathRouteTestsList = router.pathname === '/admin/takeTests';
-  const pathRouteTakeTest = router.pathname.startsWith('/admin/testPage');
-  const headTitle = pathRouteEdit
-    ? 'Edit test'
-    : pathRouteCreate
-    ? 'Create test'
-    : pathRouteTakeTest
-    ? selectedTestItem.title
-    : pathRouteTestsList
-    ? 'Tests list'
-    : 'Admin';
+  const getPageType = () => {
+    if (pathRouteEdit) return 'edit';
+    if (pathRouteCreate) return 'create';
+    if (pathRouteTakeTest) return 'takeTest';
+    if (pathRouteTestsList) return 'testsList';
+    return 'default';
+  };
+
+  const headerTitleByType = {
+    edit: 'Edit test',
+    create: 'Create test',
+    takeTest: selectedTestItem?.title,
+    testsList: 'Tests list',
+    default: user,
+  };
+
+  const headTitle = headerTitleByType[getPageType()];
+
   return (
     <>
-      <HeadComponent title={headTitle} />
+      <SeoTags title={headTitle} />
       <div
         className={s.background}
         onClick={() => {
@@ -133,31 +145,43 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
         <Header
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
-          name={admin}
-          defaultSearchValue={debouncedSearchTerm}
+          name={username}
           setSearchTerm={setSearchTerm}
+          searchTerm={searchTerm}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          pathRouteTestsList={pathRouteTestsList}
         />
 
-        {(router.asPath.startsWith('/admin/createTests') ||
-          router.asPath.startsWith(`/admin/editTest/${id}`)) && (
-          <CreateTests
-            id={id}
-            selectedTestItem={selectedTestItem}
-          />
-        )}
+        {role &&
+          (router.asPath.startsWith('/admin/create-tests') ||
+            router.asPath.startsWith(`/admin/edit-test/${id}`)) && (
+            <CreateTests
+              id={id}
+              selectedTestItem={selectedTestItem}
+              pathRouteEdit={pathRouteEdit}
+              pathRouteCreate={pathRouteCreate}
+              pathRouteTakeTest={pathRouteTakeTest}
+            />
+          )}
 
-        {router.pathname === '/admin/takeTests' && (
+        {pathRouteTestsList && (
           <TakeTestsPage
-            user={admin}
+            user={user}
             editTest={editTest}
             search={search}
             isSearching={isSearching}
             results={results}
+            searchTerm={searchTerm}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            pathRouteTestsList={pathRouteTestsList}
+            role={role}
           />
         )}
-        {router.asPath.startsWith(`/${admin}/testPage/${id}`) && (
+        {pathRouteTakeTest && (
           <TestPage
-            user={admin}
+            user={user}
             id={id}
             selectedTestItem={selectedTestItem}
           />
@@ -166,7 +190,8 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
         <Sidebar
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
-          user={admin}
+          user={user}
+          pathRouteCreate={pathRouteCreate}
         />
         <Footer />
       </div>
@@ -175,4 +200,4 @@ const AdminPage: FC<AdminPageItems> = ({ admin, id, search, selectedTest }) => {
   );
 };
 
-export default memo(AdminPage);
+export default memo(TestsListPage);

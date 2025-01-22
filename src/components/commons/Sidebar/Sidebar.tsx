@@ -8,10 +8,11 @@ import ModalWindow from '../ModalWindow/ModalWindow';
 
 import { sidebarLinksState } from '@/components/state/sidebarLinksState';
 import { questionSelector } from '@/store/selectors';
-import { logoutThunk } from '@/thunk/testsThunk';
 import { AppDispatch } from '@/store';
 import { useActionWithPayload } from '@/hooks/useAction';
-import { removeAllQuestion } from '@/store/questionReduser';
+import { removeAllQuestion } from '@/store/questionReducer';
+import { logoutThunk } from '@/thunk/authThunk';
+import { useModal } from '@/hooks/useModal';
 
 import s from './Sidebar.module.sass';
 import cx from 'classnames';
@@ -20,11 +21,18 @@ type SidebarItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   menuOpen: boolean;
   user?: string;
+  pathRouteCreate?: boolean;
 };
 
-const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
-  const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
+const Sidebar: FC<SidebarItems> = ({
+  showSidebar,
+  menuOpen,
+  user,
+  pathRouteCreate,
+}) => {
   const [nextHref, setNextHref] = useState<string | null>(null);
+  const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
+
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -32,34 +40,37 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
 
   const handleLinkClick = (href: string) => {
-    if (
-      router.pathname === '/admin/createTests' &&
-      allQuestions.questionsList.length > 0
-    ) {
+    if (pathRouteCreate && allQuestions.questionsList.length > 0) {
       setNextHref(href);
-      setIsModalWindowOpen(true);
-    } else if (href === '/signIn') {
-      dispatch(logoutThunk());
-      router.replace(href);
+      openModal('Are you sure you want to leave without saving?');
+    } else if (href === '/sign-in') {
+      dispatch(logoutThunk())
+        .unwrap()
+        .then(() => {
+          router.replace(href);
+        })
+        .catch(error => {
+          console.error('Logout failed:', error);
+        });
     } else {
-      router.push(href);
+      router.replace(href);
     }
   };
 
   const onConfirm = useCallback(() => {
     removeAllQuestionAction();
-    setIsModalWindowOpen(false);
+    closeModal();
     if (nextHref) {
-      router.push(nextHref);
+      router.replace(nextHref);
       setNextHref(null);
     }
   }, [nextHref, router]);
 
   useEffect(() => {
     const handleBeforePopState = (state: { url: string }) => {
-      if (router.pathname === '/admin/createTests') {
+      if (pathRouteCreate) {
         setNextHref(state.url);
-        setIsModalWindowOpen(true);
+        openModal('Are you sure you want to leave without saving?');
         return false;
       }
       return true;
@@ -90,7 +101,7 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
               const href =
                 element.title !== 'Log Out'
                   ? `/${user}${element.href}`
-                  : '/signIn';
+                  : '/sign-in';
 
               return (
                 <li key={i}>
@@ -112,10 +123,10 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
         </ul>
       </aside>
       <ModalWindow
-        isModalWindowOpen={isModalWindowOpen}
-        setIsModalWindowOpen={setIsModalWindowOpen}
+        isModalWindowOpen={isModalOpen}
         onConfirm={onConfirm}
-        title={'Are you sure you want to leave without saving?'}
+        title={modalTitle}
+        onClose={() => closeModal()}
       />
     </>
   );

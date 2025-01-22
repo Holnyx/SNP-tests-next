@@ -12,7 +12,13 @@ import Loader from '@/components/commons/Loader/Loader';
 import { AppDispatch } from '@/store';
 import { TestsItem } from '@/store/types';
 import { deleteTestThunk, getAllTestsThunk } from '@/thunk/testsThunk';
-import { deleteLoadingSelector, loadingSelector } from '@/store/selectors';
+import {
+  deleteLoadingSelector,
+  filterSelector,
+  loadingSelector,
+} from '@/store/selectors';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useModal } from '@/hooks/useModal';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
@@ -23,27 +29,59 @@ type TakeTestsPageItems = {
   search: string;
   isSearching: boolean;
   results: TestsItem[];
+  searchTerm: string;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  currentPage: number;
+  pathRouteTestsList: boolean;
+  role: boolean
 };
 
 const TakeTestsPage: FC<TakeTestsPageItems> = ({
   user,
   editTest,
-  search,
   isSearching,
   results,
+  searchTerm,
+  setCurrentPage,
+  currentPage,
+  pathRouteTestsList,
+  role
 }) => {
   const [show, setShow] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState('');
-  const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
-  const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
   const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
+  const filterAction = useSelector(filterSelector);
   const loading = useSelector(loadingSelector);
   const deleteLoading = useSelector(deleteLoadingSelector);
+  const debouncedSearchValue = useDebounce(searchTerm, 500);
+
+  const onClickHandlerDeleteTest = useCallback(() => {
+    openModal('Are you sure you want to delete the test?');
+  }, [openModal]);
+
+  const onConfirm = useCallback(async () => {
+    if (modalTitle.includes('delete')) {
+      await dispatch(deleteTestThunk(selectedTestId));
+      const response = await dispatch(
+        getAllTestsThunk({
+          page: currentPage,
+          per: 5,
+          search: debouncedSearchValue,
+          sort: filterAction,
+        })
+      );
+      if (response.payload?.meta?.total_pages) {
+        setTotalPages(response.payload.meta.total_pages);
+      }
+    } else if (modalTitle.includes('taking')) {
+      router.replace(`/${user}/test-page/${selectedTestId}`);
+    }
+  }, [modalTitle, dispatch, selectedTestId, currentPage, router, user]);
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
@@ -57,7 +95,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
         getAllTestsThunk({
           page: currentPage + 1,
           per: 5,
-          search: '',
+          search: debouncedSearchValue,
           sort: 'created_at_desc',
         })
       );
@@ -70,48 +108,23 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
     }
   };
 
-  const onClickHandlerDeleteTest = useCallback(() => {
-    setIsModalWindowTitle('Are you sure you want to delete the test?');
-    setIsModalWindowOpen(true);
-  }, [setIsModalWindowTitle]);
-
-  const onConfirm = useCallback(async () => {
-    if (isModalWindowTitle.includes('delete')) {
-      await dispatch(deleteTestThunk(selectedTestId));
-      const response = await dispatch(
-        getAllTestsThunk({
-          page: currentPage,
-          per: 5,
-          search: '',
-          sort: 'created_at_desc',
-        })
-      );
-      if (response.payload?.meta?.total_pages) {
-        setTotalPages(response.payload.meta.total_pages);
-      }
-    } else if (isModalWindowTitle.includes('taking')) {
-      router.push(`/${user}/testPage/${selectedTestId}`);
-    }
-  }, [isModalWindowTitle, dispatch, selectedTestId, currentPage, router, user]);
-
   useEffect(() => {
     const fetchTests = async () => {
       const response = await dispatch(
         getAllTestsThunk({
           page: currentPage,
           per: 5,
-          search: '',
-          sort: 'created_at_desc',
+          search: debouncedSearchValue,
+          sort: filterAction,
         })
       );
       if (response.payload?.meta?.total_pages) {
         setTotalPages(response.payload.meta.total_pages);
       }
     };
-    fetchTests();
-  }, [currentPage, dispatch]);
 
-  const pathRouteTakeTests = router.pathname === '/admin/takeTests';
+    fetchTests();
+  }, [currentPage, dispatch, debouncedSearchValue]);
 
   return (
     <div className={s.container}>
@@ -139,12 +152,12 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                     }}
                   />
                 )}
-                {router.pathname !== '/user/takeTests' && (
+                {router.pathname !== '/user/take-tests' && (
                   <ChangeButton
                     title={'Edit test'}
                     onClick={() => {
                       editTest(test.id);
-                      router.push(`/${user}/editTest/${test.id}`);
+                      router.replace(`/${user}/edit-test/${test.id}`);
                     }}
                   />
                 )}
@@ -153,14 +166,13 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                   title={'Take the Test'}
                   onClick={() => {
                     setSelectedTestId(test.id);
-                    setIsModalWindowTitle('Start taking the test?');
-                    setIsModalWindowOpen(true);
+                    openModal('Start taking the test?');
                   }}
                 />
                 <span className={s['test-date']}>
-                  {formatDate(test.created_at)}
+                  {formatDate(String(test.created_at))}
                 </span>
-                {pathRouteTakeTests && (
+                {pathRouteTestsList && role && (
                   <Image
                     src={arrowIcon}
                     alt={'arrow'}
@@ -207,10 +219,10 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
         </div>
       )}
       <ModalWindow
-        isModalWindowOpen={isModalWindowOpen}
-        setIsModalWindowOpen={setIsModalWindowOpen}
+        isModalWindowOpen={isModalOpen}
+        onClose={closeModal}
         onConfirm={onConfirm}
-        title={isModalWindowTitle}
+        title={modalTitle}
       />
     </div>
   );

@@ -23,7 +23,6 @@ const SearchInput: FC<SearchInputItems> = ({
 }) => {
   const [inputValue, setInputValue] = useState(defaultValue);
   const router = useRouter();
-  const currentPath = router.pathname;
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSearchChange(event.currentTarget.value);
@@ -31,10 +30,10 @@ const SearchInput: FC<SearchInputItems> = ({
     setSearchTerm(event.currentTarget.value);
     if (!event.currentTarget.value) {
       clearSearchInput('');
-      if (currentPath.includes('admin')) {
-        router.replace('/admin/takeTests');
-      } else if (currentPath.includes('user')) {
-        router.replace('/user/takeTests');
+      if (router.pathname.includes('admin')) {
+        router.replace('/admin/take-tests');
+      } else if (router.pathname.includes('user')) {
+        router.replace('/user/take-tests');
       }
     } else {
       clearSearchInput(event.currentTarget.value);
@@ -45,10 +44,10 @@ const SearchInput: FC<SearchInputItems> = ({
     setSearchTerm('');
     setInputValue('');
     clearSearchInput('');
-    if (currentPath.includes('admin')) {
-      router.replace('/admin/takeTests');
-    } else if (currentPath.includes('user')) {
-      router.replace('/user/takeTests');
+    if (router.pathname.includes('admin')) {
+      router.replace('/admin/take-tests');
+    } else if (router.pathname.includes('user')) {
+      router.replace('/user/take-tests');
     }
   };
 
