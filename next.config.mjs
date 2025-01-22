@@ -1,31 +1,26 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-/** @type {import('next').NextConfig} */
+const sassOptions = {
+  additionalData: `
+    @import "src/styles/color.sass"
+    @import "src/styles/mixins.sass"
+  `,
+  implementation: 'sass-embedded',
+};
 const nextConfig = {
   reactStrictMode: true,
-
+  sassOptions,
   async headers() {
     return [
       {
-        source: '/api/:path*',
+        source: "/api/:path*",
         headers: [
-          { key: 'Access-Control-Allow-Credentials', value: 'true' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value:
-              'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
-          },
-        ],
-      },
-    ];
+          { key: "Access-Control-Allow-Credentials", value: "true" },
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
+          { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
+        ]
+      }
+    ]
   },
-
   async rewrites() {
     return [
       {
@@ -36,8 +31,9 @@ const nextConfig = {
   },
 
   webpack(config) {
-    // Правило для обработки SVG
-    const fileLoaderRule = config.module.rules.find((rule) => rule.test?.test?.('.svg'));
+    const fileLoaderRule = config.module.rules.find((rule) =>
+      rule.test?.test?.('.svg'),
+    );
 
     config.module.rules.push(
       {
@@ -48,47 +44,31 @@ const nextConfig = {
       {
         test: /\.svg$/i,
         issuer: fileLoaderRule.issuer,
-        resourceQuery: { not: [...(fileLoaderRule.resourceQuery?.not || []), /url/] },
+        resourceQuery: { not: [...fileLoaderRule.resourceQuery.not, /url/] },
         use: ['@svgr/webpack'],
       },
     );
-
-    // Исключаем SVG из fileLoaderRule
     fileLoaderRule.exclude = /\.svg$/i;
 
-    // Настройка CSS/SCSS модулей отдельно
     // config.module.rules.push(
-    //   // Для CSS/SCSS модулей
     //   {
-    //     test: /\.module\.(scss|sass)$/,
-    //     use: [
-    //       {
-    //         loader: 'css-loader',
-    //         options: {
-    //           modules: {
-    //             auto: true, // Включение модулей для файлов `.module`
-    //             localIdentName: '[name]__[local]--[hash:base64:5]',
-    //           },
-    //         },
-    //       },
-    //       'sass-loader',
-    //     ],
+    //     test: /\.scss$/,
+    //     use: ['style-loader', 'css-loader', 'sass-loader'],
+    //     include: path.resolve(__dirname, './'),
     //   },
-    //   // Для глобальных SCSS/SASS файлов
     //   {
-    //     test: /\.(scss|sass)$/,
-    //     exclude: /\.module\.(scss|sass)$/,
-    //     use: [
-    //       'css-loader',
-    //       {
-    //         loader: 'sass-loader',
-    //         options: {
-    //           additionalData: `@import '@/styles/color'`,
-    //         },
+    //     test: /\.s[ac]ss$/i,
+    //     use: {
+    //       loader: 'sass-loader',
+    //       options: {
+    //         sassOptions: {
+    //           additionalData: '@import "src/styles/color.sass"',
+    //         }
     //       },
-    //     ],
+    //     },
     //   }
     // );
+
 
     return config;
   },
