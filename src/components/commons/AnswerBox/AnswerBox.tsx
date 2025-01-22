@@ -32,7 +32,9 @@ const AnswerBox: FC<AnswerBoxItems> = ({
   removeAnswerHandler,
   pathRouteEdit,
 }) => {
-  const [answerTitleValue, setAnswerTitleValue] = useState(answer.text);
+  const [answerTitleValue, setAnswerTitleValue] = useState<string | undefined>(
+    answer.text
+  );
   const [oldAnswerTitle, setOldAnswerTitle] = useState('');
   const [isHiddenInputAnswer, setIsHiddenInputAnswer] = useState(false);
 
@@ -45,11 +47,24 @@ const AnswerBox: FC<AnswerBoxItems> = ({
 
   const changeAnswerTitleHandler = () => {
     setIsHiddenInputAnswer(!isHiddenInputAnswer);
-    if (isHiddenInputAnswer) {
-      answerTitleValue.trim() === '' &&
-        setAnswerTitleValue(answerTitleValue.trim());
+    if (answerTitleValue) {
+      if (isHiddenInputAnswer) {
+        answerTitleValue.trim() === '' &&
+          setAnswerTitleValue(answerTitleValue.trim());
+        if (pathRouteEdit) {
+          dispatch(
+            editAnswerThunk({
+              id: answer.id,
+              data: {
+                text: String(answerTitleValue),
+                is_right: answer.is_right,
+              },
+            })
+          );
+        }
+      }
+      setOldAnswerTitle(answerTitleValue);
     }
-    setOldAnswerTitle(answerTitleValue);
   };
 
   const keyDownAnswerHandler = (event: React.KeyboardEvent) => {
@@ -61,7 +76,7 @@ const AnswerBox: FC<AnswerBoxItems> = ({
         dispatch(
           editAnswerThunk({
             id: answer.id,
-            data: { text: answerTitleValue, is_right: answer.is_right },
+            data: { text: String(answerTitleValue), is_right: answer.is_right },
           })
         );
       }

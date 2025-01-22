@@ -110,7 +110,6 @@ const Registration: FC<RegistrationItems> = ({ url }) => {
               error={error}
               value={inputPasswordConfirmValue}
               setInputValue={setInputPasswordConfirmValue}
-              inputPasswordValue={inputPasswordValue}
               url={url}
             />
             <Checkbox

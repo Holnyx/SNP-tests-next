@@ -58,18 +58,22 @@ const Header: FC<HeaderItems> = ({
         sort: filter,
       })
     ).then(() => changeTestsFilterAction(filter));
-  }, []);
+  }, [dispatch]);
 
   const handleSearchChange = useCallback(
     (query: string) => {
       if (query) {
         setSearchQueryAction(query);
-        router.replace({
-          pathname: router.pathname,
-          query: { ...router.query, search: query },
-        });
+        router.replace(
+          {
+            pathname: router.pathname,
+            query: { ...router.query, search: query },
+          },
+          undefined,
+          { shallow: true }
+        );
       } else {
-        router.replace(router.pathname);
+        router.replace(router.pathname, undefined, { shallow: true });
       }
     },
     [router, setSearchQueryAction]

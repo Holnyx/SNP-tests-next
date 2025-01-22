@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, memo } from 'react';
+import React, { ChangeEvent, FC, memo, useEffect, useState } from 'react';
 
 import s from './InputForLogIn.module.sass';
 import cx from 'classnames';
@@ -11,7 +11,6 @@ type InputForLogInItems = {
   id?: string;
   error?: boolean;
   setInputValue: React.Dispatch<React.SetStateAction<string>>;
-  inputPasswordValue?: string;
   url: string;
 };
 
@@ -23,12 +22,32 @@ const InputForLogIn: FC<InputForLogInItems> = ({
   id,
   setInputValue,
   error,
-  inputPasswordValue,
   url,
 }) => {
+  const [errorMessage, setErrorMessage] = useState('');
+
   const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.currentTarget.value);
   };
+
+  useEffect(() => {
+    setErrorMessage('');
+    if (url !== 'sign-in') {
+      if (name.includes('name')) {
+        if (!value && error) {
+          setErrorMessage('The name must contain from 3 to 19 characters');
+        } else if (value && value.length > 19) {
+          setErrorMessage('The name must not exceed 19 characters');
+        } else if (value && value.length < 3) {
+          setErrorMessage('The name must contain at least 3 characters');
+        }
+      }
+      if (title === 'Password' && (!value || value.length <= 5) && error) {
+        setErrorMessage('The password must contain more than five characters');
+      }
+    }
+  }, [value, error, name, title, url]);
+
   return (
     <div className={s.container}>
       <label
@@ -45,39 +64,9 @@ const InputForLogIn: FC<InputForLogInItems> = ({
         value={value}
         onChange={onValueChanged}
       />
-      {value === '' && error && name.includes('name') && url !== 'sign-in' ? (
-        <span className={cx(s['error-message'])}>
-          The name must contain from 3 to 19 characters
-        </span>
-      ) : value &&
-        value.length > 19 &&
-        name.includes('name') &&
-        url !== 'sign-in' ? (
-        <span className={cx(s['error-message'])}>
-          The name must not exceed 19 characters
-        </span>
-      ) : value &&
-        value.length < 3 &&
-        name.includes('name') &&
-        url !== 'sign-in' ? (
-        <span className={cx(s['error-message'])}>
-          The name must contain at least 3 characters
-        </span>
-      ) : value === '' && error && title === 'Password' && url !== 'sign-in' ? (
-        <span className={cx(s['error-message'])}>
-          The password must contain more than five character
-        </span>
-      ) : value &&
-        value.length <= 5 &&
-        error &&
-        title === 'Password' &&
-        url !== 'sign-in' ? (
-        <span className={cx(s['error-message'])}>
-          The password must contain more than five character
-        </span>
-      ) : (
-        ''
-      )}
+      {errorMessage ? (
+        <span className={cx(s['error-message'])}>{errorMessage}</span>
+      ) : null}
     </div>
   );
 };

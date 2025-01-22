@@ -1,27 +1,31 @@
 import React, { memo } from 'react';
 
-import AdminPage from '@/components/pages/AdminPage/AdminPage';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getCookie } from 'cookies-next';
 import { TestsItem } from '@/store/types';
 import axios from 'axios';
+import TestsListPage from '@/components/pages/TestsListPage/TestsListPage';
 
 const EditTests = ({
   username,
   id,
   selectedTest,
+  role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
-    <AdminPage
-      admin="admin"
+    <TestsListPage
+      user="admin"
       id={id}
       selectedTest={selectedTest}
-      search={''} username={username}    />
+      search={''}
+      username={username}
+      role={role}
+    />
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
-  const { id } = context.query
+  const { id } = context.query;
 
   const { req } = context;
   const response = await axios.get(
@@ -42,30 +46,29 @@ export const getServerSideProps: GetServerSideProps = async context => {
   const selectedTest = allTests.find(
     (test: TestsItem) => String(test.id) === String(id)
   );
-  
-  // if (user && user.is_admin) {
-  //   return {
-  //     redirect: {
-  //       destination: '/admin/take-tests',
-  //       permanent: false,
-  //     },
-  //   };
-  // }
 
-  // if (!selectedTest || selectedTest.user_id !== user.id) {
-  //   return {
-  //     notFound: true,
-  //     props: {
-  //       username: user ? user.username : null,
-  //     },
-  //   };
-  // }
-
+  if (user && user.is_admin === false) {
+    return {
+      redirect: {
+        destination: '/user/take-tests',
+        permanent: false,
+      },
+    };
+  }
+  if (!user) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
   return {
     props: {
       id: id as string,
       selectedTest,
       username: user ? user.username : null,
+      role: user.is_admin,
     },
   };
 };

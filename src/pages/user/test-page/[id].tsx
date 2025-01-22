@@ -1,24 +1,26 @@
 import React, { memo } from 'react';
-
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getCookie } from 'cookies-next';
-import { TestsItem } from '@/store/types';
-import UserPage from '@/components/pages/UserPage/UserPage';
 import axios from 'axios';
+
+import TestsListPage from '@/components/pages/TestsListPage/TestsListPage';
+import { TestsItem } from '@/store/types';
 
 const TestPage = ({
   username,
   id,
   selectedTest,
+  role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
-    <UserPage
+    <TestsListPage
       user={'user'}
       id={id}
       search={''}
       selectedTest={selectedTest}
       username={username}
-    ></UserPage>
+      role={role}
+    ></TestsListPage>
   );
 };
 
@@ -43,30 +45,21 @@ export const getServerSideProps: GetServerSideProps = async context => {
   const selectedTest = allTests.find(
     (test: TestsItem) => String(test.id) === String(id)
   );
-
-  // if (user && user.is_admin) {
-  //   return {
-  //     redirect: {
-  //       destination: '/admin/take-tests',
-  //       permanent: false,
-  //     },
-  //   };
-  // }
-
-  // if (!selectedTest || selectedTest.user_id !== user.id) {
-  //   return {
-  //     notFound: true,
-  //     props: {
-  //       username: user ? user.username : null,
-  //     },
-  //   };
-  // }
+  if (!user) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {
       id: id as string,
       selectedTest,
       username: user ? user.username : null,
+      role: user.is_admin,
     },
   };
 };

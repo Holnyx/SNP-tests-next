@@ -1,24 +1,22 @@
 import React, { memo } from 'react';
-import AdminPage from '@/components/pages/AdminPage/AdminPage';
+
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import axios from 'axios';
+import TestsListPage from '@/components/pages/TestsListPage/TestsListPage';
 
 const TakeTests = ({
   search,
   username,
+  role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
-    <AdminPage
-      admin={'admin'}
+    <TestsListPage
+      user={'admin'}
       search={search}
-      selectedTest={{
-        id: '',
-        title: '',
-        created_at: '',
-        questions: [],
-      }}
+      selectedTest={null}
       username={username}
-    ></AdminPage>
+      role={role}
+    ></TestsListPage>
   );
 };
 
@@ -56,6 +54,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
     props: {
       search: search || '',
       username: user ? user.username : null,
+      role: user.is_admin,
     },
   };
 };

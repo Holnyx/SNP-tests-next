@@ -6,6 +6,7 @@ import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 import QuestionsForTest from '@/components/commons/QuestionsForTest/QuestionsForTest';
 
 import { AnswerItem, OnAnswerSelectArgs, TestsItem } from '@/store/types';
+import { useModal } from '@/hooks/useModal';
 
 import s from './TestPage.module.sass';
 import cx from 'classnames';
@@ -13,33 +14,34 @@ import cx from 'classnames';
 type TestPageItems = {
   user?: string;
   id?: string;
-  selectedTestItem: TestsItem;
+  selectedTestItem: TestsItem | null;
 };
 
 const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
-  const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
-  const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
   const [nextHref, setNextHref] = useState<string | null>(null);
-  const [correctAnswers, setCorrectAnswers] = useState<AnswerItem[]>([]);
+  const [correctAnswers, setCorrectAnswers] = useState<
+    AnswerItem[] | undefined
+  >([]);
   const [userSelectedAnswers, setUserSelectedAnswers] = useState<AnswerItem[]>(
     []
   );
   const [completeTest, setCompleteTest] = useState(false);
   const [correctUserAnswers, setCorrectUserAnswers] = useState(0);
+  const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
 
   const router = useRouter();
   const pathRouteTakeTest = router.pathname.startsWith(`/${user}/test-page`);
 
   const onConfirm = useCallback(() => {
-    setIsModalWindowOpen(false);
+    closeModal();
     if (nextHref) {
       router.replace(nextHref);
       setNextHref(null);
     }
-    if (isModalWindowTitle.includes('complete')) {
+    if (modalTitle.includes('complete')) {
       let correctUserAnswers = 0;
       userSelectedAnswers.forEach(userAnswer => {
-        const correctAnswer = correctAnswers.find(
+        const correctAnswer = correctAnswers?.find(
           answer => answer.id === userAnswer.id
         );
         if (correctAnswer) {
@@ -61,13 +63,7 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
       setCompleteTest(true);
       setCorrectUserAnswers(correctUserAnswers);
     }
-  }, [
-    nextHref,
-    router,
-    userSelectedAnswers,
-    correctAnswers,
-    isModalWindowTitle,
-  ]);
+  }, [nextHref, router, userSelectedAnswers, correctAnswers, modalTitle]);
 
   const handleAnswerSelect = (args: OnAnswerSelectArgs) => {
     setUserSelectedAnswers(prevSelectedAnswers => {
@@ -119,7 +115,9 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
     (href: string) => {
       if (!completeTest && pathRouteTakeTest) {
         setNextHref(href);
-        setIsModalWindowOpen(true);
+        openModal(
+          'Are you sure you want to leave the page without complete the test?'
+        );
       }
       if (completeTest && pathRouteTakeTest) {
         router.replace(href);
@@ -129,20 +127,19 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
   );
 
   const onClickHandlerCompleteTest = useCallback(() => {
-    setIsModalWindowTitle('Are you sure you want to complete the test?');
-    setIsModalWindowOpen(true);
-  }, [setIsModalWindowTitle, setIsModalWindowOpen]);
+    openModal('Are you sure you want to complete the test?');
+  }, [openModal]);
 
   useEffect(() => {
-    const correct = selectedTestItem.questions.flatMap(question =>
+    const correct = selectedTestItem?.questions.flatMap(question =>
       question.answers.filter(answer => answer.is_right)
     );
     setCorrectAnswers(correct);
-  }, [selectedTestItem.questions]);
+  }, [selectedTestItem?.questions]);
 
   return (
     <div className={s.container}>
-      <div className={s['test-title']}> {selectedTestItem.title}</div>
+      <div className={s['test-title']}> {selectedTestItem?.title}</div>
       {!completeTest &&
         selectedTestItem &&
         selectedTestItem.questions.map(test => {
@@ -161,7 +158,7 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
         <>
           <div>Correct answers:</div>
           <div>
-            {correctUserAnswers} from {correctAnswers.length}
+            {correctUserAnswers} from {correctAnswers?.length}
           </div>
         </>
       )}
@@ -174,9 +171,6 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
               title={'Go Back'}
               onClick={() => {
                 handleLinkClick(`/${user}/take-tests`);
-                setIsModalWindowTitle(
-                  'Are you sure you want to leave the page without complete the test?'
-                );
               }}
             />
             <ChangeButton
@@ -205,10 +199,10 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
       </div>
 
       <ModalWindow
-        isModalWindowOpen={isModalWindowOpen}
+        isModalWindowOpen={isModalOpen}
         onConfirm={onConfirm}
-        title={isModalWindowTitle}
-        onClose={() => setIsModalWindowOpen(false)}
+        title={modalTitle}
+        onClose={closeModal}
       />
     </div>
   );

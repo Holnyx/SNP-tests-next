@@ -48,7 +48,7 @@ export const createTestThunk = createAsyncThunk(
       const createdQuestions = [];
       for (const question of data.questionList) {
         const createdQuestion = await api.createQuestion(createdTest.id, {
-          title: question.title,
+          title: String(question.title),
           question_type: question.question_type,
           answer: 0,
         });

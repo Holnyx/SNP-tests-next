@@ -12,6 +12,7 @@ import { AppDispatch } from '@/store';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { removeAllQuestion } from '@/store/questionReducer';
 import { logoutThunk } from '@/thunk/authThunk';
+import { useModal } from '@/hooks/useModal';
 
 import s from './Sidebar.module.sass';
 import cx from 'classnames';
@@ -29,8 +30,9 @@ const Sidebar: FC<SidebarItems> = ({
   user,
   pathRouteCreate,
 }) => {
-  const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
   const [nextHref, setNextHref] = useState<string | null>(null);
+  const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
+
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -40,7 +42,7 @@ const Sidebar: FC<SidebarItems> = ({
   const handleLinkClick = (href: string) => {
     if (pathRouteCreate && allQuestions.questionsList.length > 0) {
       setNextHref(href);
-      setIsModalWindowOpen(true);
+      openModal('Are you sure you want to leave without saving?');
     } else if (href === '/sign-in') {
       dispatch(logoutThunk())
         .unwrap()
@@ -57,7 +59,7 @@ const Sidebar: FC<SidebarItems> = ({
 
   const onConfirm = useCallback(() => {
     removeAllQuestionAction();
-    setIsModalWindowOpen(false);
+    closeModal();
     if (nextHref) {
       router.replace(nextHref);
       setNextHref(null);
@@ -68,7 +70,7 @@ const Sidebar: FC<SidebarItems> = ({
     const handleBeforePopState = (state: { url: string }) => {
       if (pathRouteCreate) {
         setNextHref(state.url);
-        setIsModalWindowOpen(true);
+        openModal('Are you sure you want to leave without saving?');
         return false;
       }
       return true;
@@ -121,10 +123,10 @@ const Sidebar: FC<SidebarItems> = ({
         </ul>
       </aside>
       <ModalWindow
-        isModalWindowOpen={isModalWindowOpen}
+        isModalWindowOpen={isModalOpen}
         onConfirm={onConfirm}
-        title={'Are you sure you want to leave without saving?'}
-        onClose={() => setIsModalWindowOpen(false)}
+        title={modalTitle}
+        onClose={() => closeModal()}
       />
     </>
   );

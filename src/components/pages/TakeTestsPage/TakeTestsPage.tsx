@@ -12,8 +12,13 @@ import Loader from '@/components/commons/Loader/Loader';
 import { AppDispatch } from '@/store';
 import { TestsItem } from '@/store/types';
 import { deleteTestThunk, getAllTestsThunk } from '@/thunk/testsThunk';
-import { deleteLoadingSelector, loadingSelector } from '@/store/selectors';
+import {
+  deleteLoadingSelector,
+  filterSelector,
+  loadingSelector,
+} from '@/store/selectors';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useModal } from '@/hooks/useModal';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
@@ -27,7 +32,8 @@ type TakeTestsPageItems = {
   searchTerm: string;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   currentPage: number;
-  pathRouteTestsList: boolean
+  pathRouteTestsList: boolean;
+  role: boolean
 };
 
 const TakeTestsPage: FC<TakeTestsPageItems> = ({
@@ -38,44 +44,44 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   searchTerm,
   setCurrentPage,
   currentPage,
-  pathRouteTestsList
+  pathRouteTestsList,
+  role
 }) => {
   const [show, setShow] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState('');
-  const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
-  const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
   const [totalPages, setTotalPages] = useState(1);
+  const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
+  const filterAction = useSelector(filterSelector);
   const loading = useSelector(loadingSelector);
   const deleteLoading = useSelector(deleteLoadingSelector);
   const debouncedSearchValue = useDebounce(searchTerm, 500);
 
   const onClickHandlerDeleteTest = useCallback(() => {
-    setIsModalWindowTitle('Are you sure you want to delete the test?');
-    setIsModalWindowOpen(true);
-  }, [setIsModalWindowTitle]);
+    openModal('Are you sure you want to delete the test?');
+  }, [openModal]);
 
   const onConfirm = useCallback(async () => {
-    if (isModalWindowTitle.includes('delete')) {
+    if (modalTitle.includes('delete')) {
       await dispatch(deleteTestThunk(selectedTestId));
       const response = await dispatch(
         getAllTestsThunk({
           page: currentPage,
           per: 5,
           search: debouncedSearchValue,
-          sort: 'created_at_desc',
+          sort: filterAction,
         })
       );
       if (response.payload?.meta?.total_pages) {
         setTotalPages(response.payload.meta.total_pages);
       }
-    } else if (isModalWindowTitle.includes('taking')) {
+    } else if (modalTitle.includes('taking')) {
       router.replace(`/${user}/test-page/${selectedTestId}`);
     }
-  }, [isModalWindowTitle, dispatch, selectedTestId, currentPage, router, user]);
+  }, [modalTitle, dispatch, selectedTestId, currentPage, router, user]);
 
   const formatDate = (isoDate: string) => {
     const date = new Date(isoDate);
@@ -109,7 +115,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
           page: currentPage,
           per: 5,
           search: debouncedSearchValue,
-          sort: 'created_at_desc',
+          sort: filterAction,
         })
       );
       if (response.payload?.meta?.total_pages) {
@@ -160,14 +166,13 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                   title={'Take the Test'}
                   onClick={() => {
                     setSelectedTestId(test.id);
-                    setIsModalWindowTitle('Start taking the test?');
-                    setIsModalWindowOpen(true);
+                    openModal('Start taking the test?');
                   }}
                 />
                 <span className={s['test-date']}>
-                  {formatDate(test.created_at)}
+                  {formatDate(String(test.created_at))}
                 </span>
-                {pathRouteTestsList && (
+                {pathRouteTestsList && role && (
                   <Image
                     src={arrowIcon}
                     alt={'arrow'}
@@ -214,10 +219,10 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
         </div>
       )}
       <ModalWindow
-        isModalWindowOpen={isModalWindowOpen}
-        onClose={() => setIsModalWindowOpen(false)}
+        isModalWindowOpen={isModalOpen}
+        onClose={closeModal}
         onConfirm={onConfirm}
-        title={isModalWindowTitle}
+        title={modalTitle}
       />
     </div>
   );

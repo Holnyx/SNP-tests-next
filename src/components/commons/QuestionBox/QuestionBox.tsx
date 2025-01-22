@@ -36,7 +36,7 @@ type QuestionBoxItems = {
   takeTest: boolean;
   questionId: string;
   removeQuestionHandler: () => void;
-  questions: QuestionItem[];
+  questions: QuestionItem[] | undefined;
   onAnswerSelect: (args: OnAnswerSelectArgs) => void;
   pathRouteEdit: boolean;
   pathRouteCreate: boolean;
@@ -52,7 +52,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   pathRouteCreate,
 }) => {
   const [answerOption, setAnswerOption] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState<string | undefined>('');
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
@@ -60,7 +60,9 @@ const QuestionBox: FC<QuestionBoxItems> = ({
     question.answers
   );
   const [questionTitleValue, setQuestionTitleValue] = useState(question.title);
-  const [oldQuestionTitle, setOldQuestionTitle] = useState('');
+  const [oldQuestionTitle, setOldQuestionTitle] = useState<string | undefined>(
+    ''
+  );
   const previousOrderRef = useRef<AnswerItem[]>(question.answers);
 
   const dispatch = useDispatch<AppDispatch>();
@@ -69,6 +71,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const updateAnswersOrderAction = useActionWithPayload(updateAnswersOrder);
 
   const checkAnswerValue =
+    inputValue &&
     inputValue.length >= 1 &&
     inputValue.trim() !== '' &&
     inputValue.length <= 30;
@@ -81,7 +84,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const saveClickHandler = useCallback(() => {
     const newAnswer: AnswerItem = {
       id: v1(),
-      text: inputValue,
+      text: String(inputValue),
       name: question.title,
       is_right: question.question_type === 'number' ? true : isChecked,
       questionId,
@@ -181,8 +184,21 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const changeQuestionTitleHandler = () => {
     setIsHidden(!isHidden);
     if (isHidden) {
-      questionTitleValue.trim() === '' &&
+      questionTitleValue &&
+        questionTitleValue.trim() === '' &&
         setQuestionTitleValue(questionTitleValue.trim());
+      if (pathRouteEdit) {
+        dispatch(
+          editQuestionThunk({
+            id: question.id,
+            data: {
+              title: String(questionTitleValue),
+              question_type: question.question_type,
+              answer: 0,
+            },
+          })
+        );
+      }
     }
     setOldQuestionTitle(questionTitleValue);
   };
@@ -197,7 +213,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
           editQuestionThunk({
             id: question.id,
             data: {
-              title: questionTitleValue,
+              title: String(questionTitleValue),
               question_type: question.question_type,
               answer: 0,
             },

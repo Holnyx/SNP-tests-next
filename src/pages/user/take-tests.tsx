@@ -1,31 +1,28 @@
 import React, { memo } from 'react';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-
-import UserPage from '@/components/pages/UserPage/UserPage';
 import axios from 'axios';
+
+import TestsListPage from '@/components/pages/TestsListPage/TestsListPage';
 
 const TakeTests = ({
   username,
   search,
+  role,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
-    <UserPage
+    <TestsListPage
       user={'user'}
       search={search}
-      selectedTest={{
-        id: '',
-        title: '',
-        created_at: '',
-        questions: [],
-      }}
+      selectedTest={null}
       username={username}
-    ></UserPage>
+      role={role}
+    ></TestsListPage>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { search } = context.query;
-  const { req, res } = context;
+  const { req } = context;
   const response = await axios.get(
     'https://interns-test-fe.snp.agency/api/v1/users/current',
     {
@@ -57,7 +54,9 @@ export const getServerSideProps: GetServerSideProps = async context => {
     props: {
       search: search || '',
       username: user ? user.username : null,
+      role: user.is_admin,
     },
   };
 };
+
 export default memo(TakeTests);
