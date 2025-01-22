@@ -87,10 +87,10 @@ const Input: FC<InputItems> = ({
             onKeyDown={onKeyDown}
             autoFocus={autoFocus}
           />
-          {(value && value.length < 1) ||
-          (value === '' && error && title.includes('Title')) ? (
+          {(!value && error) ||
+          (value && value.length < 3 && title.includes('Title')) ? (
             <span className={cx(s['error-message'])}>
-              The title must contain more than 1 character
+              The title must contain more than 2 character
             </span>
           ) : (value && value.length < 1) ||
             (value === '' && error && title.includes('Answer')) ? (

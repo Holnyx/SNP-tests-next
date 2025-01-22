@@ -32,9 +32,9 @@ const SearchInput: FC<SearchInputItems> = ({
     if (!event.currentTarget.value) {
       clearSearchInput('');
       if (currentPath.includes('admin')) {
-        router.replace('/admin/takeTests');
+        router.replace('/admin/take-tests');
       } else if (currentPath.includes('user')) {
-        router.replace('/user/takeTests');
+        router.replace('/user/take-tests');
       }
     } else {
       clearSearchInput(event.currentTarget.value);
@@ -46,9 +46,9 @@ const SearchInput: FC<SearchInputItems> = ({
     setInputValue('');
     clearSearchInput('');
     if (currentPath.includes('admin')) {
-      router.replace('/admin/takeTests');
+      router.replace('/admin/take-tests');
     } else if (currentPath.includes('user')) {
-      router.replace('/user/takeTests');
+      router.replace('/user/take-tests');
     }
   };
 

@@ -1,4 +1,5 @@
-import { getCurrentUser, signinThunk, signupThunk } from '@/thunk/testsThunk';
+import { signinThunk, signupThunk } from '@/thunk/authThunk';
+import { getCurrentUser } from '@/thunk/testsThunk';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {

@@ -1,11 +1,11 @@
 import React, { FC, memo } from 'react';
 import Head from 'next/head';
 
-type HeadComponentItems = {
+type SeoTagsItems = {
   title?: string;
 };
 
-const HeadComponent: FC<HeadComponentItems> = ({ title }) => {
+const SeoTags: FC<SeoTagsItems> = ({ title }) => {
   return (
     <>
       <Head>
@@ -44,4 +44,4 @@ const HeadComponent: FC<HeadComponentItems> = ({ title }) => {
   );
 };
 
-export default memo(HeadComponent);
+export default memo(SeoTags);

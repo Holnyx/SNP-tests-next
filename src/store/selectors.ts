@@ -38,7 +38,7 @@ export const sortedTestsSelector = createSelector(
     return [...testsList].sort((a, b) => {
       const dateA = new Date(a.created_at);
       const dateB = new Date(b.created_at);
-      return sortOrder === 'asc'
+      return sortOrder === 'created_at_asc'
         ? dateA.getTime() - dateB.getTime()
         : dateB.getTime() - dateA.getTime();
     });

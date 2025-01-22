@@ -19,7 +19,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://interns-test-fe.snp.agency/api/:path*',
+        destination: `${process.env.NEXT_BASE_URL}/api/:path*`,
       },
     ];
   },

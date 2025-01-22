@@ -4,6 +4,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 import { getCookie } from 'cookies-next';
 import { TestsItem } from '@/store/types';
 import UserPage from '@/components/pages/UserPage/UserPage';
+import axios from 'axios';
 
 const TestPage = ({
   username,
@@ -12,18 +13,28 @@ const TestPage = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <UserPage
-      user={username}
+      user={'user'}
       id={id}
       search={''}
       selectedTest={selectedTest}
+      username={username}
     ></UserPage>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
   const { id } = context.query;
-  const cookies = context.req.cookies;
-  const username = cookies.username || 'user';
+  const { req } = context;
+  const response = await axios.get(
+    'https://interns-test-fe.snp.agency/api/v1/users/current',
+    {
+      headers: {
+        Cookie: req.headers.cookie || '',
+      },
+    }
+  );
+
+  const user = response.data;
 
   const allTestsCookie = getCookie('tests', {
     req: context.req,
@@ -33,17 +44,30 @@ export const getServerSideProps: GetServerSideProps = async context => {
     (test: TestsItem) => String(test.id) === String(id)
   );
 
-  if (selectedTest) {
-    return {
-      props: {
-        id,
-        selectedTest,
-        username,
-      },
-    };
-  }
+  // if (user && user.is_admin) {
+  //   return {
+  //     redirect: {
+  //       destination: '/admin/take-tests',
+  //       permanent: false,
+  //     },
+  //   };
+  // }
+
+  // if (!selectedTest || selectedTest.user_id !== user.id) {
+  //   return {
+  //     notFound: true,
+  //     props: {
+  //       username: user ? user.username : null,
+  //     },
+  //   };
+  // }
+
   return {
-    notFound: true,
+    props: {
+      id: id as string,
+      selectedTest,
+      username: user ? user.username : null,
+    },
   };
 };
 

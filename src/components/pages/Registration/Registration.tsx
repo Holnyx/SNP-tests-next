@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,13 +8,17 @@ import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
 import Checkbox from '@/components/commons/Inputs/Checkbox/Checkbox';
 
-import { signupThunk } from '@/thunk/testsThunk';
-import { AppDispatch, AppRootStateItems } from '@/store';
+import { AppDispatch } from '@/store';
+import { signupThunk } from '@/thunk/authThunk';
 
 import s from './Registration.module.sass';
 import cx from 'classnames';
 
-const Registration = () => {
+type RegistrationItems = {
+  url: string;
+};
+
+const Registration: FC<RegistrationItems> = ({ url }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
   const [inputNameValue, setInputNameValue] = useState('');
@@ -29,7 +33,6 @@ const Registration = () => {
     username: string;
     password: string;
     password_confirmation: string;
-    auth_token: string;
     is_admin: boolean;
   }) => {
     dispatch(signupThunk(data));
@@ -38,14 +41,13 @@ const Registration = () => {
   const checkNameValue =
     inputNameValue.length >= 3 && inputNameValue.trim() !== '';
 
-  const checkPasswordValue =
+  const isPasswordValid =
     inputPasswordValue.length >= 6 && inputPasswordValue.trim() !== '';
 
   const registrationInAction = async (data: {
     username: string;
     password: string;
     password_confirmation: string;
-    auth_token: string;
     is_admin: boolean;
   }) => {
     const resultAction = await authorizationAction(data);
@@ -57,19 +59,18 @@ const Registration = () => {
   };
 
   const onClickHandlerSignUp = useCallback(() => {
-    if (checkNameValue && checkPasswordValue) {
+    if (checkNameValue && isPasswordValid) {
       registrationInAction({
         username: inputNameValue,
         password: inputPasswordValue,
         password_confirmation: inputPasswordConfirmValue,
-        auth_token: new Date().toISOString(),
         is_admin: isChecked,
       });
       setError(false);
     } else {
       setError(true);
     }
-  }, [checkNameValue, checkPasswordValue, registrationInAction]);
+  }, [checkNameValue, isPasswordValid, registrationInAction]);
 
   return (
     <div className={s.authorization}>
@@ -85,29 +86,32 @@ const Registration = () => {
         {!successMessage && (
           <div className={s.form}>
             <InputForLogIn
-              getTitle={'User name'}
-              getType={'text'}
-              getName={'username'}
+              title={'User name'}
+              type={'text'}
+              name={'username'}
               error={error}
               value={inputNameValue}
               setInputValue={setInputNameValue}
+              url={url}
             />
             <InputForLogIn
-              getTitle={'Password'}
-              getType={'password'}
-              getName={'password'}
+              title={'Password'}
+              type={'password'}
+              name={'password'}
               error={error}
               value={inputPasswordValue}
               setInputValue={setInputPasswordValue}
+              url={url}
             />
             <InputForLogIn
-              getTitle={'Password confirmation'}
-              getType={'password'}
-              getName={'password_confirmation'}
+              title={'Password confirmation'}
+              type={'password'}
+              name={'password_confirmation'}
               error={error}
               value={inputPasswordConfirmValue}
               setInputValue={setInputPasswordConfirmValue}
               inputPasswordValue={inputPasswordValue}
+              url={url}
             />
             <Checkbox
               title={'Create an admin account'}
@@ -121,8 +125,8 @@ const Registration = () => {
             />
             <div className={s['button-box']}>
               <ButtonLog
-                getTitle={'Sign up'}
-                getClassName={s.button}
+                title={'Sign up'}
+                className={s.button}
                 onClick={() => {
                   onClickHandlerSignUp();
                 }}
@@ -130,7 +134,7 @@ const Registration = () => {
               <span className={s['sign-up']}>
                 Do you have an account?{' '}
                 <Link
-                  href="/signIn"
+                  href="/sign-in"
                   className={s.link}
                 >
                   Sign In

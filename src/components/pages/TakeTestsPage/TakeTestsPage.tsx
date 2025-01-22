@@ -13,6 +13,7 @@ import { AppDispatch } from '@/store';
 import { TestsItem } from '@/store/types';
 import { deleteTestThunk, getAllTestsThunk } from '@/thunk/testsThunk';
 import { deleteLoadingSelector, loadingSelector } from '@/store/selectors';
+import { useDebounce } from '@/hooks/useDebounce';
 
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
@@ -23,52 +24,32 @@ type TakeTestsPageItems = {
   search: string;
   isSearching: boolean;
   results: TestsItem[];
+  searchTerm: string;
+  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  currentPage: number;
 };
 
 const TakeTestsPage: FC<TakeTestsPageItems> = ({
   user,
   editTest,
-  search,
   isSearching,
   results,
+  searchTerm,
+  setCurrentPage,
+  currentPage,
 }) => {
   const [show, setShow] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState('');
   const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
   const [isModalWindowTitle, setIsModalWindowTitle] = useState('');
   const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
   const loading = useSelector(loadingSelector);
   const deleteLoading = useSelector(deleteLoadingSelector);
-
-  const formatDate = (isoDate: string) => {
-    const date = new Date(isoDate);
-    return date.toLocaleDateString('ru-RU');
-  };
-
-  const loadMoreTests = () => {
-    if (currentPage <= totalPages) {
-      setCurrentPage(prevPage => prevPage + 1);
-      dispatch(
-        getAllTestsThunk({
-          page: currentPage + 1,
-          per: 5,
-          search: '',
-          sort: 'created_at_desc',
-        })
-      );
-    }
-  };
-
-  const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(prevPage => prevPage - 1);
-    }
-  };
+  const debouncedSearchValue = useDebounce(searchTerm, 500);
 
   const onClickHandlerDeleteTest = useCallback(() => {
     setIsModalWindowTitle('Are you sure you want to delete the test?');
@@ -82,7 +63,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
         getAllTestsThunk({
           page: currentPage,
           per: 5,
-          search: '',
+          search: debouncedSearchValue,
           sort: 'created_at_desc',
         })
       );
@@ -90,9 +71,34 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
         setTotalPages(response.payload.meta.total_pages);
       }
     } else if (isModalWindowTitle.includes('taking')) {
-      router.push(`/${user}/testPage/${selectedTestId}`);
+      router.replace(`/${user}/test-page/${selectedTestId}`);
     }
   }, [isModalWindowTitle, dispatch, selectedTestId, currentPage, router, user]);
+
+  const formatDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    return date.toLocaleDateString('ru-RU');
+  };
+
+  const loadMoreTests = () => {
+    if (currentPage <= totalPages) {
+      setCurrentPage(prevPage => prevPage + 1);
+      dispatch(
+        getAllTestsThunk({
+          page: currentPage + 1,
+          per: 5,
+          search: debouncedSearchValue,
+          sort: 'created_at_desc',
+        })
+      );
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
+  };
 
   useEffect(() => {
     const fetchTests = async () => {
@@ -100,7 +106,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
         getAllTestsThunk({
           page: currentPage,
           per: 5,
-          search: '',
+          search: debouncedSearchValue,
           sort: 'created_at_desc',
         })
       );
@@ -108,10 +114,11 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
         setTotalPages(response.payload.meta.total_pages);
       }
     };
-    fetchTests();
-  }, [currentPage, dispatch]);
 
-  const pathRouteTakeTests = router.pathname === '/admin/takeTests';
+    fetchTests();
+  }, [currentPage, dispatch, debouncedSearchValue]);
+
+  const pathRouteTakeTests = router.pathname === '/admin/take-tests';
 
   return (
     <div className={s.container}>
@@ -139,12 +146,12 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                     }}
                   />
                 )}
-                {router.pathname !== '/user/takeTests' && (
+                {router.pathname !== '/user/take-tests' && (
                   <ChangeButton
                     title={'Edit test'}
                     onClick={() => {
                       editTest(test.id);
-                      router.push(`/${user}/editTest/${test.id}`);
+                      router.replace(`/${user}/edit-test/${test.id}`);
                     }}
                   />
                 )}
@@ -208,7 +215,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
       )}
       <ModalWindow
         isModalWindowOpen={isModalWindowOpen}
-        setIsModalWindowOpen={setIsModalWindowOpen}
+        onClose={() => setIsModalWindowOpen(false)}
         onConfirm={onConfirm}
         title={isModalWindowTitle}
       />

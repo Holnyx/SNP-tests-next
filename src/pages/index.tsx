@@ -1,17 +1,13 @@
-import { memo, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import { parseCookies } from 'nookies';
+import { memo } from 'react';
 
-import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
+import SeoTags from '@/components/commons/SeoTags/SeoTags';
+import HomePage from '@/components/pages/HomePage/HomePage';
 
-const Home = (
-) => {
-  const router = useRouter();
-
+const Home = () => {
   return (
     <>
-      <HeadComponent />
+      <SeoTags />
+      <HomePage />
     </>
   );
 };

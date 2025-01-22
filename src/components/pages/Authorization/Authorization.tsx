@@ -1,4 +1,11 @@
-import React, { memo, useCallback, useRef, useState } from 'react';
+import React, {
+  FC,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import Link from 'next/link';
@@ -9,12 +16,16 @@ import leafImage from '/public/img/logIn-img.jpeg';
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
 
 import { AppDispatch } from '@/store';
-import { signinThunk } from '@/thunk/testsThunk';
+import { signinThunk } from '@/thunk/authThunk';
 
 import s from './Authorization.module.sass';
 import cx from 'classnames';
 
-const Authorization = () => {
+type AuthorizationItems = {
+  url: string;
+};
+
+const Authorization: FC<AuthorizationItems> = ({ url }) => {
   const [error, setError] = useState(false);
   const [inputNameValue, setInputNameValue] = useState('');
   const [inputPasswordValue, setInputPasswordValue] = useState('');
@@ -32,32 +43,21 @@ const Authorization = () => {
     if (signinThunk.fulfilled.match(resultAction)) {
       const user = resultAction.payload;
       if (user.is_admin) {
-        router.push('/admin/takeTests');
+        router.replace('/admin/take-tests');
       } else {
-        router.push('/user/takeTests');
+        router.replace('/user/take-tests');
       }
     } else {
       setError(true);
     }
   };
 
-  const checkNameValue =
-    inputNameValue.length >= 3 && inputNameValue.trim() !== '';
-
-  const checkPasswordValue =
-    inputPasswordValue.length >= 6 && inputPasswordValue.trim() !== '';
-
   const onClickHandlerSignUp = useCallback(() => {
-    if (checkNameValue && checkPasswordValue) {
-      logInAction({
-        username: inputNameRef.current,
-        password: inputPasswordRef.current,
-      });
-      setError(false);
-    } else {
-      setError(true);
-    }
-  }, [checkNameValue, checkPasswordValue]);
+    logInAction({
+      username: inputNameRef.current,
+      password: inputPasswordRef.current,
+    });
+  }, []);
 
   return (
     <div className={s.authorization}>
@@ -68,31 +68,33 @@ const Authorization = () => {
         </span>
         <div className={s.form}>
           <InputForLogIn
-            getTitle={'User name'}
-            getType={'text'}
-            getName={'username'}
+            title={'User name'}
+            type={'text'}
+            name={'username'}
             setInputValue={setInputNameValue}
             error={error}
             value={inputNameValue}
+            url={url}
           />
           <InputForLogIn
-            getTitle={'Password'}
-            getType={'password'}
-            getName={'password'}
+            title={'Password'}
+            type={'password'}
+            name={'password'}
             setInputValue={setInputPasswordValue}
             error={error}
             value={inputPasswordValue}
+            url={url}
           />
           <div className={s['button-box']}>
             <ButtonLog
-              getTitle={'Sign in'}
-              getClassName={s.button}
+              title={'Sign in'}
+              className={s.button}
               onClick={onClickHandlerSignUp}
             />
             <span className={s['sign-up']}>
               Don't have an account?{' '}
               <Link
-                href="/signUp"
+                href="/sign-up"
                 className={s.link}
               >
                 Sign Up

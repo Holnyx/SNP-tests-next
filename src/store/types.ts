@@ -56,5 +56,14 @@ export type UserAnswer = {
   selectedAnswers: string[];
 };
 
-export type FilteredTestsByDate = 'desc' | 'asc';
+export type FilteredTestsByDate = 'created_at_desc' | 'created_at_asc';
 export type TestsOptionsForSelect = 'none' | 'single' | 'multiple' | 'number';
+
+
+export type OnAnswerSelectArgs = {
+  selectedAnswer: AnswerItem;
+  type: string;
+  inputNumberValue: number;
+  isChecked: boolean;
+  questionId: string;
+};

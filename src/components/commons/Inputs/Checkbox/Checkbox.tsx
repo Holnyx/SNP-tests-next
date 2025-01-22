@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 
 import starUrl from '/public/img/checkbox-icon.svg?url';
 
-import { AnswerItem } from '@/store/types';
+import { AnswerItem, OnAnswerSelectArgs } from '@/store/types';
 
 import s from './Checkbox.module.sass';
 import cx from 'classnames';
@@ -15,13 +15,7 @@ type CheckboxItems = {
   name: string;
   leftCheck: boolean;
   id?: string;
-  onAnswerSelect: (
-    selectedAnswer: AnswerItem,
-    type: string,
-    inputNumberValue: number,
-    isChecked: boolean,
-    questionId: string
-  ) => void;
+  onAnswerSelect: (args: OnAnswerSelectArgs) => void;
   answer?: AnswerItem;
   questionId: string;
   setIsChecked: React.Dispatch<React.SetStateAction<boolean>>;
@@ -48,18 +42,18 @@ const Checkbox: FC<CheckboxItems> = ({
     }
     questionId &&
       answer &&
-      onAnswerSelect(
-        answer,
-        type,
-        type === 'number' ? Number(value) : 0,
-        e.currentTarget.checked,
-        questionId
-      );
+      onAnswerSelect({
+        selectedAnswer: answer,
+        type: type,
+        inputNumberValue: type === 'number' ? Number(value) : 0,
+        isChecked: e.currentTarget.checked,
+        questionId: questionId,
+      });
 
     setIsChecked(e.currentTarget.checked);
   };
 
-  const changeStyleAdminCheckbox = router.pathname === '/signUp';
+  const changeStyleAdminCheckbox = router.pathname === '/sign-up';
   const changeType =
     type === 'multiple'
       ? 'checkbox'

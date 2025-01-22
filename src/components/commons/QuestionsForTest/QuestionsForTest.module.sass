@@ -1,17 +1,37 @@
 @import '../../../styles/mixins'
 @import '../../../styles/color'
 
-.option
+.questions-box
+    position: relative
     display: flex
+    flex-direction: column
     justify-content: center
     align-items: center
-    gap: 10px
-
-.buttons
-    display: flex
-    justify-content: center
     gap: 20px
     width: 100%
+    padding: 40px 20px
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    border-radius: 30px
+    box-sizing: border-box
+
+    .answer-list
+        display: flex
+        flex-direction: column
+        justify-content: space-between
+        align-items: center
+        gap: 10px
+
+        .option
+            display: flex
+            justify-content: center
+            align-items: center
+            gap: 10px
+
+    .buttons
+        display: flex
+        justify-content: center
+        gap: 20px
+        width: 100%
 
 .test-title
     display: flex
@@ -44,11 +64,3 @@
 .error-answer
     @include font-style(400,12px,142%,0)
     color: $color-red
-
-.dots-icon
-    width: 20px
-    height: 20px
-    cursor: grab
-    
-    &:active
-        cursor: grabbing

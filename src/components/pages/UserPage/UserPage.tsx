@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 
 import Header from '@/components/commons/Header/Header';
-import HeadComponent from '@/components/commons/HeadComponent/HeadComponent';
+import SeoTags from '@/components/commons/SeoTags/SeoTags';
 import TakeTestsPage from '../TakeTestsPage/TakeTestsPage';
 import TestPage from '../TestPage/TestPage';
 import Sidebar from '@/components/commons/Sidebar/Sidebar';
@@ -24,9 +24,10 @@ type UserPageItems = {
   user?: string;
   id?: string;
   selectedTest: TestsItem;
+  username: string | undefined
 };
 
-const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest }) => {
+const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest, username }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
@@ -34,7 +35,7 @@ const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest }) => {
   const [selectedTestItem, setSelectedTestItem] =
     useState<TestsItem>(selectedTest);
 
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
@@ -83,41 +84,56 @@ const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest }) => {
     }
   }, [allTests]);
 
-  const pathRouteEdit = router.pathname.startsWith('/user/editTest');
-  const pathRouteCreate = router.pathname === '/user/createTests';
-  const pathRouteTestsList = router.pathname === '/user/takeTests';
-  const pathRouteTakeTest = router.pathname.startsWith('/user/testPage');
-  const headTitle = pathRouteEdit
-    ? 'Edit test'
-    : pathRouteCreate
-    ? 'Create test'
-    : pathRouteTakeTest
-    ? selectedTestItem.title
-    : pathRouteTestsList
-    ? 'Tests list'
-    : user;
+  const pathRouteEdit = router.pathname.startsWith('/user/edit-test');
+  const pathRouteCreate = router.pathname === '/user/create-tests';
+  const pathRouteTestsList = router.pathname === '/user/take-tests';
+  const pathRouteTakeTest = router.pathname.startsWith('/user/test-page');
+
+  const getPageType = () => {
+    if (pathRouteEdit) return 'edit';
+    if (pathRouteCreate) return 'create';
+    if (pathRouteTakeTest) return 'takeTest';
+    if (pathRouteTestsList) return 'testsList';
+    return 'default';
+  };
+
+  const headerTitleByType = {
+    edit: 'Edit test',
+    create: 'Create test',
+    takeTest: selectedTestItem.title,
+    testsList: 'Tests list',
+    default: user,
+  };
+
+  const headTitle = headerTitleByType[getPageType()];
 
   return (
     <>
-      <HeadComponent title={headTitle} />
-      <div className={s.background}>
+      <SeoTags title={headTitle} />
+      <div
+        className={s.background}
+        onClick={() => {
+          menuOpen && setMenuOpen(!menuOpen);
+        }}
+      >
         <Header
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
-          name={user}
+          name={username}
           setSearchTerm={setSearchTerm}
-          defaultSearchValue={''}
+          searchTerm={searchTerm}
         />
-        {router.pathname === '/user/takeTests' && (
+        {router.pathname === '/user/take-tests' && (
           <TakeTestsPage
             user={user}
             editTest={() => {}}
             search={search}
             isSearching={isSearching}
             results={results}
+            searchTerm={searchTerm}
           />
         )}
-        {router.asPath.startsWith(`/${user}/testPage/${id}`) && (
+        {router.asPath.startsWith(`/${user}/test-page/${id}`) && (
           <TestPage
             user={user}
             id={id}

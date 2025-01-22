@@ -1,61 +1,6 @@
-import axios from 'axios';
-
 import api from '@/api/api';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AnswerItem, TestForAdd, TestsItem } from '@/store/types';
-
-export const signupThunk = createAsyncThunk(
-  'auth/signup',
-  async (
-    userData: {
-      username: string;
-      password: string;
-      password_confirmation: string;
-      is_admin: boolean;
-    },
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await api.signup(userData);
-      return response.data;
-    } catch (error: any) {
-      if (axios.isAxiosError(error)) {
-        return rejectWithValue(
-          error.response?.data.message || 'Registration error'
-        );
-      } else {
-        return rejectWithValue('Unknown error');
-      }
-    }
-  }
-);
-
-export const signinThunk = createAsyncThunk(
-  'auth/signin',
-  async (
-    credentials: { username: string; password: string },
-    { dispatch, rejectWithValue }
-  ) => {
-    try {
-      const userData = await api.signin(credentials);
-      dispatch(getCurrentUser());
-      return userData;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
-    }
-  }
-);
-export const logoutThunk = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      await api.logout();
-      return 'Logged out successfully';
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Logout failed');
-    }
-  }
-);
 
 export const getCurrentUser = createAsyncThunk(
   'auth/getCurrentUser',

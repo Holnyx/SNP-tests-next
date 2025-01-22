@@ -17,10 +17,10 @@ import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
 import Checkbox from '../Inputs/Checkbox/Checkbox';
 import AnswerBox from '../AnswerBox/AnswerBox';
 
-import { AnswerItem, QuestionItem } from '@/store/types';
+import { AnswerItem, OnAnswerSelectArgs, QuestionItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
-import { updateAnswersOrder } from '@/store/questionReduser';
-import { addAnswer, removeAnswer } from '@/store/questionReduser';
+import { updateAnswersOrder } from '@/store/questionReducer';
+import { addAnswer, removeAnswer } from '@/store/questionReducer';
 import { AppDispatch } from '@/store';
 import {
   createAnswerThunk,
@@ -38,13 +38,7 @@ type QuestionBoxItems = {
   questionId: string;
   removeQuestionHandler: () => void;
   questions: QuestionItem[];
-  onAnswerSelect: (
-    selectedAnswer: AnswerItem,
-    type: string,
-    inputNumberValue: number,
-    isChecked: boolean,
-    questionId: string
-  ) => void;
+  onAnswerSelect: (args: OnAnswerSelectArgs) => void;
 };
 
 const QuestionBox: FC<QuestionBoxItems> = ({
@@ -75,8 +69,8 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const removeAnswerAction = useActionWithPayload(removeAnswer);
   const updateAnswersOrderAction = useActionWithPayload(updateAnswersOrder);
 
-  const pathRouteCreate = router.pathname === '/admin/createTests';
-  const pathRouteEdit = router.pathname.startsWith('/admin/editTest');
+  const pathRouteCreate = router.pathname === '/admin/create-tests';
+  const pathRouteEdit = router.pathname.startsWith('/admin/edit-test');
 
   const checkAnswerValue =
     inputValue.length >= 1 &&
