@@ -56,7 +56,7 @@ const Input: FC<InputItems> = ({
       ? s['radio']
       : s.input;
 
-  const changeStyleAdminCheckbox = router.pathname === '/signUp';
+  const changeStyleAdminCheckbox = router.pathname === '/sign-up';
 
   return (
     <div

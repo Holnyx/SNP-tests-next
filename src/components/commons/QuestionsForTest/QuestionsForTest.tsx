@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useRef, useState } from 'react';
+import React, { FC, memo, useEffect, useState } from 'react';
 import { Reorder } from 'motion/react';
 
 import AnswerBox from '../AnswerBox/AnswerBox';
@@ -41,6 +41,7 @@ const QuestionForTest: FC<QuestionForTestItems> = ({
               takeTest={takeTest}
               onAnswerSelect={onAnswerSelect}
               answer={answer}
+              pathRouteEdit={false}
             />
           );
         })}

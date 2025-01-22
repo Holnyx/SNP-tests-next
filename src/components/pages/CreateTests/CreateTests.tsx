@@ -39,9 +39,18 @@ import cx from 'classnames';
 type CreateTestsItems = {
   id?: string;
   selectedTestItem: TestsItem;
+  pathRouteEdit: boolean;
+  pathRouteCreate: boolean;
+  pathRouteTakeTest: boolean;
 };
 
-const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
+const CreateTests: FC<CreateTestsItems> = ({
+  id,
+  selectedTestItem,
+  pathRouteEdit,
+  pathRouteCreate,
+  pathRouteTakeTest,
+}) => {
   const [testDateValue, setTestDateValue] = useState(
     selectedTestItem.created_at
   );
@@ -81,10 +90,6 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     const hasCorrectAnswer = question.answers.some(answer => answer.is_right);
     return hasEnoughAnswers && hasCorrectAnswer;
   });
-
-  const pathRouteEdit = router.pathname.startsWith('/admin/edit-test');
-  const pathRouteCreate = router.pathname === '/admin/create-tests';
-  const pathRouteTakeTest = router.pathname.startsWith('/admin/test-page');
 
   const cleanInputs = useCallback(() => {
     setInputValue('');
@@ -171,7 +176,12 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
       setErrorTestTitle(false);
       setErrorList(false);
     }
-    if (checkTestTitleValue && isQuestionListValid && hasAnswer && testTitleValue) {
+    if (
+      checkTestTitleValue &&
+      isQuestionListValid &&
+      hasAnswer &&
+      testTitleValue
+    ) {
       setIsModalWindowOpen(true);
       setIsModalWindowTitle('Are you sure you want to save the test?');
     }
@@ -184,7 +194,12 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   ]);
 
   const createTest = useCallback(async () => {
-    if (checkTestTitleValue && isQuestionListValid && hasAnswer && testTitleValue) {
+    if (
+      checkTestTitleValue &&
+      isQuestionListValid &&
+      hasAnswer &&
+      testTitleValue
+    ) {
       const answersData = allQuestions.questionsList.map(question => ({
         questionId: question.id,
         answers: question.answers || [],
@@ -214,7 +229,12 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
   ]);
 
   const saveChange = useCallback(() => {
-    if (checkTestTitleValue && isQuestionListValid && hasAnswer && testTitleValue) {
+    if (
+      checkTestTitleValue &&
+      isQuestionListValid &&
+      hasAnswer &&
+      testTitleValue
+    ) {
       if (selectedTestItem) {
         const updatedTitle =
           testTitleValue !== '' ? testTitleValue : selectedTestItem.title;
@@ -259,7 +279,7 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
     } else if (isModalWindowTitle.includes('cancel')) {
       router.replace('/admin/take-tests');
     }
-    setIsModalWindowOpen(false)
+    setIsModalWindowOpen(false);
   }, [
     isModalWindowTitle,
     pathRouteCreate,
@@ -347,6 +367,8 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                       removeQuestionHandler={() => removeQuestionHandler(q.id)}
                       questions={selectedTestItem.questions}
                       onAnswerSelect={() => {}}
+                      pathRouteEdit={pathRouteEdit}
+                      pathRouteCreate={pathRouteCreate}
                     />
                   );
                 })
@@ -359,6 +381,8 @@ const CreateTests: FC<CreateTestsItems> = ({ id, selectedTestItem }) => {
                     removeQuestionHandler={() => removeQuestionHandler(q.id)}
                     questions={questions}
                     onAnswerSelect={() => {}}
+                    pathRouteEdit={pathRouteEdit}
+                    pathRouteCreate={pathRouteCreate}
                   />
                 ))}
             {errorList && !isQuestionListValid && (

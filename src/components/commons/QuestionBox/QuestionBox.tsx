@@ -7,8 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useRouter } from 'next/router';
+import { useDispatch } from 'react-redux';
 import { Reorder } from 'motion/react';
 import { v1 } from 'uuid';
 
@@ -39,6 +38,8 @@ type QuestionBoxItems = {
   removeQuestionHandler: () => void;
   questions: QuestionItem[];
   onAnswerSelect: (args: OnAnswerSelectArgs) => void;
+  pathRouteEdit: boolean;
+  pathRouteCreate: boolean;
 };
 
 const QuestionBox: FC<QuestionBoxItems> = ({
@@ -46,8 +47,9 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   takeTest,
   questionId,
   removeQuestionHandler,
-  questions,
   onAnswerSelect,
+  pathRouteEdit,
+  pathRouteCreate,
 }) => {
   const [answerOption, setAnswerOption] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -59,18 +61,12 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   );
   const [questionTitleValue, setQuestionTitleValue] = useState(question.title);
   const [oldQuestionTitle, setOldQuestionTitle] = useState('');
-
   const previousOrderRef = useRef<AnswerItem[]>(question.answers);
 
-  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-
   const addAnswerAction = useActionWithPayload(addAnswer);
   const removeAnswerAction = useActionWithPayload(removeAnswer);
   const updateAnswersOrderAction = useActionWithPayload(updateAnswersOrder);
-
-  const pathRouteCreate = router.pathname === '/admin/create-tests';
-  const pathRouteEdit = router.pathname.startsWith('/admin/edit-test');
 
   const checkAnswerValue =
     inputValue.length >= 1 &&
@@ -269,6 +265,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
               onAnswerSelect={onAnswerSelect}
               answer={answer}
               removeAnswerHandler={removeAnswerHandler}
+              pathRouteEdit={pathRouteEdit}
             />
           );
         })}

@@ -28,6 +28,7 @@ type HeaderItems = {
   searchTerm: string;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   currentPage: number;
+  pathRouteTestsList: boolean;
 };
 
 const Header: FC<HeaderItems> = ({
@@ -38,13 +39,15 @@ const Header: FC<HeaderItems> = ({
   searchTerm,
   setCurrentPage,
   currentPage,
+  pathRouteTestsList,
 }) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const test = useSelector(filterSelector);
+
+  const filterAction = useSelector(filterSelector);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const setSearchQueryAction = useActionWithPayload(setSearchQuery);
   const changeTestsFilterAction = useActionWithPayload(filteredTestsByDate);
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const changeTestsFilter = useCallback((filter: FilteredTestsByDate) => {
     dispatch(
@@ -74,14 +77,10 @@ const Header: FC<HeaderItems> = ({
 
   const handleSort = useCallback(() => {
     const newSortOrder =
-      test === 'created_at_asc' ? 'created_at_desc' : 'created_at_asc';
+      filterAction === 'created_at_asc' ? 'created_at_desc' : 'created_at_asc';
     changeTestsFilter(newSortOrder);
     setCurrentPage(1);
-  }, [test, changeTestsFilter]);
-
-  const isTakeTests =
-    router.pathname === '/admin/take-tests' ||
-    router.pathname === '/user/take-tests';
+  }, [filterAction, changeTestsFilter]);
 
   return (
     <header className={s.container}>
@@ -89,7 +88,7 @@ const Header: FC<HeaderItems> = ({
         showSidebar={showSidebar}
         menuOpen={menuOpen}
       />
-      {isTakeTests ? (
+      {pathRouteTestsList ? (
         <div className={s['search']}>
           <SearchInput
             setSearchTerm={setSearchTerm}
@@ -99,7 +98,7 @@ const Header: FC<HeaderItems> = ({
           />
           <Image
             className={cx(s['sort-icon'], {
-              [s['sort-icon-click']]: test === 'created_at_asc',
+              [s['sort-icon-click']]: filterAction === 'created_at_asc',
             })}
             src={sortIcon}
             alt={'adminIcon'}

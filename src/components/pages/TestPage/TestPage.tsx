@@ -2,14 +2,13 @@ import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
-import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
+import QuestionsForTest from '@/components/commons/QuestionsForTest/QuestionsForTest';
 
 import { AnswerItem, OnAnswerSelectArgs, TestsItem } from '@/store/types';
 
 import s from './TestPage.module.sass';
 import cx from 'classnames';
-import QuestionsForTest from '@/components/commons/QuestionsForTest/QuestionsForTest';
 
 type TestPageItems = {
   user?: string;
@@ -153,9 +152,6 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
               <QuestionsForTest
                 question={test}
                 takeTest={pathRouteTakeTest}
-                questionId={''}
-                removeQuestionHandler={() => {}}
-                questions={selectedTestItem.questions}
                 onAnswerSelect={handleAnswerSelect}
               />
             </div>

@@ -1,6 +1,5 @@
 import React, { ChangeEvent, FC, memo, useCallback, useState } from 'react';
 import { Reorder } from 'motion/react';
-import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import Image from 'next/image';
 
@@ -22,6 +21,7 @@ type AnswerBoxItems = {
   onAnswerSelect: (args: OnAnswerSelectArgs) => void;
   answer: AnswerItem;
   removeAnswerHandler?: (questionId: string, answerId: string) => void;
+  pathRouteEdit: boolean;
 };
 
 const AnswerBox: FC<AnswerBoxItems> = ({
@@ -30,14 +30,13 @@ const AnswerBox: FC<AnswerBoxItems> = ({
   onAnswerSelect,
   answer,
   removeAnswerHandler,
+  pathRouteEdit,
 }) => {
   const [answerTitleValue, setAnswerTitleValue] = useState(answer.text);
   const [oldAnswerTitle, setOldAnswerTitle] = useState('');
   const [isHiddenInputAnswer, setIsHiddenInputAnswer] = useState(false);
 
-  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const pathRouteEdit = router.pathname.startsWith('/admin/edit-test');
 
   const cancelChangeAnswerTitle = () => {
     setIsHiddenInputAnswer(!isHiddenInputAnswer);

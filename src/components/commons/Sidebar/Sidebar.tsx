@@ -8,22 +8,27 @@ import ModalWindow from '../ModalWindow/ModalWindow';
 
 import { sidebarLinksState } from '@/components/state/sidebarLinksState';
 import { questionSelector } from '@/store/selectors';
-
 import { AppDispatch } from '@/store';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { removeAllQuestion } from '@/store/questionReducer';
+import { logoutThunk } from '@/thunk/authThunk';
 
 import s from './Sidebar.module.sass';
 import cx from 'classnames';
-import { logoutThunk } from '@/thunk/authThunk';
 
 type SidebarItems = {
   showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
   menuOpen: boolean;
   user?: string;
+  pathRouteCreate?: boolean;
 };
 
-const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
+const Sidebar: FC<SidebarItems> = ({
+  showSidebar,
+  menuOpen,
+  user,
+  pathRouteCreate,
+}) => {
   const [isModalWindowOpen, setIsModalWindowOpen] = useState(false);
   const [nextHref, setNextHref] = useState<string | null>(null);
   const router = useRouter();
@@ -33,10 +38,7 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
   const removeAllQuestionAction = useActionWithPayload(removeAllQuestion);
 
   const handleLinkClick = (href: string) => {
-    if (
-      router.pathname === '/admin/create-tests' &&
-      allQuestions.questionsList.length > 0
-    ) {
+    if (pathRouteCreate && allQuestions.questionsList.length > 0) {
       setNextHref(href);
       setIsModalWindowOpen(true);
     } else if (href === '/sign-in') {
@@ -45,7 +47,7 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
         .then(() => {
           router.replace(href);
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Logout failed:', error);
         });
     } else {
@@ -64,7 +66,7 @@ const Sidebar: FC<SidebarItems> = ({ showSidebar, menuOpen, user }) => {
 
   useEffect(() => {
     const handleBeforePopState = (state: { url: string }) => {
-      if (router.pathname === '/admin/create-tests') {
+      if (pathRouteCreate) {
         setNextHref(state.url);
         setIsModalWindowOpen(true);
         return false;

@@ -144,6 +144,7 @@ const AdminPage: FC<AdminPageItems> = ({
           searchTerm={searchTerm}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
+          pathRouteTestsList={pathRouteTestsList}
         />
 
         {(router.asPath.startsWith('/admin/create-tests') ||
@@ -151,10 +152,13 @@ const AdminPage: FC<AdminPageItems> = ({
           <CreateTests
             id={id}
             selectedTestItem={selectedTestItem}
+            pathRouteEdit={pathRouteEdit}
+            pathRouteCreate={pathRouteCreate}
+            pathRouteTakeTest={pathRouteTakeTest}
           />
         )}
 
-        {router.pathname === '/admin/take-tests' && (
+        {pathRouteTestsList && (
           <TakeTestsPage
             user={admin}
             editTest={editTest}
@@ -164,6 +168,7 @@ const AdminPage: FC<AdminPageItems> = ({
             searchTerm={searchTerm}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
+            pathRouteTestsList={pathRouteTestsList}
           />
         )}
         {router.asPath.startsWith(`/admin/test-page/${id}`) && (
@@ -178,6 +183,7 @@ const AdminPage: FC<AdminPageItems> = ({
           showSidebar={setMenuOpen}
           menuOpen={menuOpen}
           user={admin}
+          pathRouteCreate={pathRouteCreate}
         />
         <Footer />
       </div>

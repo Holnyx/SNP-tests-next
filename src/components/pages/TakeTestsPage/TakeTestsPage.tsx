@@ -27,6 +27,7 @@ type TakeTestsPageItems = {
   searchTerm: string;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   currentPage: number;
+  pathRouteTestsList: boolean
 };
 
 const TakeTestsPage: FC<TakeTestsPageItems> = ({
@@ -37,6 +38,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   searchTerm,
   setCurrentPage,
   currentPage,
+  pathRouteTestsList
 }) => {
   const [show, setShow] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState('');
@@ -118,8 +120,6 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
     fetchTests();
   }, [currentPage, dispatch, debouncedSearchValue]);
 
-  const pathRouteTakeTests = router.pathname === '/admin/take-tests';
-
   return (
     <div className={s.container}>
       <h2 className={s.title}> Take Test</h2>
@@ -167,7 +167,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
                 <span className={s['test-date']}>
                   {formatDate(test.created_at)}
                 </span>
-                {pathRouteTakeTests && (
+                {pathRouteTestsList && (
                   <Image
                     src={arrowIcon}
                     alt={'arrow'}

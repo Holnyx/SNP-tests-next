@@ -1,16 +1,18 @@
 import React, { memo, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useDispatch } from 'react-redux';
 
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 
-import s from './NotFound.module.sass';
-import cx from 'classnames';
-import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
 import { getCurrentUser } from '@/thunk/testsThunk';
 
+import s from './NotFound.module.sass';
+import cx from 'classnames';
+
 const NotFoundPage = () => {
   const [isHover, setIsHover] = useState(false);
+  
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 

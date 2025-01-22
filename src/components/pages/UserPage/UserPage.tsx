@@ -1,6 +1,6 @@
 import React, { FC, memo, useEffect, useState } from 'react';
 import { setCookie } from 'cookies-next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 
 import Header from '@/components/commons/Header/Header';
@@ -14,7 +14,6 @@ import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 import { TestsItem } from '@/store/types';
 import { useDebounce } from '@/hooks/useDebounce';
 import { sortedTestsSelector, testSelector } from '@/store/selectors';
-import { AppDispatch } from '@/store';
 
 import s from './UserPage.module.sass';
 import cx from 'classnames';
@@ -24,18 +23,24 @@ type UserPageItems = {
   user?: string;
   id?: string;
   selectedTest: TestsItem;
-  username: string | undefined
+  username: string | undefined;
 };
 
-const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest, username }) => {
+const UserPage: FC<UserPageItems> = ({
+  user,
+  search,
+  id,
+  selectedTest,
+  username,
+}) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<TestsItem[]>([]);
   const [selectedTestItem, setSelectedTestItem] =
     useState<TestsItem>(selectedTest);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const allTests = useSelector(testSelector);
@@ -87,7 +92,7 @@ const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest, username 
   const pathRouteEdit = router.pathname.startsWith('/user/edit-test');
   const pathRouteCreate = router.pathname === '/user/create-tests';
   const pathRouteTestsList = router.pathname === '/user/take-tests';
-  const pathRouteTakeTest = router.pathname.startsWith('/user/test-page');
+  const pathRouteTakeTest = router.asPath.startsWith(`/user/test-page/${id}`);
 
   const getPageType = () => {
     if (pathRouteEdit) return 'edit';
@@ -122,8 +127,11 @@ const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest, username 
           name={username}
           setSearchTerm={setSearchTerm}
           searchTerm={searchTerm}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          pathRouteTestsList={pathRouteTestsList}
         />
-        {router.pathname === '/user/take-tests' && (
+        {pathRouteTestsList && (
           <TakeTestsPage
             user={user}
             editTest={() => {}}
@@ -131,9 +139,12 @@ const UserPage: FC<UserPageItems> = ({ user, search, id, selectedTest, username 
             isSearching={isSearching}
             results={results}
             searchTerm={searchTerm}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            pathRouteTestsList={pathRouteTestsList}
           />
         )}
-        {router.asPath.startsWith(`/${user}/test-page/${id}`) && (
+        {pathRouteTakeTest && (
           <TestPage
             user={user}
             id={id}
