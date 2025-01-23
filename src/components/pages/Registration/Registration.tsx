@@ -29,15 +29,6 @@ const Registration: FC<RegistrationItems> = ({ url }) => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const authorizationAction = (data: {
-    username: string;
-    password: string;
-    password_confirmation: string;
-    is_admin: boolean;
-  }) => {
-    dispatch(signupThunk(data));
-  };
-
   const checkNameValue =
     inputNameValue.length >= 3 && inputNameValue.trim() !== '';
 
@@ -50,7 +41,7 @@ const Registration: FC<RegistrationItems> = ({ url }) => {
     password_confirmation: string;
     is_admin: boolean;
   }) => {
-    const resultAction = await authorizationAction(data);
+    const resultAction = await dispatch(signupThunk(data));
     if (signupThunk.fulfilled.match(resultAction)) {
       setSuccessMessage('Registration was successful');
     } else {
@@ -145,7 +136,7 @@ const Registration: FC<RegistrationItems> = ({ url }) => {
         {successMessage && (
           <div className={s['button-box-signin']}>
             <Link
-              href="/signIn"
+              href="/sign-in"
               className={s.button}
             >
               Sign In
