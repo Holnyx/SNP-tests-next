@@ -1,10 +1,10 @@
 import React, { memo } from 'react';
+import axios from 'axios';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
 
 import Authorization from '@/components/pages/Authorization/Authorization';
 import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 import SeoTags from '@/components/commons/SeoTags/SeoTags';
-import axios from 'axios';
 
 const SignInPage = ({}: InferGetServerSidePropsType<
   typeof getServerSideProps
