@@ -13,11 +13,15 @@ import cx from 'classnames';
 
 type TestPageItems = {
   user?: string;
-  id?: string;
   selectedTestItem: TestsItem | null;
+  pathRouteTakeTest: boolean;
 };
 
-const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
+const TestPage: FC<TestPageItems> = ({
+  user,
+  selectedTestItem,
+  pathRouteTakeTest,
+}) => {
   const [nextHref, setNextHref] = useState<string | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState<
     AnswerItem[] | undefined
@@ -30,7 +34,13 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
   const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
 
   const router = useRouter();
-  const pathRouteTakeTest = router.pathname.startsWith(`/${user}/test-page`);
+
+  const retryTest = () => {
+    setUserSelectedAnswers([]);
+    setCompleteTest(false);
+    setCorrectUserAnswers(0);
+    router.replace(router.asPath);
+  };
 
   const onConfirm = useCallback(() => {
     closeModal();
@@ -131,11 +141,13 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
   }, [openModal]);
 
   useEffect(() => {
-    const correct = selectedTestItem?.questions.flatMap(question =>
-      question.answers.filter(answer => answer.is_right)
-    );
-    setCorrectAnswers(correct);
-  }, [selectedTestItem?.questions]);
+    if (selectedTestItem) {
+      const correct = selectedTestItem.questions.flatMap(question =>
+        question.answers.filter(answer => answer.is_right)
+      );
+      setCorrectAnswers(correct);
+    }
+  }, [selectedTestItem]);
 
   return (
     <div className={s.container}>
@@ -190,9 +202,7 @@ const TestPage: FC<TestPageItems> = ({ user, id, selectedTestItem }) => {
             />
             <ChangeButton
               title={'Try again'}
-              onClick={() => {
-                router.reload();
-              }}
+              onClick={retryTest}
             />
           </>
         )}

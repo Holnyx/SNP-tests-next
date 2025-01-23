@@ -182,8 +182,8 @@ const TestsListPage: FC<TestsListPageItems> = ({
         {pathRouteTakeTest && (
           <TestPage
             user={user}
-            id={id}
             selectedTestItem={selectedTestItem}
+            pathRouteTakeTest={pathRouteTakeTest}
           />
         )}
 
