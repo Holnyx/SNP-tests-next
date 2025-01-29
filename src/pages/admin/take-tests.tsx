@@ -8,6 +8,7 @@ const TakeTests = ({
   search,
   username,
   role,
+  page,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <TestsListPage
@@ -16,6 +17,7 @@ const TakeTests = ({
       selectedTest={null}
       username={username}
       role={role}
+      page={page}
     ></TestsListPage>
   );
 };
@@ -31,7 +33,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
       },
     }
   );
-
+  const page = parseInt(context.query.page as string, 10) || 1;
   const user = response.data;
   if (user && !user.is_admin) {
     return {
@@ -55,6 +57,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
       search: search || '',
       username: user ? user.username : null,
       role: user.is_admin,
+      page,
     },
   };
 };

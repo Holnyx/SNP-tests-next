@@ -33,7 +33,7 @@ type TakeTestsPageItems = {
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
   currentPage: number;
   pathRouteTestsList: boolean;
-  role: boolean
+  role: boolean;
 };
 
 const TakeTestsPage: FC<TakeTestsPageItems> = ({
@@ -45,7 +45,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
   setCurrentPage,
   currentPage,
   pathRouteTestsList,
-  role
+  role,
 }) => {
   const [show, setShow] = useState(false);
   const [selectedTestId, setSelectedTestId] = useState('');
@@ -96,7 +96,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
           page: currentPage + 1,
           per: 5,
           search: debouncedSearchValue,
-          sort: 'created_at_desc',
+          sort: filterAction,
         })
       );
     }
@@ -106,6 +106,20 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
     if (currentPage > 1) {
       setCurrentPage(prevPage => prevPage - 1);
     }
+  };
+
+  const handlePageChange = () => {
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          page: currentPage,
+        },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   useEffect(() => {
@@ -122,9 +136,9 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
         setTotalPages(response.payload.meta.total_pages);
       }
     };
-
+    handlePageChange();
     fetchTests();
-  }, [currentPage, dispatch, debouncedSearchValue]);
+  }, [currentPage, dispatch, debouncedSearchValue, filterAction]);
 
   return (
     <div className={s.container}>

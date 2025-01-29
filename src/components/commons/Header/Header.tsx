@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback } from 'react';
+import React, { FC, memo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,7 +10,11 @@ import SearchInput from '../SearchInput/SearchInput';
 import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 
 import { useActionWithPayload } from '@/hooks/useAction';
-import { filteredTestsByDate, setSearchQuery } from '@/store/testReducer';
+import {
+  filteredTestsByDate,
+  setSearchQuery,
+  setSortQuery,
+} from '@/store/testReducer';
 import { filterSelector } from '@/store/selectors';
 import { FilteredTestsByDate } from '@/store/types';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -47,44 +51,73 @@ const Header: FC<HeaderItems> = ({
   const filterAction = useSelector(filterSelector);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const setSearchQueryAction = useActionWithPayload(setSearchQuery);
+  const setSortQueryAction = useActionWithPayload(setSortQuery);
   const changeTestsFilterAction = useActionWithPayload(filteredTestsByDate);
 
-  const changeTestsFilter = useCallback((filter: FilteredTestsByDate) => {
-    dispatch(
-      getAllTestsThunk({
-        page: currentPage,
-        per: 5,
-        search: debouncedSearchTerm,
-        sort: filter,
-      })
-    ).then(() => changeTestsFilterAction(filter));
-  }, [dispatch]);
+  const changeTestsFilter = useCallback(
+    (filter: FilteredTestsByDate) => {
+      dispatch(
+        getAllTestsThunk({
+          page: currentPage,
+          per: 5,
+          search: debouncedSearchTerm,
+          sort: filter,
+        })
+      ).then(() => changeTestsFilterAction(filter));
+    },
+    [dispatch]
+  );
+
+  const handleSortChange = useCallback(
+    (sortOrder: string) => {
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: { page: 1, ...router.query, sort: sortOrder },
+        },
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router, currentPage]
+  );
 
   const handleSearchChange = useCallback(
     (query: string) => {
-      if (query) {
-        setSearchQueryAction(query);
-        router.replace(
-          {
-            pathname: router.pathname,
-            query: { ...router.query, search: query },
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: {
+            ...router.query,
+            search: query || undefined,
           },
-          undefined,
-          { shallow: true }
-        );
-      } else {
-        router.replace(router.pathname, undefined, { shallow: true });
-      }
+        },
+        undefined,
+        { shallow: true }
+      );
     },
-    [router, setSearchQueryAction]
+    [router]
   );
 
   const handleSort = useCallback(() => {
-    const newSortOrder =
-      filterAction === 'created_at_asc' ? 'created_at_desc' : 'created_at_asc';
+    handleSortChange(newSortOrder);
     changeTestsFilter(newSortOrder);
     setCurrentPage(1);
-  }, [filterAction, changeTestsFilter]);
+  }, [filterAction, changeTestsFilter, handleSortChange]);
+
+  useEffect(() => {
+    if (!router.query.sort && filterAction) {
+      setSortQueryAction(filterAction);
+    } else if (router.query.sort) {
+      setSortQueryAction(router.query.sort);
+    }
+  }, [router.query.sort, filterAction, setSortQueryAction]);
+
+  const initialSortOrder = router.query.sort || filterAction;
+  const newSortOrder =
+    initialSortOrder === 'created_at_asc'
+      ? 'created_at_desc'
+      : 'created_at_asc';
 
   return (
     <header className={s.container}>

@@ -26,6 +26,7 @@ type TestsListPageItems = {
   selectedTest: TestsItem | null;
   username: string;
   role: boolean;
+  page: number;
 };
 
 const TestsListPage: FC<TestsListPageItems> = ({
@@ -35,6 +36,7 @@ const TestsListPage: FC<TestsListPageItems> = ({
   selectedTest,
   username,
   role,
+  page,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
@@ -43,7 +45,7 @@ const TestsListPage: FC<TestsListPageItems> = ({
   const [selectedTestItem, setSelectedTestItem] = useState<TestsItem | null>(
     selectedTest
   );
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(page);
 
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);

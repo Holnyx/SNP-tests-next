@@ -55,7 +55,7 @@ const ModalWindow: FC<ModalWindowItems> = ({
               title={'Yes'}
               onClick={() => {
                 onConfirm();
-                onClose
+                onClose()
               }}
             />
           </div>
