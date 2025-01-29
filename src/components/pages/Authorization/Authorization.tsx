@@ -12,17 +12,16 @@ import { AppDispatch } from '@/store';
 import { signinThunk } from '@/thunk/authThunk';
 
 import s from './Authorization.module.sass';
-import cx from 'classnames';
 
-type AuthorizationItems = {
+type AuthorizationProps = {
   url: string;
 };
 
-const Authorization: FC<AuthorizationItems> = ({ url }) => {
+const Authorization: FC<AuthorizationProps> = ({ url }) => {
   const [error, setError] = useState(false);
   const [inputNameValue, setInputNameValue] = useState('');
   const [inputPasswordValue, setInputPasswordValue] = useState('');
-  
+
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -86,7 +85,7 @@ const Authorization: FC<AuthorizationItems> = ({ url }) => {
               onClick={onClickHandlerSignUp}
             />
             <span className={s['sign-up']}>
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link
                 href="/sign-up"
                 className={s.link}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { signinThunk, signupThunk } from '@/thunk/authThunk';
 import { getCurrentUser } from '@/thunk/testsThunk';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
@@ -28,7 +29,9 @@ const authSlice = createSlice({
       state.errors = [];
     },
     removeError(state, action) {
-        state.errors = state.errors.filter((_, index) => index !== action.payload)
+      state.errors = state.errors.filter(
+        (_, index) => index !== action.payload
+      );
     },
   },
   extraReducers: builder => {
@@ -55,15 +58,15 @@ const authSlice = createSlice({
       })
       .addCase(signinThunk.fulfilled, (state, action: PayloadAction<any>) => {
         state.isLoading = false;
-        state.user = action.payload; 
+        state.user = action.payload;
       })
       .addCase(signinThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.errors.push(action.payload as string);
       });
 
-      builder
-      .addCase(getCurrentUser.pending, (state) => {
+    builder
+      .addCase(getCurrentUser.pending, state => {
         state.isLoading = true;
         state.errors = [];
       })
@@ -73,7 +76,7 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.errors = [action.payload as string]
+        state.errors = [action.payload as string];
       });
   },
 });

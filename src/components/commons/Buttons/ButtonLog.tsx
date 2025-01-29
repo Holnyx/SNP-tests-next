@@ -1,12 +1,12 @@
 import React, { FC, memo } from 'react';
 
-type ButtonLogItems = {
+type ButtonLogProps = {
   title: string;
   className: string;
   onClick: () => void;
 };
 
-const ButtonLog: FC<ButtonLogItems> = ({ title, className, onClick }) => {
+const ButtonLog: FC<ButtonLogProps> = ({ title, className, onClick }) => {
   return (
     <>
       <button

@@ -1,7 +1,6 @@
 import React from 'react';
 
 import s from './Footer.module.sass';
-import cx from 'classnames';
 
 const Footer = () => {
   return (

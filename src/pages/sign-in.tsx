@@ -1,14 +1,12 @@
 import React, { memo } from 'react';
 import axios from 'axios';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { GetServerSideProps } from 'next';
 
 import Authorization from '@/components/pages/Authorization/Authorization';
 import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 import SeoTags from '@/components/commons/SeoTags/SeoTags';
 
-const SignInPage = ({}: InferGetServerSidePropsType<
-  typeof getServerSideProps
->) => {
+const SignInPage = () => {
   return (
     <>
       <SeoTags title="Sign In" />

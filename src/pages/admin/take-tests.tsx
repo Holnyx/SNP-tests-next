@@ -1,8 +1,7 @@
 import React, { memo } from 'react';
-
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import axios from 'axios';
 import TestsListPage from '@/components/pages/TestsListPage/TestsListPage';
+import { useGetServerSideProps } from '@/hooks/useGetServerSideProps';
 
 const TakeTests = ({
   search,
@@ -18,48 +17,12 @@ const TakeTests = ({
       username={username}
       role={role}
       page={page}
-    ></TestsListPage>
+    />
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
-  const { search } = context.query;
-  const { req, res } = context;
-  const response = await axios.get(
-    'https://interns-test-fe.snp.agency/api/v1/users/current',
-    {
-      headers: {
-        Cookie: req.headers.cookie || '',
-      },
-    }
-  );
-  const page = parseInt(context.query.page as string, 10) || 1;
-  const user = response.data;
-  if (user && !user.is_admin) {
-    return {
-      redirect: {
-        destination: '/user/take-tests',
-        permanent: false,
-      },
-    };
-  }
-  if (!user) {
-    return {
-      redirect: {
-        destination: '/sign-in',
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      search: search || '',
-      username: user ? user.username : null,
-      role: user.is_admin,
-      page,
-    },
-  };
+  return useGetServerSideProps(context);
 };
 
 export default memo(TakeTests);

@@ -109,7 +109,9 @@ const testSlice = createSlice({
         }
       )
       .addCase(deleteTestThunk.rejected, (state, action) => {
-        action.payload && state.errors.push(action.payload as string);
+        if (action.payload) {
+          state.errors.push(action.payload as string);
+        }
         state.deleteLoading = false;
       })
       .addCase(updateTestThunk.pending, state => {

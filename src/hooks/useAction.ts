@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useDispatch } from 'react-redux';
 import { AsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { useCallback } from 'react';
@@ -17,14 +18,13 @@ export const useActionWithPayload = <T>(
   return handler;
 };
 
-
 export const useActionAsyncWithPayload = <T extends any[]>(
   action: AsyncThunk<any, T[0], any> | ((...args: T) => PayloadAction<any>)
 ) => {
   const dispatch = useDispatch<AppDispatch>();
   const handler = useCallback(
     (...args: T) => {
-      dispatch(action({...args}));
+      dispatch(action({ ...args }));
     },
     [dispatch, action]
   );

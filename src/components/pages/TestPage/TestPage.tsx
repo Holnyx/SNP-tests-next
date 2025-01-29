@@ -9,15 +9,14 @@ import { AnswerItem, OnAnswerSelectArgs, TestsItem } from '@/store/types';
 import { useModal } from '@/hooks/useModal';
 
 import s from './TestPage.module.sass';
-import cx from 'classnames';
 
-type TestPageItems = {
+type TestPageProps = {
   user?: string;
   selectedTestItem: TestsItem | null;
   pathRouteTakeTest: boolean;
 };
 
-const TestPage: FC<TestPageItems> = ({
+const TestPage: FC<TestPageProps> = ({
   user,
   selectedTestItem,
   pathRouteTakeTest,

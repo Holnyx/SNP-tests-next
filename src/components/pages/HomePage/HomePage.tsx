@@ -1,12 +1,10 @@
-import React, { memo, useState } from 'react';
-import { useRouter } from 'next/router';
+import React, { memo } from 'react';
 import Link from 'next/link';
 
 import s from './HomePage.module.sass';
 import cx from 'classnames';
 
 const HomePage = () => {
-  const router = useRouter();
   return (
     <div className={cx(s['home-page'])}>
       <div className={s.info}>

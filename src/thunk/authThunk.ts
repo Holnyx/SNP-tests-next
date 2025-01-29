@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 import api from '@/api/api';
 import { createAsyncThunk } from '@reduxjs/toolkit';
@@ -23,9 +24,9 @@ export const signupThunk = createAsyncThunk(
           error.response?.data?.username?.[0] === 'has already been taken'
             ? 'User already exists'
             : error.response?.data?.password_confirmation?.[0] ===
-              `doesn't match Password`
-            ? `Doesn't match Password`
-            : error.response?.data.message || 'Registration error';
+                `doesn't match Password`
+              ? `Doesn't match Password`
+              : error.response?.data.message || 'Registration error';
         return rejectWithValue(errorMessage);
       } else {
         return rejectWithValue('Unknown error');

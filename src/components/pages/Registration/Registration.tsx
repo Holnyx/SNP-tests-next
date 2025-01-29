@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,13 +12,12 @@ import { AppDispatch } from '@/store';
 import { signupThunk } from '@/thunk/authThunk';
 
 import s from './Registration.module.sass';
-import cx from 'classnames';
 
-type RegistrationItems = {
+type RegistrationProps = {
   url: string;
 };
 
-const Registration: FC<RegistrationItems> = ({ url }) => {
+const Registration: FC<RegistrationProps> = ({ url }) => {
   const [isChecked, setIsChecked] = useState(false);
   const [error, setError] = useState(false);
   const [inputNameValue, setInputNameValue] = useState('');

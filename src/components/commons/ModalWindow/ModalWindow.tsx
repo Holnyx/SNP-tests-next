@@ -9,14 +9,14 @@ import useBodyScrollLock from '@/hooks/useBodyScrollLock';
 import s from './ModalWindow.module.sass';
 import cx from 'classnames';
 
-type ModalWindowItems = {
+type ModalWindowProps = {
   isModalWindowOpen: boolean;
   onConfirm: () => void;
   title: string;
   onClose: () => void;
 };
 
-const ModalWindow: FC<ModalWindowItems> = ({
+const ModalWindow: FC<ModalWindowProps> = ({
   isModalWindowOpen,
   onConfirm,
   title,
@@ -55,7 +55,7 @@ const ModalWindow: FC<ModalWindowItems> = ({
               title={'Yes'}
               onClick={() => {
                 onConfirm();
-                onClose()
+                onClose();
               }}
             />
           </div>

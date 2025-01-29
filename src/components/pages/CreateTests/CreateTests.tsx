@@ -37,7 +37,7 @@ import { AppDispatch } from '@/store';
 import s from './CreateTests.module.sass';
 import cx from 'classnames';
 
-type CreateTestsItems = {
+type CreateTestsProps = {
   id?: string;
   selectedTestItem: TestsItem | null;
   pathRouteEdit: boolean;
@@ -45,7 +45,7 @@ type CreateTestsItems = {
   pathRouteTakeTest: boolean;
 };
 
-const CreateTests: FC<CreateTestsItems> = ({
+const CreateTests: FC<CreateTestsProps> = ({
   id,
   selectedTestItem,
   pathRouteEdit,

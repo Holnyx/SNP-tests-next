@@ -17,9 +17,8 @@ import { TestsItem } from '@/store/types';
 import { sortedTestsSelector, testSelector } from '@/store/selectors';
 
 import s from './TestsListPage.module.sass';
-import cx from 'classnames';
 
-type TestsListPageItems = {
+type TestsListPageProps = {
   user?: string;
   id?: string;
   search: string;
@@ -29,7 +28,7 @@ type TestsListPageItems = {
   page: number;
 };
 
-const TestsListPage: FC<TestsListPageItems> = ({
+const TestsListPage: FC<TestsListPageProps> = ({
   user,
   id,
   search,
@@ -141,7 +140,9 @@ const TestsListPage: FC<TestsListPageItems> = ({
       <div
         className={s.background}
         onClick={() => {
-          menuOpen && setMenuOpen(!menuOpen);
+          if (menuOpen) {
+            setMenuOpen(!menuOpen);
+          }
         }}
       >
         <Header

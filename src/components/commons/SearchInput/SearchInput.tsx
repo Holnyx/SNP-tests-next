@@ -6,16 +6,15 @@ import starUrl from '/public/img/loupe-icon.svg?url';
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
 import s from './SearchInput.module.sass';
-import cx from 'classnames';
 
-type SearchInputItems = {
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+type SearchInputProps = {
+  setSearchTerm: (v: string) => void;
   defaultValue: string;
   onSearchChange: (query: string) => void;
   clearSearchInput: (payload: string) => void;
 };
 
-const SearchInput: FC<SearchInputItems> = ({
+const SearchInput: FC<SearchInputProps> = ({
   setSearchTerm,
   defaultValue,
   onSearchChange,

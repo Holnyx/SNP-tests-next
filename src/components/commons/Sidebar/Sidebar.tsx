@@ -17,14 +17,14 @@ import { useModal } from '@/hooks/useModal';
 import s from './Sidebar.module.sass';
 import cx from 'classnames';
 
-type SidebarItems = {
-  showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+type SidebarProps = {
+  showSidebar: (v: boolean) => void;
   menuOpen: boolean;
   user?: string;
   pathRouteCreate?: boolean;
 };
 
-const Sidebar: FC<SidebarItems> = ({
+const Sidebar: FC<SidebarProps> = ({
   showSidebar,
   menuOpen,
   user,

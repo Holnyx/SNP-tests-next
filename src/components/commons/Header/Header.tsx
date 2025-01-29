@@ -24,18 +24,18 @@ import { getAllTestsThunk } from '@/thunk/testsThunk';
 import s from './Header.module.sass';
 import cx from 'classnames';
 
-type HeaderItems = {
-  showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+type HeaderProps = {
+  showSidebar: (v: boolean) => void;
   menuOpen: boolean;
   name?: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  setSearchTerm: (v: string) => void;
   searchTerm: string;
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  setCurrentPage: (v: number) => void;
   currentPage: number;
   pathRouteTestsList: boolean;
 };
 
-const Header: FC<HeaderItems> = ({
+const Header: FC<HeaderProps> = ({
   showSidebar,
   menuOpen,
   name,

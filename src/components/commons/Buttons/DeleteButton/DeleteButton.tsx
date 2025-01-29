@@ -4,13 +4,12 @@ import Image from 'next/image';
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
 import s from './DeleteButton.module.sass';
-import cx from 'classnames';
 
-type DeleteButtonItems = {
+type DeleteButtonProps = {
   onClick: () => void;
 };
 
-const DeleteButton: FC<DeleteButtonItems> = ({ onClick }) => {
+const DeleteButton: FC<DeleteButtonProps> = ({ onClick }) => {
   const onKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       onClick();

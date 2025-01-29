@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, memo, SetStateAction, useState } from 'react';
+import React, { FC, memo, useState } from 'react';
 import { TestsOptionsItem } from '@/components/state/testsOptions';
 
 import s from './SelectField.module.sass';
@@ -7,8 +7,8 @@ import cx from 'classnames';
 type SelectFieldPropsItem = {
   defaultValue: string;
   directionOptions: TestsOptionsItem[];
-  setSelect: React.Dispatch<React.SetStateAction<string>>;
-  onChange: Dispatch<SetStateAction<string>>;
+  setSelect: (v: string) => void;
+  onChange: (v: string) => void;
   error: boolean;
 };
 

@@ -12,7 +12,7 @@ import cx from 'classnames';
 
 const NotFoundPage = () => {
   const [isHover, setIsHover] = useState(false);
-  
+
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -28,7 +28,7 @@ const NotFoundPage = () => {
       } else {
         router.replace('/sign-in');
       }
-    } catch (error) {
+    } catch {
       router.replace('/sign-in');
     }
   };

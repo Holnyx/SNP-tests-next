@@ -3,18 +3,18 @@ import React, { ChangeEvent, FC, memo, useEffect, useState } from 'react';
 import s from './InputForLogIn.module.sass';
 import cx from 'classnames';
 
-type InputForLogInItems = {
+type InputForLogInProps = {
   title: string;
   type: string;
   name: string;
   value?: string;
   id?: string;
   error?: boolean;
-  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  setInputValue: (v: string) => void;
   url: string;
 };
 
-const InputForLogIn: FC<InputForLogInItems> = ({
+const InputForLogIn: FC<InputForLogInProps> = ({
   title,
   type,
   name,

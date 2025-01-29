@@ -31,7 +31,7 @@ import {
 import s from './QuestionBox.module.sass';
 import cx from 'classnames';
 
-type QuestionBoxItems = {
+type QuestionBoxProps = {
   question: QuestionItem;
   takeTest: boolean;
   questionId: string;
@@ -42,7 +42,7 @@ type QuestionBoxItems = {
   pathRouteCreate: boolean;
 };
 
-const QuestionBox: FC<QuestionBoxItems> = ({
+const QuestionBox: FC<QuestionBoxProps> = ({
   question,
   takeTest,
   questionId,
@@ -184,9 +184,9 @@ const QuestionBox: FC<QuestionBoxItems> = ({
   const changeQuestionTitleHandler = () => {
     setIsHidden(!isHidden);
     if (isHidden) {
-      questionTitleValue &&
-        questionTitleValue.trim() === '' &&
+      if (questionTitleValue && questionTitleValue.trim() === '') {
         setQuestionTitleValue(questionTitleValue.trim());
+      }
       if (pathRouteEdit) {
         dispatch(
           editQuestionThunk({
@@ -274,15 +274,21 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       >
         {answerState.map(answer => {
           return (
-            <AnswerBox
+            <Reorder.Item
+              value={answer}
               key={answer.id}
-              question={question}
-              takeTest={takeTest}
-              onAnswerSelect={onAnswerSelect}
-              answer={answer}
-              removeAnswerHandler={removeAnswerHandler}
-              pathRouteEdit={pathRouteEdit}
-            />
+              className={s['option']}
+            >
+              <AnswerBox
+                key={answer.id}
+                question={question}
+                takeTest={takeTest}
+                onAnswerSelect={onAnswerSelect}
+                answer={answer}
+                removeAnswerHandler={removeAnswerHandler}
+                pathRouteEdit={pathRouteEdit}
+              />
+            </Reorder.Item>
           );
         })}
       </Reorder.Group>

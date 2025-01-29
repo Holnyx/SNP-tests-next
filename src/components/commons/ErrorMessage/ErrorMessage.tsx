@@ -45,7 +45,8 @@ const ErrorMessage = () => {
           <button
             className={s.button}
             onClick={() => {
-              deleteAuthError(index), deleteTestsError(index);
+              deleteAuthError(index);
+              deleteTestsError(index);
             }}
           >
             <Image

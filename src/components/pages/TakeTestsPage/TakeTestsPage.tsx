@@ -23,20 +23,20 @@ import { useModal } from '@/hooks/useModal';
 import s from './TakeTestsPage.module.sass';
 import cx from 'classnames';
 
-type TakeTestsPageItems = {
+type TakeTestsPageProps = {
   user?: string;
   editTest: (id: string) => void;
   search: string;
   isSearching: boolean;
   results: TestsItem[];
   searchTerm: string;
-  setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+  setCurrentPage: (v: number) => void;
   currentPage: number;
   pathRouteTestsList: boolean;
   role: boolean;
 };
 
-const TakeTestsPage: FC<TakeTestsPageItems> = ({
+const TakeTestsPage: FC<TakeTestsPageProps> = ({
   user,
   editTest,
   isSearching,
@@ -90,7 +90,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
 
   const loadMoreTests = () => {
     if (currentPage <= totalPages) {
-      setCurrentPage(prevPage => prevPage + 1);
+      setCurrentPage(currentPage + 1);
       dispatch(
         getAllTestsThunk({
           page: currentPage + 1,
@@ -104,7 +104,7 @@ const TakeTestsPage: FC<TakeTestsPageItems> = ({
 
   const prevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(prevPage => prevPage - 1);
+      setCurrentPage(currentPage - 1);
     }
   };
 

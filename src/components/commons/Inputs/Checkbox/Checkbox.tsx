@@ -9,7 +9,7 @@ import { AnswerItem, OnAnswerSelectArgs } from '@/store/types';
 import s from './Checkbox.module.sass';
 import cx from 'classnames';
 
-type CheckboxItems = {
+type CheckboxProps = {
   title: string;
   type: string;
   name: string;
@@ -18,10 +18,10 @@ type CheckboxItems = {
   onAnswerSelect: (args: OnAnswerSelectArgs) => void;
   answer?: AnswerItem;
   questionId: string;
-  setIsChecked: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsChecked: (v: boolean) => void;
 };
 
-const Checkbox: FC<CheckboxItems> = ({
+const Checkbox: FC<CheckboxProps> = ({
   title,
   type,
   name,
@@ -40,8 +40,7 @@ const Checkbox: FC<CheckboxItems> = ({
     if (type === 'number') {
       setInputNumberValue(value);
     }
-    questionId &&
-      answer &&
+    if (questionId && answer) {
       onAnswerSelect({
         selectedAnswer: answer,
         type: type,
@@ -49,7 +48,7 @@ const Checkbox: FC<CheckboxItems> = ({
         isChecked: e.currentTarget.checked,
         questionId: questionId,
       });
-
+    }
     setIsChecked(e.currentTarget.checked);
   };
 
@@ -58,10 +57,10 @@ const Checkbox: FC<CheckboxItems> = ({
     type === 'multiple'
       ? 'checkbox'
       : type === 'single'
-      ? 'radio'
-      : type === 'number'
-      ? 'number'
-      : 'checkbox';
+        ? 'radio'
+        : type === 'number'
+          ? 'number'
+          : 'checkbox';
   return (
     <div
       className={cx(s.container, {

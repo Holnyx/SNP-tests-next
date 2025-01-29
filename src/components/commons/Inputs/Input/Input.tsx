@@ -7,12 +7,12 @@ import starUrl from '/public/img/checkbox-icon.svg?url';
 import s from './Input.module.sass';
 import cx from 'classnames';
 
-type InputItems = {
+type InputProps = {
   title: string;
   type: string;
   name: string;
   leftCheck: boolean;
-  setInputValue: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setInputValue: (v: string | undefined) => void;
   value?: string;
   id?: string;
   error?: boolean;
@@ -23,7 +23,7 @@ type InputItems = {
   isHidden?: boolean;
 };
 
-const Input: FC<InputItems> = ({
+const Input: FC<InputProps> = ({
   title,
   type,
   name,
@@ -77,8 +77,8 @@ const Input: FC<InputItems> = ({
     type === 'checkbox'
       ? s['checkbox']
       : type === 'radio'
-      ? s['radio']
-      : s.input;
+        ? s['radio']
+        : s.input;
 
   const changeStyleAdminCheckbox = router.pathname === '/sign-up';
 

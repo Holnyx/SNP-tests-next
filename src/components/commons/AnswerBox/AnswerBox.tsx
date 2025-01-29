@@ -1,5 +1,4 @@
 import React, { ChangeEvent, FC, memo, useCallback, useState } from 'react';
-import { Reorder } from 'motion/react';
 import { useDispatch } from 'react-redux';
 import Image from 'next/image';
 
@@ -13,9 +12,8 @@ import { AppDispatch } from '@/store';
 import { editAnswerThunk } from '@/thunk/testsThunk';
 
 import s from './AnswerBox.module.sass';
-import cx from 'classnames';
 
-type AnswerBoxItems = {
+type AnswerBoxProps = {
   question: QuestionItem;
   takeTest: boolean;
   onAnswerSelect: (args: OnAnswerSelectArgs) => void;
@@ -24,7 +22,7 @@ type AnswerBoxItems = {
   pathRouteEdit: boolean;
 };
 
-const AnswerBox: FC<AnswerBoxItems> = ({
+const AnswerBox: FC<AnswerBoxProps> = ({
   question,
   takeTest,
   onAnswerSelect,
@@ -49,8 +47,9 @@ const AnswerBox: FC<AnswerBoxItems> = ({
     setIsHiddenInputAnswer(!isHiddenInputAnswer);
     if (answerTitleValue) {
       if (isHiddenInputAnswer) {
-        answerTitleValue.trim() === '' &&
+        if (answerTitleValue.trim() === '') {
           setAnswerTitleValue(answerTitleValue.trim());
+        }
         if (pathRouteEdit) {
           dispatch(
             editAnswerThunk({
@@ -91,11 +90,7 @@ const AnswerBox: FC<AnswerBoxItems> = ({
   );
 
   return (
-    <Reorder.Item
-      value={answer}
-      key={answer.id}
-      className={s['option']}
-    >
+    <>
       {takeTest && (
         <Checkbox
           title={answer.text}
@@ -137,13 +132,15 @@ const AnswerBox: FC<AnswerBoxItems> = ({
       )}
       {!takeTest && answer.is_right && <div className={s.true}>True</div>}
       {!takeTest && (
-        <Image
-          className={s['dots-icon']}
-          alt={'dots'}
-          src={dotsIcon}
-        />
+        <div className={s.grab}>
+          <Image
+            className={s['dots-icon']}
+            alt={'dots'}
+            src={dotsIcon}
+          />
+        </div>
       )}
-    </Reorder.Item>
+    </>
   );
 };
 
