@@ -20,6 +20,6 @@ const CreateTest = ({
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
-  return useGetServerSideProps(context);
+  return useGetServerSideProps(context, { includeSelectedTest: true });
 };
 export default memo(CreateTest);
