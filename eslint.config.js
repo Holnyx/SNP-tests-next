@@ -1,65 +1,104 @@
-import globals from 'globals';
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
 import pluginReact from 'eslint-plugin-react';
-import eslintPluginPrettier from 'eslint-plugin-prettier/recommended';
+import pluginReactHooks from 'eslint-plugin-react-hooks';
 
-/** @type {import('eslint').Linter.Config[]} */
+import pluginJs from '@eslint/js';
+import configPrettier from 'eslint-config-prettier';
+import pluginImport from 'eslint-plugin-import';
+import pluginPrettier from 'eslint-plugin-prettier';
+import pluginUnusedImports from 'eslint-plugin-unused-imports';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+
+/** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
   { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
-  eslintPluginPrettier,
   ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
-
+  configPrettier,
   {
+    plugins: {
+      react: pluginReact,
+      'react-hooks': pluginReactHooks,
+      prettier: pluginPrettier,
+      import: pluginImport,
+      'unused-imports': pluginUnusedImports,
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
     rules: {
-      // 🔹 Автоматическое расположение хуков перед любыми функциями
       'react-hooks/rules-of-hooks': 'error',
-
-      // 🔹 Следование рекомендациям по deps в useEffect/useCallback/useMemo
       'react-hooks/exhaustive-deps': 'warn',
-
-      // 🔹 Оптимизированный порядок кода внутри React-компонента
-      'react/sort-comp': [
-        'error',
+      'react/prop-types': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-sort-props': [
+        'warn',
         {
-          order: [
-            'static-methods',
-            'state',
-            'instance-variables',
-            'lifecycle',
-            'everything-else',
-            'render',
-          ],
+          callbacksLast: true,
+          shorthandFirst: true,
+          reservedFirst: true,
         },
       ],
-
-      // 🔹 Сортировка импорта (альтернативный вариант)
-      'perfectionist/sort-imports': [
+      'import/order': [
         'error',
         {
-          type: 'natural',
-          order: 'asc',
           groups: [
-            ['react', 'next'],
-            ['external', 'builtin'],
-            'parent',
-            'sibling',
-            'index',
+            'builtin', // Встроенные модули (fs, path и т. д.)
+            'external', // Внешние библиотеки (react, redux, motion, uuid)
+            'internal', // Внутренние компоненты (../)
+            'parent', // Родительские папки (../../)
+            'sibling', // Файлы из той же директории (./)
+            'index', // index.js в той же папке
           ],
+          pathGroups: [
+            {
+              pattern: 'react',
+              group: 'external',
+              position: 'before',
+            },
+            {
+              pattern: '{react,**react**,**/react,next/**,**next**}',
+              group: 'external',
+              position: 'before',
+            },
+            {
+              pattern: '{@/components/**,../*}',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '@/**',
+              group: 'parent',
+              position: 'after',
+            },
+            {
+              pattern: '{./*.module.*,classnames}', // Объединяем стили и classnames
+              group: 'sibling',
+              position: 'before',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['react, next'],
+          'newlines-between': 'always', // Пустая строка между группами
+          alphabetize: {
+            order: 'asc', // Импорты внутри групп сортируются по алфавиту
+            caseInsensitive: true, // Игнорировать регистр букв
+          },
         },
       ],
-
-      // 🔹 Сортировка свойств объектов (опционально)
-      'perfectionist/sort-objects': [
-        'error',
+      'unused-imports/no-unused-imports': 'warn',
+      'prettier/prettier': 'error',
+      'no-unused-vars': [
+        'warn',
         {
-          type: 'natural',
-          order: 'asc',
+          vars: 'all',
+          args: 'none',
+          ignoreRestSiblings: false,
         },
       ],
+      'no-undef': 'error',
     },
   },
 ];

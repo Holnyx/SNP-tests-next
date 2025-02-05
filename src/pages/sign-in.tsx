@@ -1,10 +1,12 @@
 import React, { memo } from 'react';
-import axios from 'axios';
+
 import { GetServerSideProps } from 'next';
 
-import Authorization from '@/components/pages/Authorization/Authorization';
+import axios from 'axios';
+
 import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 import SeoTags from '@/components/commons/SeoTags/SeoTags';
+import Authorization from '@/components/pages/Authorization/Authorization';
 
 const SignInPage = () => {
   return (

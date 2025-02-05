@@ -1,4 +1,5 @@
 import Head from 'next/head';
+
 import NotFoundPage from '@/components/pages/NotFound/NotFound';
 
 export default function NotFound() {
@@ -7,16 +8,16 @@ export default function NotFound() {
       <Head>
         <title>Page not found</title>
         <meta
-          name="description"
           content="Page not found"
+          name="description"
         />
         <meta
-          name="keywords"
           content="not found, 404"
+          name="keywords"
         />
         <meta
-          name="viewport"
           content="width=device-width, initial-scale=1"
+          name="viewport"
         />
       </Head>
       <NotFoundPage />

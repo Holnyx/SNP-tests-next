@@ -19,6 +19,7 @@ export type AnswerItem = {
   is_right: boolean;
   questionId: string;
   checked?: boolean;
+  value?: number;
 };
 
 export type TestsState = {

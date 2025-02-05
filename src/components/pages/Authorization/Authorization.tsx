@@ -1,12 +1,14 @@
 import React, { FC, memo, useCallback, useRef, useState } from 'react';
+
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
-import Link from 'next/link';
-import Image from 'next/image';
 
-import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
-import leafImage from '/public/img/logIn-img.jpeg';
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
+import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
+
+import leafImage from '/public/img/logIn-img.jpeg';
 
 import { AppDispatch } from '@/store';
 import { signinThunk } from '@/thunk/authThunk';
@@ -61,34 +63,34 @@ const Authorization: FC<AuthorizationProps> = ({ url }) => {
         </span>
         <div className={s.form}>
           <InputForLogIn
-            title={'User name'}
-            type={'text'}
+            error={error}
             name={'username'}
             setInputValue={setInputNameValue}
-            error={error}
-            value={inputNameValue}
+            title={'User name'}
+            type={'text'}
             url={url}
+            value={inputNameValue}
           />
           <InputForLogIn
-            title={'Password'}
-            type={'password'}
+            error={error}
             name={'password'}
             setInputValue={setInputPasswordValue}
-            error={error}
-            value={inputPasswordValue}
+            title={'Password'}
+            type={'password'}
             url={url}
+            value={inputPasswordValue}
           />
           <div className={s['button-box']}>
             <ButtonLog
-              title={'Sign in'}
               className={s.button}
+              title={'Sign in'}
               onClick={onClickHandlerSignUp}
             />
             <span className={s['sign-up']}>
               Don&apos;t have an account?{' '}
               <Link
-                href="/sign-up"
                 className={s.link}
+                href="/sign-up"
               >
                 Sign Up
               </Link>
@@ -98,9 +100,9 @@ const Authorization: FC<AuthorizationProps> = ({ url }) => {
       </div>
       <div className={s['image-box']}>
         <Image
+          alt={'img-monstera-leafs'}
           className={s.image}
           src={leafImage}
-          alt={'img-monstera-leafs'}
         />
       </div>
     </div>

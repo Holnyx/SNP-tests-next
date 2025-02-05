@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from 'axios';
 import { getCookie } from 'cookies-next';
 import { GetServerSidePropsContext } from 'next';
+
+import axios from 'axios';
 
 interface FetchUserDataOptions {
   includeSelectedTest?: boolean;

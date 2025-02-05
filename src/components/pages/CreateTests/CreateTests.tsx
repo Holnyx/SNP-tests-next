@@ -1,24 +1,20 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { v1 } from 'uuid';
+
 import { useRouter } from 'next/router';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { testsOptions } from '@/components/state/testsOptions';
-import SelectField from '@/components/commons/SelectField/SelectField';
-import Input from '@/components/commons/Inputs/Input/Input';
+import { v1 } from 'uuid';
+
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
-import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
-import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
+import CreateQuestion from '@/components/commons/CreateQuestion/CreateQuestion';
+import Input from '@/components/commons/Inputs/Input/Input';
 import Loader from '@/components/commons/Loader/Loader';
+import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
+import QuestionBox from '@/components/commons/QuestionBox/QuestionBox';
 
-import {
-  QuestionItem,
-  TestForAdd,
-  TestsItem,
-  TestsOptionsForSelect,
-} from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
 import { useModal } from '@/hooks/useModal';
+import { AppDispatch } from '@/store';
 import {
   addQuestion,
   removeAllQuestion,
@@ -26,13 +22,18 @@ import {
 } from '@/store/questionReducer';
 import { loadingSelector, questionSelector } from '@/store/selectors';
 import {
+  QuestionItem,
+  TestForAdd,
+  TestsItem,
+  TestsOptionsForSelect,
+} from '@/store/types';
+import {
   createQuestionThunk,
   createTestThunk,
   deleteQuestionThunk,
   deleteTestThunk,
   updateTestThunk,
 } from '@/thunk/testsThunk';
-import { AppDispatch } from '@/store';
 
 import s from './CreateTests.module.sass';
 import cx from 'classnames';
@@ -326,65 +327,47 @@ const CreateTests: FC<CreateTestsProps> = ({
           <>
             <div className={cx(s['test-title'])}>
               <Input
+                error={errorTestTitle}
+                leftCheck={true}
+                name={'name'}
                 title={'Test Title:'}
                 type={'text'}
-                name={'name'}
-                leftCheck={true}
-                setInputValue={setTestTitleValue}
-                error={errorTestTitle}
                 value={testTitleValue}
+                onChange={setTestTitleValue}
               />
             </div>
-
-            <div className={cx(s['test-title'])}>
-              <Input
-                title={'Question Title:'}
-                type={'text'}
-                name={'questionTitle'}
-                leftCheck={true}
-                value={inputValue}
-                setInputValue={setInputValue}
-                error={error}
-              />
-              <SelectField
-                defaultValue={select}
-                directionOptions={testsOptions}
-                setSelect={setSelect}
-                onChange={setSelectType}
-                error={error}
-              />
-              <ChangeButton
-                title={'Add question'}
-                onClick={saveQuestionClickHandler}
-              />
-            </div>
+            <CreateQuestion
+              error={error}
+              questionInputValue={inputValue}
+              saveQuestionClickHandler={saveQuestionClickHandler}
+              seQuestionInputValue={setInputValue}
+              select={select}
+              setSelect={setSelect}
+              setSelectType={setSelectType}
+            />
             {pathRouteEdit && selectedTestItem
               ? questions?.map(q => {
                   return (
                     <QuestionBox
                       key={q.id}
-                      questionId={q.id}
-                      question={q}
-                      takeTest={pathRouteTakeTest}
-                      removeQuestionHandler={() => removeQuestionHandler(q.id)}
-                      questions={selectedTestItem.questions}
-                      onAnswerSelect={() => {}}
-                      pathRouteEdit={pathRouteEdit}
                       pathRouteCreate={pathRouteCreate}
+                      pathRouteEdit={pathRouteEdit}
+                      question={q}
+                      questionId={q.id}
+                      removeQuestionHandler={removeQuestionHandler}
+                      takeTest={pathRouteTakeTest}
                     />
                   );
                 })
               : allQuestions.questionsList.map(q => (
                   <QuestionBox
-                    questionId={q.id}
                     key={q.id}
-                    question={q}
-                    takeTest={pathRouteTakeTest}
-                    removeQuestionHandler={() => removeQuestionHandler(q.id)}
-                    questions={questions}
-                    onAnswerSelect={() => {}}
-                    pathRouteEdit={pathRouteEdit}
                     pathRouteCreate={pathRouteCreate}
+                    pathRouteEdit={pathRouteEdit}
+                    question={q}
+                    questionId={q.id}
+                    removeQuestionHandler={removeQuestionHandler}
+                    takeTest={pathRouteTakeTest}
                   />
                 ))}
             {errorList && !isQuestionListValid && (
@@ -407,9 +390,9 @@ const CreateTests: FC<CreateTestsProps> = ({
       </div>
       <ModalWindow
         isModalWindowOpen={isModalOpen}
+        title={modalTitle}
         onClose={closeModal}
         onConfirm={onConfirm}
-        title={modalTitle}
       />
     </div>
   );

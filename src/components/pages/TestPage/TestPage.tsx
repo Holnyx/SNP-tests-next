@@ -1,12 +1,13 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+
 import { useRouter } from 'next/router';
 
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 import ModalWindow from '@/components/commons/ModalWindow/ModalWindow';
 import QuestionsForTest from '@/components/commons/QuestionsForTest/QuestionsForTest';
 
-import { AnswerItem, OnAnswerSelectArgs, TestsItem } from '@/store/types';
 import { useModal } from '@/hooks/useModal';
+import { AnswerItem, OnAnswerSelectArgs, TestsItem } from '@/store/types';
 
 import s from './TestPage.module.sass';
 
@@ -33,13 +34,12 @@ const TestPage: FC<TestPageProps> = ({
   const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
 
   const router = useRouter();
-
-  const retryTest = () => {
+  const retryTest = useCallback(() => {
     setUserSelectedAnswers([]);
     setCompleteTest(false);
     setCorrectUserAnswers(0);
     router.replace(router.asPath);
-  };
+  }, []);
 
   const onConfirm = useCallback(() => {
     closeModal();
@@ -74,15 +74,12 @@ const TestPage: FC<TestPageProps> = ({
     }
   }, [nextHref, router, userSelectedAnswers, correctAnswers, modalTitle]);
 
-  const handleAnswerSelect = (args: OnAnswerSelectArgs) => {
+  const handleAnswerSelect = useCallback((args: OnAnswerSelectArgs) => {
     setUserSelectedAnswers(prevSelectedAnswers => {
       if (args.type === 'number') {
-        const isAnswerCorrect =
-          Number(args.selectedAnswer.text) === args.inputNumberValue;
         const updatedAnswer = {
           ...args.selectedAnswer,
           value: args.inputNumberValue,
-          isCorrect: isAnswerCorrect,
         };
 
         return prevSelectedAnswers.some(
@@ -118,22 +115,19 @@ const TestPage: FC<TestPageProps> = ({
           : [...prevSelectedAnswers, args.selectedAnswer];
       }
     });
-  };
+  }, []);
 
-  const handleLinkClick = useCallback(
-    (href: string) => {
-      if (!completeTest && pathRouteTakeTest) {
-        setNextHref(href);
-        openModal(
-          'Are you sure you want to leave the page without complete the test?'
-        );
-      }
-      if (completeTest && pathRouteTakeTest) {
-        router.replace(href);
-      }
-    },
-    [completeTest, pathRouteTakeTest]
-  );
+  const handleLinkClick = useCallback(() => {
+    if (!completeTest && pathRouteTakeTest) {
+      setNextHref(`/${user}/take-tests`);
+      openModal(
+        'Are you sure you want to leave the page without complete the test?'
+      );
+    }
+    if (completeTest && pathRouteTakeTest) {
+      router.replace(`/${user}/take-tests`);
+    }
+  }, [completeTest, pathRouteTakeTest]);
 
   const onClickHandlerCompleteTest = useCallback(() => {
     openModal('Are you sure you want to complete the test?');
@@ -147,6 +141,18 @@ const TestPage: FC<TestPageProps> = ({
       setCorrectAnswers(correct);
     }
   }, [selectedTestItem]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const message = 'Are you sure you want to leave this page?';
+      event.returnValue = message;
+      return message;
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   return (
     <div className={s.container}>
@@ -180,24 +186,18 @@ const TestPage: FC<TestPageProps> = ({
             {' '}
             <ChangeButton
               title={'Go Back'}
-              onClick={() => {
-                handleLinkClick(`/${user}/take-tests`);
-              }}
+              onClick={handleLinkClick}
             />
             <ChangeButton
               title={'Complete'}
-              onClick={() => {
-                onClickHandlerCompleteTest();
-              }}
+              onClick={onClickHandlerCompleteTest}
             />
           </>
         ) : (
           <>
             <ChangeButton
               title={'Go Back'}
-              onClick={() => {
-                handleLinkClick(`/${user}/take-tests`);
-              }}
+              onClick={handleLinkClick}
             />
             <ChangeButton
               title={'Try again'}
@@ -209,9 +209,9 @@ const TestPage: FC<TestPageProps> = ({
 
       <ModalWindow
         isModalWindowOpen={isModalOpen}
-        onConfirm={onConfirm}
         title={modalTitle}
         onClose={closeModal}
+        onConfirm={onConfirm}
       />
     </div>
   );

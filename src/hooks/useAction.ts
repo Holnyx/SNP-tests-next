@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useDispatch } from 'react-redux';
-import { AsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { useCallback } from 'react';
+
+import { useDispatch } from 'react-redux';
+
+import { AsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+
 import { AppDispatch } from '@/store';
 
 export const useActionWithPayload = <T>(

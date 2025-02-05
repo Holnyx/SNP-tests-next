@@ -1,4 +1,5 @@
 import React, { ChangeEvent, FC, memo, useEffect, useState } from 'react';
+
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -43,35 +44,34 @@ const SearchInput: FC<SearchInputProps> = ({
     setSearchTerm('');
     setInputValue('');
     clearSearchInput('');
-    if (router.pathname.includes('admin')) {
-      router.replace('/admin/take-tests');
-    } else if (router.pathname.includes('user')) {
-      router.replace('/user/take-tests');
-    }
+    // if (router.pathname.includes('admin')) {
+    //   router.replace('/admin/take-tests', undefined, { shallow: true });
+    // } else if (router.pathname.includes('user')) {
+    //   router.replace('/user/take-tests', undefined, { shallow: true });
+    // }
   };
 
   useEffect(() => {
     setInputValue(defaultValue);
     clearSearchInput(defaultValue);
-  }, [defaultValue]);
+  }, [clearSearchInput, defaultValue]);
 
   return (
     <div className={s['container']}>
       <label
-        htmlFor="search"
         className={s.icon}
+        htmlFor="search"
       >
         <Image
-          src={starUrl}
           alt={'loupe-icon'}
-          priority
+          src={starUrl}
         />
       </label>
       <input
-        id="search"
-        type="text"
-        placeholder={'Search'}
         className={s.input}
+        id="search"
+        placeholder={'Search'}
+        type="text"
         value={inputValue}
         onChange={handleChange}
       ></input>
@@ -82,9 +82,9 @@ const SearchInput: FC<SearchInputProps> = ({
           onClick={clearInput}
         >
           <Image
+            alt={'Clear'}
             className={s['clear-icon']}
             src={deleteIconUrl}
-            alt={'Clear'}
           />
         </button>
       )}

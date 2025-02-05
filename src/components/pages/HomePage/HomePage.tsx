@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+
 import Link from 'next/link';
 
 import s from './HomePage.module.sass';
@@ -12,14 +13,14 @@ const HomePage = () => {
         <p className={s['home-page__info']}>here you can take tests</p>
         <div className={s['button-box-signin']}>
           <Link
-            href="/sign-in"
             className={s.button}
+            href="/sign-in"
           >
             Sign In
           </Link>
           <Link
-            href="/sign-up"
             className={s.button}
+            href="/sign-up"
           >
             Sign Up
           </Link>

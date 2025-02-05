@@ -1,6 +1,9 @@
 import React, { memo } from 'react';
+
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+
 import TestsListPage from '@/components/pages/TestsListPage/TestsListPage';
+
 import { useGetServerSideProps } from '@/hooks/useGetServerSideProps';
 
 const EditTests = ({
@@ -11,13 +14,13 @@ const EditTests = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <TestsListPage
-      user="admin"
       id={id}
-      selectedTest={selectedTest}
-      search={''}
-      username={username}
-      role={role}
       page={0}
+      role={role}
+      search={''}
+      selectedTest={selectedTest}
+      user="admin"
+      username={username}
     />
   );
 };

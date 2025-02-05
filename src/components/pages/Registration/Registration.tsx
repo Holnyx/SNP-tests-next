@@ -1,12 +1,14 @@
 import React, { FC, memo, useCallback, useState } from 'react';
-import { useDispatch } from 'react-redux';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useDispatch } from 'react-redux';
 
 import leafImage from '/public/img/logIn-img.jpeg';
-import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
+
 import ButtonLog from '@/components/commons/Buttons/ButtonLog';
 import Checkbox from '@/components/commons/Inputs/Checkbox/Checkbox';
+import InputForLogIn from '@/components/commons/Inputs/InputForLogIn';
 
 import { AppDispatch } from '@/store';
 import { signupThunk } from '@/thunk/authThunk';
@@ -76,46 +78,45 @@ const Registration: FC<RegistrationProps> = ({ url }) => {
         {!successMessage && (
           <div className={s.form}>
             <InputForLogIn
+              error={error}
+              name={'username'}
+              setInputValue={setInputNameValue}
               title={'User name'}
               type={'text'}
-              name={'username'}
-              error={error}
-              value={inputNameValue}
-              setInputValue={setInputNameValue}
               url={url}
+              value={inputNameValue}
             />
             <InputForLogIn
+              error={error}
+              name={'password'}
+              setInputValue={setInputPasswordValue}
               title={'Password'}
               type={'password'}
-              name={'password'}
-              error={error}
-              value={inputPasswordValue}
-              setInputValue={setInputPasswordValue}
               url={url}
+              value={inputPasswordValue}
             />
             <InputForLogIn
+              error={error}
+              name={'password_confirmation'}
+              setInputValue={setInputPasswordConfirmValue}
               title={'Password confirmation'}
               type={'password'}
-              name={'password_confirmation'}
-              error={error}
-              value={inputPasswordConfirmValue}
-              setInputValue={setInputPasswordConfirmValue}
               url={url}
+              value={inputPasswordConfirmValue}
             />
             <Checkbox
-              title={'Create an admin account'}
-              type={'checkbox'}
-              name={'selectTrue'}
-              leftCheck={false}
               id={'1'}
-              onAnswerSelect={() => {}}
+              leftCheck={false}
+              name={'selectTrue'}
               questionId={''}
               setIsChecked={setIsChecked}
+              title={'Create an admin account'}
+              type={'checkbox'}
             />
             <div className={s['button-box']}>
               <ButtonLog
-                title={'Sign up'}
                 className={s.button}
+                title={'Sign up'}
                 onClick={() => {
                   onClickHandlerSignUp();
                 }}
@@ -123,8 +124,8 @@ const Registration: FC<RegistrationProps> = ({ url }) => {
               <span className={s['sign-up']}>
                 Do you have an account?{' '}
                 <Link
-                  href="/sign-in"
                   className={s.link}
+                  href="/sign-in"
                 >
                   Sign In
                 </Link>
@@ -135,8 +136,8 @@ const Registration: FC<RegistrationProps> = ({ url }) => {
         {successMessage && (
           <div className={s['button-box-signin']}>
             <Link
-              href="/sign-in"
               className={s.button}
+              href="/sign-in"
             >
               Sign In
             </Link>
@@ -146,9 +147,9 @@ const Registration: FC<RegistrationProps> = ({ url }) => {
 
       <div className={s['image-box']}>
         <Image
+          alt={'img-monstera-leafs'}
           className={s.image}
           src={leafImage}
-          alt={'img-monstera-leafs'}
         />
       </div>
     </div>

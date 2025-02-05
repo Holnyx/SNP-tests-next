@@ -58,9 +58,9 @@ const InputForLogIn: FC<InputForLogInProps> = ({
       </label>
       <input
         className={s.input}
-        type={type}
-        name={name}
         id={id}
+        name={name}
+        type={type}
         value={value}
         onChange={onValueChanged}
       />

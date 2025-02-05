@@ -1,22 +1,25 @@
 import React, { memo } from 'react';
+
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+
 import TestsListPage from '@/components/pages/TestsListPage/TestsListPage';
+
 import { useGetServerSideProps } from '@/hooks/useGetServerSideProps';
 
 const TakeTests = ({
-  search,
   username,
+  search,
   role,
   page,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <TestsListPage
-      user={'admin'}
+      page={page}
+      role={role}
       search={search}
       selectedTest={null}
+      user={'admin'}
       username={username}
-      role={role}
-      page={page}
     />
   );
 };

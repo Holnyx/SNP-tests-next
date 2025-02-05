@@ -1,4 +1,5 @@
 import React, { FC, memo } from 'react';
+
 import Head from 'next/head';
 
 type SeoTagsProps = {
@@ -11,16 +12,16 @@ const SeoTags: FC<SeoTagsProps> = ({ title }) => {
       <Head>
         <title>{title ? title : 'Tests'}</title>
         <meta
-          name="description"
           content="Tests"
+          name="description"
         />
         <meta
-          name="keywords"
           content="test, testing"
+          name="keywords"
         />
         <meta
-          name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no"
+          name="viewport"
         />
       </Head>
     </>

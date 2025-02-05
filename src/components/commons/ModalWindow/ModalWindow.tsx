@@ -1,9 +1,11 @@
 import React, { FC, memo } from 'react';
+
 import Image from 'next/image';
 
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
 import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
+
 import useBodyScrollLock from '@/hooks/useBodyScrollLock';
 
 import s from './ModalWindow.module.sass';
@@ -41,9 +43,9 @@ const ModalWindow: FC<ModalWindowProps> = ({
             onClick={onClose}
           >
             <Image
+              alt={'Clear'}
               className={s['closed-img']}
               src={deleteIconUrl}
-              alt={'Clear'}
             />
           </button>
           <div className={s['buttons_box']}>

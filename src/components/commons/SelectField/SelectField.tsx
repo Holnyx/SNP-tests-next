@@ -1,4 +1,5 @@
 import React, { FC, memo, useState } from 'react';
+
 import { TestsOptionsItem } from '@/components/state/testsOptions';
 
 import s from './SelectField.module.sass';

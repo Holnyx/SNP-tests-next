@@ -34,11 +34,11 @@ const ChangeButton: FC<ChangeButtonProps> = ({
         },
         notFoundStyle
       )}
+      disabled={disabled}
       onClick={onClick}
+      onKeyDown={onKeyDown}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onKeyDown={onKeyDown}
-      disabled={disabled}
     >
       {title}
     </button>

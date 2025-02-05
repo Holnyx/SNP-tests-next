@@ -1,4 +1,5 @@
 import React, { FC, memo } from 'react';
+
 import Image from 'next/image';
 
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
@@ -23,9 +24,9 @@ const DeleteButton: FC<DeleteButtonProps> = ({ onClick }) => {
       onKeyDown={onKeyDown}
     >
       <Image
-        src={deleteIconUrl}
         alt={'delete-icon'}
         className={s['delete-icon']}
+        src={deleteIconUrl}
       />
     </button>
   );

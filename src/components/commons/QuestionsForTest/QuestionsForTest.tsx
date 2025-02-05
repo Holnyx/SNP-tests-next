@@ -1,6 +1,7 @@
 import React, { FC, memo, useEffect, useState } from 'react';
 
 import AnswerBox from '../AnswerBox/AnswerBox';
+
 import { AnswerItem, OnAnswerSelectArgs, QuestionItem } from '@/store/types';
 
 import s from './QuestionsForTest.module.sass';
@@ -8,7 +9,7 @@ import s from './QuestionsForTest.module.sass';
 type QuestionForTestProps = {
   question: QuestionItem;
   takeTest: boolean;
-  onAnswerSelect: (args: OnAnswerSelectArgs) => void;
+  onAnswerSelect?: (args: OnAnswerSelectArgs) => void;
 };
 
 const QuestionForTest: FC<QuestionForTestProps> = ({
@@ -30,11 +31,11 @@ const QuestionForTest: FC<QuestionForTestProps> = ({
         return (
           <AnswerBox
             key={answer.id}
+            answer={answer}
+            pathRouteEdit={false}
             question={question}
             takeTest={takeTest}
             onAnswerSelect={onAnswerSelect}
-            answer={answer}
-            pathRouteEdit={false}
           />
         );
       })}

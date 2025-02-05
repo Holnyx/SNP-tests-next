@@ -1,4 +1,5 @@
-import React, { ChangeEvent, FC, memo, useState } from 'react';
+import React, { ChangeEvent, FC, memo, useCallback, useState } from 'react';
+
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -15,10 +16,10 @@ type CheckboxProps = {
   name: string;
   leftCheck: boolean;
   id?: string;
-  onAnswerSelect: (args: OnAnswerSelectArgs) => void;
+  onAnswerSelect?: (args: OnAnswerSelectArgs) => void;
   answer?: AnswerItem;
   questionId: string;
-  setIsChecked: (v: boolean) => void;
+  setIsChecked: (e: boolean) => void;
 };
 
 const Checkbox: FC<CheckboxProps> = ({
@@ -33,24 +34,30 @@ const Checkbox: FC<CheckboxProps> = ({
   setIsChecked,
 }) => {
   const [inputNumberValue, setInputNumberValue] = useState<number | string>('');
-  const router = useRouter();
-  const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.currentTarget.value;
 
-    if (type === 'number') {
-      setInputNumberValue(value);
-    }
-    if (questionId && answer) {
-      onAnswerSelect({
-        selectedAnswer: answer,
-        type: type,
-        inputNumberValue: type === 'number' ? Number(value) : 0,
-        isChecked: e.currentTarget.checked,
-        questionId: questionId,
-      });
-    }
-    setIsChecked(e.currentTarget.checked);
-  };
+  const router = useRouter();
+
+  const onValueChanged = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      if (type === 'number' && inputNumberValue !== e.currentTarget.value) {
+        setInputNumberValue(e.currentTarget.value);
+      }
+      if (questionId && answer) {
+        if (onAnswerSelect) {
+          onAnswerSelect({
+            selectedAnswer: answer,
+            type: type,
+            inputNumberValue:
+              type === 'number' ? Number(e.currentTarget.value) : 0,
+            isChecked: e.currentTarget.checked,
+            questionId: questionId,
+          });
+        }
+      }
+      setIsChecked(e.currentTarget.checked);
+    },
+    [type, questionId, answer, setIsChecked, onAnswerSelect]
+  );
 
   const changeStyleAdminCheckbox = router.pathname === '/sign-up';
   const changeType =
@@ -69,8 +76,8 @@ const Checkbox: FC<CheckboxProps> = ({
     >
       {leftCheck && (
         <label
-          htmlFor={id}
           className={s.label}
+          htmlFor={id}
         >
           {title}
         </label>
@@ -82,24 +89,24 @@ const Checkbox: FC<CheckboxProps> = ({
           { [s['real-radio']]: type === 'single' },
           { [s['checkbox']]: type === 'multiple' || type === 'checkbox' }
         )}
-        type={changeType}
         id={id}
         name={name}
+        type={changeType}
         value={inputNumberValue}
         onChange={onValueChanged}
       />
       {(type === 'multiple' || type.trim() === 'checkbox') && (
         <label
-          htmlFor={id}
           className={cx(s['custom-checkbox'], {
             [s['admin-checkbox']]: changeStyleAdminCheckbox,
           })}
+          htmlFor={id}
         >
           <Image
-            src={starUrl}
-            alt={'checkbox-icon'}
             priority
+            alt={'checkbox-icon'}
             className={cx(s['custom-checkbox-img'])}
+            src={starUrl}
           />
         </label>
       )}
@@ -111,10 +118,10 @@ const Checkbox: FC<CheckboxProps> = ({
       )}
       {!leftCheck && title !== '' && type !== 'number' && (
         <label
-          htmlFor={id}
           className={cx(s.label, {
             [s['admin-label']]: changeStyleAdminCheckbox,
           })}
+          htmlFor={id}
         >
           {title}
         </label>

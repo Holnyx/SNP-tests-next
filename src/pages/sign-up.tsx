@@ -1,10 +1,12 @@
 import React, { memo } from 'react';
+
 import { GetServerSideProps } from 'next';
+
 import axios from 'axios';
 
+import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 import SeoTags from '@/components/commons/SeoTags/SeoTags';
 import Registration from '@/components/pages/Registration/Registration';
-import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 
 const SignUpPage = () => {
   return (
