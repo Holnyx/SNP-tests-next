@@ -31,6 +31,9 @@ const testSlice = createSlice({
     setSearchQuery(state, action: PayloadAction<string>) {
       state.searchQuery = action.payload;
     },
+    setSortQuery(state, action: PayloadAction<FilteredTestsByDate>) {
+      state.sortOrder = action.payload;
+    },
     clearError(state, action: PayloadAction<number>) {
       state.errors = state.errors.filter(
         (_, index) => index !== action.payload
@@ -106,7 +109,9 @@ const testSlice = createSlice({
         }
       )
       .addCase(deleteTestThunk.rejected, (state, action) => {
-        action.payload && state.errors.push(action.payload as string);
+        if (action.payload) {
+          state.errors.push(action.payload as string);
+        }
         state.deleteLoading = false;
       })
       .addCase(updateTestThunk.pending, state => {
@@ -132,6 +137,6 @@ const testSlice = createSlice({
   },
 });
 
-export const { setSearchQuery, clearError, filteredTestsByDate } =
+export const { setSearchQuery, setSortQuery, clearError, filteredTestsByDate } =
   testSlice.actions;
 export default testSlice.reducer;

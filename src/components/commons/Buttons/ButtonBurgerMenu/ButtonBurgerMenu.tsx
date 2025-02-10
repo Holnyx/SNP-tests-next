@@ -3,12 +3,12 @@ import React, { FC, memo } from 'react';
 import s from './ButtonBurgerMenu.module.sass';
 import cx from 'classnames';
 
-type ButtonBurgerMenuItems = {
-  showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+type ButtonBurgerMenuProps = {
+  showSidebar: (v: boolean) => void;
   menuOpen: boolean;
 };
 
-const ButtonBurgerMenu: FC<ButtonBurgerMenuItems> = ({
+const ButtonBurgerMenu: FC<ButtonBurgerMenuProps> = ({
   showSidebar,
   menuOpen,
 }) => {

@@ -1,4 +1,12 @@
-import React, { ChangeEvent, FC, memo, useEffect, useState } from 'react';
+import React, {
+  ChangeEvent,
+  FC,
+  memo,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
@@ -7,28 +15,26 @@ import starUrl from '/public/img/checkbox-icon.svg?url';
 import s from './Input.module.sass';
 import cx from 'classnames';
 
-type InputItems = {
+type InputProps = {
   title: string;
   type: string;
   name: string;
   leftCheck: boolean;
-  setInputValue: React.Dispatch<React.SetStateAction<string | undefined>>;
   value?: string;
   id?: string;
   error?: boolean;
   onKeyDown?: (e: React.KeyboardEvent) => void;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: string) => void;
   onBlur?: () => void;
   autoFocus?: boolean;
   isHidden?: boolean;
 };
 
-const Input: FC<InputItems> = ({
+const Input: FC<InputProps> = ({
   title,
   type,
   name,
   leftCheck,
-  setInputValue,
   value,
   id,
   error,
@@ -38,19 +44,11 @@ const Input: FC<InputItems> = ({
   autoFocus,
   isHidden,
 }) => {
-  const [isChecked, setIsChecked] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
   const router = useRouter();
-  const onValueChanged = (e: ChangeEvent<HTMLInputElement>) => {
-    if (onChange) {
-      onChange(e);
-    }
-    setInputValue(e.currentTarget.value);
-    if (type === 'checkbox') {
-      setIsChecked(e.currentTarget.checked);
-    }
-  };
+  const onValueChanged = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    onChange(e.currentTarget.value);
+  }, []);
 
   useEffect(() => {
     setErrorMessage('');
@@ -77,8 +75,8 @@ const Input: FC<InputItems> = ({
     type === 'checkbox'
       ? s['checkbox']
       : type === 'radio'
-      ? s['radio']
-      : s.input;
+        ? s['radio']
+        : s.input;
 
   const changeStyleAdminCheckbox = router.pathname === '/sign-up';
 
@@ -93,23 +91,22 @@ const Input: FC<InputItems> = ({
         <>
           {leftCheck && (
             <label
-              htmlFor={id}
               className={s.label}
+              htmlFor={id}
             >
               {title}
             </label>
           )}
           <input
+            autoFocus={autoFocus}
             className={cx(changeStyle)}
-            type={type}
             id={id}
             name={name}
-            checked={isChecked}
-            onChange={onValueChanged}
+            type={type}
             value={value}
             onBlur={onBlur}
+            onChange={onValueChanged}
             onKeyDown={onKeyDown}
-            autoFocus={autoFocus}
           />
           {errorMessage && (
             <span className={cx(s['error-message'])}>{errorMessage}</span>
@@ -119,16 +116,16 @@ const Input: FC<InputItems> = ({
 
       {type === 'checkbox' && (
         <label
-          htmlFor={id}
           className={cx(s['custom-checkbox'], {
             [s['admin-checkbox']]: changeStyleAdminCheckbox,
           })}
+          htmlFor={id}
         >
           <Image
-            src={starUrl}
-            alt={'checkbox-icon'}
             priority
+            alt={'checkbox-icon'}
             className={cx(s['custom-checkbox-img'])}
+            src={starUrl}
           />
         </label>
       )}
@@ -136,9 +133,9 @@ const Input: FC<InputItems> = ({
         <>
           <input
             className={s['real-radio']}
-            type="radio"
             id={id}
             name={name}
+            type="radio"
           />
           <label
             className={s['custom-radio']}
@@ -148,10 +145,10 @@ const Input: FC<InputItems> = ({
       )}
       {!leftCheck && title !== '' && (
         <label
-          htmlFor={id}
           className={cx(s.label, {
             [s['admin-label']]: changeStyleAdminCheckbox,
           })}
+          htmlFor={id}
         >
           {title}
         </label>

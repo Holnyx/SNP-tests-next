@@ -42,10 +42,12 @@
     @include font-style(400,12px,142%,0)
     color: $color-red
 
+.grab
+    cursor: grab
+    &:active
+        cursor: grabbing
+
 .dots-icon
     width: 20px
     height: 20px
-    cursor: grab
-    
-    &:active
-        cursor: grabbing
+    pointer-events: none

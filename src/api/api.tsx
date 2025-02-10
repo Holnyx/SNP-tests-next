@@ -108,7 +108,7 @@ const testApi = {
         },
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
+          Pragma: 'no-cache',
         },
       });
       return response.data;

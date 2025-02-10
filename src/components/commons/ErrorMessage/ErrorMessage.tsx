@@ -1,13 +1,14 @@
-import { authErrorSelector, errorSelector } from '@/store/selectors';
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
+
 import Image from 'next/image';
 import { useSelector } from 'react-redux';
 
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
 import { useActionWithPayload } from '@/hooks/useAction';
-import { clearError } from '@/store/testReducer';
 import { removeError } from '@/store/authReducer';
+import { authErrorSelector, errorSelector } from '@/store/selectors';
+import { clearError } from '@/store/testReducer';
 
 import s from './ErrorMessage.module.sass';
 import cx from 'classnames';
@@ -45,13 +46,14 @@ const ErrorMessage = () => {
           <button
             className={s.button}
             onClick={() => {
-              deleteAuthError(index), deleteTestsError(index);
+              deleteAuthError(index);
+              deleteTestsError(index);
             }}
           >
             <Image
-              src={deleteIconUrl}
               alt={'delete-icon'}
               className={s['delete-icon']}
+              src={deleteIconUrl}
             />
           </button>
         </div>
@@ -60,4 +62,4 @@ const ErrorMessage = () => {
   );
 };
 
-export default ErrorMessage;
+export default memo(ErrorMessage);

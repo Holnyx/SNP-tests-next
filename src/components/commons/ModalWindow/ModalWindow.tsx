@@ -1,22 +1,24 @@
 import React, { FC, memo } from 'react';
+
 import Image from 'next/image';
 
 import deleteIconUrl from '/public/img/delete-icon.svg?url';
 
 import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
+
 import useBodyScrollLock from '@/hooks/useBodyScrollLock';
 
 import s from './ModalWindow.module.sass';
 import cx from 'classnames';
 
-type ModalWindowItems = {
+type ModalWindowProps = {
   isModalWindowOpen: boolean;
   onConfirm: () => void;
   title: string;
   onClose: () => void;
 };
 
-const ModalWindow: FC<ModalWindowItems> = ({
+const ModalWindow: FC<ModalWindowProps> = ({
   isModalWindowOpen,
   onConfirm,
   title,
@@ -41,9 +43,9 @@ const ModalWindow: FC<ModalWindowItems> = ({
             onClick={onClose}
           >
             <Image
+              alt={'Clear'}
               className={s['closed-img']}
               src={deleteIconUrl}
-              alt={'Clear'}
             />
           </button>
           <div className={s['buttons_box']}>
@@ -55,7 +57,7 @@ const ModalWindow: FC<ModalWindowItems> = ({
               title={'Yes'}
               onClick={() => {
                 onConfirm();
-                onClose
+                onClose();
               }}
             />
           </div>

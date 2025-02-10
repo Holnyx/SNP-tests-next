@@ -1,4 +1,5 @@
 import React, { memo, useState } from 'react';
+
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 
@@ -12,7 +13,7 @@ import cx from 'classnames';
 
 const NotFoundPage = () => {
   const [isHover, setIsHover] = useState(false);
-  
+
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -28,7 +29,7 @@ const NotFoundPage = () => {
       } else {
         router.replace('/sign-in');
       }
-    } catch (error) {
+    } catch {
       router.replace('/sign-in');
     }
   };

@@ -3,7 +3,7 @@ import React, { FC, memo } from 'react';
 import s from './ChangeButton.module.sass';
 import cx from 'classnames';
 
-type ChangeButtonItems = {
+type ChangeButtonProps = {
   title: string;
   onClick: () => void;
   onMouseEnter?: () => void;
@@ -11,7 +11,7 @@ type ChangeButtonItems = {
   disabled?: boolean;
 };
 
-const ChangeButton: FC<ChangeButtonItems> = ({
+const ChangeButton: FC<ChangeButtonProps> = ({
   title,
   onClick,
   onMouseEnter,
@@ -34,11 +34,11 @@ const ChangeButton: FC<ChangeButtonItems> = ({
         },
         notFoundStyle
       )}
+      disabled={disabled}
       onClick={onClick}
+      onKeyDown={onKeyDown}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onKeyDown={onKeyDown}
-      disabled={disabled}
     >
       {title}
     </button>

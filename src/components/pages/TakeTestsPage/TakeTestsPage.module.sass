@@ -27,44 +27,6 @@
             margin-bottom: 10px
             margin-top: 10px
 
-    .tests-box
-        display: flex
-        flex-direction: column
-        justify-content: flex-start
-        align-items: flex-start
-        gap: 15px
-        padding: 16px 36px
-        border-radius: 16px
-        border: 1px solid rgba(255, 255, 255, 0.1)
-
-        .questions-list
-            display: flex
-            flex-direction: column
-            justify-content: center
-            gap: 15px
-            width: 100%
-
-        .test
-            display: flex
-            flex-direction: row
-            justify-content: center
-            align-items: center
-            gap: 15px
-            @include laptop
-                flex-wrap: wrap
-
-            .test-date
-                padding: 16px
-                border-radius: 16px
-                border: 1px solid rgba(255, 255, 255, 0.1)
-                @include font-style(400,12px,142%,0)
-
-            .arrow-icon
-                transform: scaleY(1)
-                cursor: pointer
-
-            .show
-                transform: scaleY(-1)
     .pages
         display: flex
         align-items: center

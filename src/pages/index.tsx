@@ -1,6 +1,8 @@
 import { memo } from 'react';
-import axios from 'axios';
+
 import { GetServerSideProps } from 'next';
+
+import axios from 'axios';
 
 import SeoTags from '@/components/commons/SeoTags/SeoTags';
 import HomePage from '@/components/pages/HomePage/HomePage';

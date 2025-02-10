@@ -1,5 +1,4 @@
 import React, {
-  ChangeEvent,
   FC,
   memo,
   useCallback,
@@ -7,20 +6,22 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useDispatch } from 'react-redux';
+
 import { Reorder } from 'motion/react';
+import { useDispatch } from 'react-redux';
+
 import { v1 } from 'uuid';
 
-import Input from '../Inputs/Input/Input';
+import AnswerBox from '../AnswerBox/AnswerBox';
 import ChangeButton from '../Buttons/ChangeButton/ChangeButton';
 import Checkbox from '../Inputs/Checkbox/Checkbox';
-import AnswerBox from '../AnswerBox/AnswerBox';
+import Input from '../Inputs/Input/Input';
 
-import { AnswerItem, OnAnswerSelectArgs, QuestionItem } from '@/store/types';
 import { useActionWithPayload } from '@/hooks/useAction';
+import { AppDispatch } from '@/store';
 import { updateAnswersOrder } from '@/store/questionReducer';
 import { addAnswer, removeAnswer } from '@/store/questionReducer';
-import { AppDispatch } from '@/store';
+import { AnswerItem, OnAnswerSelectArgs, QuestionItem } from '@/store/types';
 import {
   createAnswerThunk,
   deleteAnswerThunk,
@@ -31,18 +32,17 @@ import {
 import s from './QuestionBox.module.sass';
 import cx from 'classnames';
 
-type QuestionBoxItems = {
+type QuestionBoxProps = {
   question: QuestionItem;
   takeTest: boolean;
   questionId: string;
-  removeQuestionHandler: () => void;
-  questions: QuestionItem[] | undefined;
-  onAnswerSelect: (args: OnAnswerSelectArgs) => void;
+  removeQuestionHandler: (questionId: string) => void;
+  onAnswerSelect?: (args: OnAnswerSelectArgs) => void;
   pathRouteEdit: boolean;
   pathRouteCreate: boolean;
 };
 
-const QuestionBox: FC<QuestionBoxItems> = ({
+const QuestionBox: FC<QuestionBoxProps> = ({
   question,
   takeTest,
   questionId,
@@ -129,12 +129,13 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       setError(true);
     }
   }, [
-    checkAnswerValue,
     inputValue,
-    isChecked,
     question.title,
-    questionId,
     question.question_type,
+    isChecked,
+    questionId,
+    checkAnswerValue,
+    addAnswerAction,
     pathRouteEdit,
     dispatch,
     cleanInputs,
@@ -153,40 +154,54 @@ const QuestionBox: FC<QuestionBoxItems> = ({
         });
       }
     },
-    [removeAnswerAction, dispatch, questionId, pathRouteCreate]
+    [removeAnswerAction, dispatch, pathRouteCreate]
   );
 
-  const handleReorder = (newOrder: AnswerItem[]) => {
-    if (JSON.stringify(previousOrderRef.current) !== JSON.stringify(newOrder)) {
-      setAnswerState(newOrder);
-      updateAnswersOrderAction({ questionId: question.id, newOrder });
-      if (!takeTest) {
-        newOrder.forEach((answer, index) => {
-          dispatch(moveAnswerThunk({ id: answer.id, position: index }));
-        });
+  const handleReorder = useCallback(
+    (newOrder: AnswerItem[]) => {
+      if (
+        JSON.stringify(previousOrderRef.current) !== JSON.stringify(newOrder)
+      ) {
+        setAnswerState(newOrder);
+        updateAnswersOrderAction({ questionId: question.id, newOrder });
+        if (!takeTest) {
+          newOrder.forEach((answer, index) => {
+            dispatch(moveAnswerThunk({ id: answer.id, position: index }));
+          });
+        }
+        previousOrderRef.current = newOrder;
       }
-      previousOrderRef.current = newOrder;
-    }
-  };
-
-  const changeTitleHandler = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setQuestionTitleValue(e.currentTarget.value);
     },
-    [setQuestionTitleValue]
+    [dispatch, question.id, takeTest, updateAnswersOrderAction]
   );
 
-  const cancelChangeTaskTitle = () => {
+  // const changeTitleHandler = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  //   setQuestionTitleValue(e.currentTarget.value);
+  // }, []);
+
+  const handlerAddAnswer = useCallback(() => {
+    setAnswerOption(!answerOption);
+  }, [answerOption]);
+
+  const cancelChangeTaskTitle = useCallback(() => {
     setIsHidden(!isHidden);
     setQuestionTitleValue(oldQuestionTitle);
-  };
+  }, [isHidden, oldQuestionTitle]);
 
-  const changeQuestionTitleHandler = () => {
+  // const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  //   setInputValue(e.currentTarget.value);
+  // }, []);
+
+  const removeQuestionHand = useCallback(() => {
+    removeQuestionHandler(questionId);
+  }, [questionId, removeQuestionHandler]);
+
+  const changeQuestionTitleHandler = useCallback(() => {
     setIsHidden(!isHidden);
     if (isHidden) {
-      questionTitleValue &&
-        questionTitleValue.trim() === '' &&
+      if (questionTitleValue && questionTitleValue.trim() === '') {
         setQuestionTitleValue(questionTitleValue.trim());
+      }
       if (pathRouteEdit) {
         dispatch(
           editQuestionThunk({
@@ -201,7 +216,21 @@ const QuestionBox: FC<QuestionBoxItems> = ({
       }
     }
     setOldQuestionTitle(questionTitleValue);
-  };
+  }, [
+    dispatch,
+    isHidden,
+    pathRouteEdit,
+    question.id,
+    question.question_type,
+    questionTitleValue,
+  ]);
+
+  const addAnswerClick = useCallback(() => {
+    if (!error) {
+      handlerAddAnswer();
+      saveClickHandler();
+    }
+  }, [error, handlerAddAnswer, saveClickHandler]);
 
   const keyDownHandler = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
@@ -228,7 +257,7 @@ const QuestionBox: FC<QuestionBoxItems> = ({
     if (checkAnswerValue) {
       setError(false);
     }
-  }, [question.answers]);
+  }, [checkAnswerValue, question.answers]);
 
   const hasTrueAnswer =
     answerState.some(answer => answer.is_right) && answerState.length >= 2;
@@ -254,75 +283,74 @@ const QuestionBox: FC<QuestionBoxItems> = ({
           </h3>
         ) : (
           <Input
-            title={''}
-            type={'text'}
-            name={''}
-            leftCheck={false}
-            value={questionTitleValue}
-            setInputValue={setQuestionTitleValue}
-            onKeyDown={keyDownHandler}
-            onChange={changeTitleHandler}
-            onBlur={changeQuestionTitleHandler}
             autoFocus={true}
             isHidden={isHidden}
+            leftCheck={false}
+            name={''}
+            title={''}
+            type={'text'}
+            value={questionTitleValue}
+            onBlur={changeQuestionTitleHandler}
+            onChange={setQuestionTitleValue}
+            onKeyDown={keyDownHandler}
           />
         ))}
       <Reorder.Group
+        className={cx(s['answer-list'], { [s['margin-top']]: isHidden })}
         values={answerState}
         onReorder={takeTest ? () => {} : handleReorder}
-        className={cx(s['answer-list'], { [s['margin-top']]: isHidden })}
       >
         {answerState.map(answer => {
           return (
-            <AnswerBox
+            <Reorder.Item
               key={answer.id}
-              question={question}
-              takeTest={takeTest}
-              onAnswerSelect={onAnswerSelect}
-              answer={answer}
-              removeAnswerHandler={removeAnswerHandler}
-              pathRouteEdit={pathRouteEdit}
-            />
+              className={s['option']}
+              value={answer}
+            >
+              <AnswerBox
+                key={answer.id}
+                answer={answer}
+                pathRouteEdit={pathRouteEdit}
+                question={question}
+                removeAnswerHandler={removeAnswerHandler}
+                takeTest={takeTest}
+                onAnswerSelect={onAnswerSelect}
+              />
+            </Reorder.Item>
           );
         })}
       </Reorder.Group>
       {question && answerOption && (
         <div className={s['test-title']}>
           <Input
+            error={error}
+            leftCheck={true}
+            name={'question'}
             title={
               question.question_type !== 'number'
                 ? 'Answer the question:'
                 : 'Correct answer'
             }
             type={question.question_type !== 'number' ? 'text' : 'number'}
-            name={'question'}
-            leftCheck={true}
-            setInputValue={setInputValue}
             value={inputValue}
-            error={error}
+            onChange={setInputValue}
           />
           {addTrueAnswerChange && (
             <Checkbox
-              title={'Select true answer'}
-              type={'checkbox'}
-              name={'selectTrue'}
-              leftCheck={false}
               id={question.id}
-              onAnswerSelect={() => {}}
+              leftCheck={false}
+              name={'selectTrue'}
               questionId={questionId}
               setIsChecked={setIsChecked}
+              title={'Select true answer'}
+              type={'checkbox'}
             />
           )}
 
           <div className={s.buttons}>
             <ChangeButton
               title="Add answer"
-              onClick={() => {
-                if (!error) {
-                  setAnswerOption(prevValue => !prevValue);
-                  saveClickHandler();
-                }
-              }}
+              onClick={addAnswerClick}
             />
           </div>
         </div>
@@ -331,16 +359,14 @@ const QuestionBox: FC<QuestionBoxItems> = ({
         <div className={s.buttons}>
           <ChangeButton
             title={'Delete question'}
-            onClick={removeQuestionHandler}
+            onClick={removeQuestionHand}
           />
           {!(
             question.question_type === 'number' && question.answers.length === 1
           ) && (
             <ChangeButton
               title={answerOption ? 'Hide' : 'Add answer'}
-              onClick={() => {
-                setAnswerOption(prevValue => !prevValue);
-              }}
+              onClick={handlerAddAnswer}
             />
           )}
         </div>

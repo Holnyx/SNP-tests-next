@@ -47,6 +47,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.19.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -54,11 +55,23 @@
     "@types/uuid": "^9.0.8",
     "concurrently": "^9.0.1",
     "css-loader": "^7.1.2",
+    "eslint": "^9.19.0",
+    "eslint-config-next": "15.1.6",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-perfectionist": "^4.7.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "file-loader": "^6.2.0",
     "gh-pages": "^6.1.1",
+    "globals": "^15.14.0",
+    "prettier": "3.4.2",
     "sass-loader": "^14.2.1",
     "style-loader": "^4.0.0",
     "typescript": "^5",
+    "typescript-eslint": "^8.22.0",
     "url-loader": "^4.1.1"
   }
 }

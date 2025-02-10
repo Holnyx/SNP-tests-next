@@ -15,10 +15,11 @@ export type QuestionItem = {
 export type AnswerItem = {
   id: string;
   text: string;
-  name: string| undefined;
+  name: string | undefined;
   is_right: boolean;
   questionId: string;
   checked?: boolean;
+  value?: number;
 };
 
 export type TestsState = {
@@ -28,15 +29,15 @@ export type TestsState = {
   errors: string[];
   sortOrder: FilteredTestsByDate;
   test: null;
-  loading: boolean
-  deleteLoading: boolean
+  loading: boolean;
+  deleteLoading: boolean;
 };
 
 export type QuestionState = {
   questionsList: QuestionItem[];
   answers: AnswerItem[];
   errors: string[];
-  loading: boolean
+  loading: boolean;
 };
 
 export type TestForAdd = {
@@ -57,8 +58,13 @@ export type UserAnswer = {
 };
 
 export type FilteredTestsByDate = 'created_at_desc' | 'created_at_asc';
-export type TestsOptionsForSelect = 'none' | 'single' | 'multiple' | 'number';
 
+export enum TestsOptionsForSelect {
+  None = 'none',
+  Single = 'single',
+  Multiple = 'multiple',
+  Number = 'number',
+}
 
 export type OnAnswerSelectArgs = {
   selectedAnswer: AnswerItem;

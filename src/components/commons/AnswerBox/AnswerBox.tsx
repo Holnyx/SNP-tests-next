@@ -1,30 +1,30 @@
-import React, { ChangeEvent, FC, memo, useCallback, useState } from 'react';
-import { Reorder } from 'motion/react';
-import { useDispatch } from 'react-redux';
-import Image from 'next/image';
+import React, { FC, memo, useCallback, useState } from 'react';
 
-import Input from '../Inputs/Input/Input';
-import Checkbox from '../Inputs/Checkbox/Checkbox';
-import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
+import Image from 'next/image';
+import { useDispatch } from 'react-redux';
+
 import dotsIcon from '/public/img/dots.svg?url';
 
-import { AnswerItem, OnAnswerSelectArgs, QuestionItem } from '@/store/types';
+import DeleteButton from '../Buttons/DeleteButton/DeleteButton';
+import Checkbox from '../Inputs/Checkbox/Checkbox';
+import Input from '../Inputs/Input/Input';
+
 import { AppDispatch } from '@/store';
+import { AnswerItem, OnAnswerSelectArgs, QuestionItem } from '@/store/types';
 import { editAnswerThunk } from '@/thunk/testsThunk';
 
 import s from './AnswerBox.module.sass';
-import cx from 'classnames';
 
-type AnswerBoxItems = {
+type AnswerBoxProps = {
   question: QuestionItem;
   takeTest: boolean;
-  onAnswerSelect: (args: OnAnswerSelectArgs) => void;
+  onAnswerSelect?: (args: OnAnswerSelectArgs) => void;
   answer: AnswerItem;
   removeAnswerHandler?: (questionId: string, answerId: string) => void;
   pathRouteEdit: boolean;
 };
 
-const AnswerBox: FC<AnswerBoxItems> = ({
+const AnswerBox: FC<AnswerBoxProps> = ({
   question,
   takeTest,
   onAnswerSelect,
@@ -40,73 +40,67 @@ const AnswerBox: FC<AnswerBoxItems> = ({
 
   const dispatch = useDispatch<AppDispatch>();
 
-  const cancelChangeAnswerTitle = () => {
-    setIsHiddenInputAnswer(!isHiddenInputAnswer);
+  const cancelChangeAnswerTitle = useCallback(() => {
+    setIsHiddenInputAnswer(prev => !prev);
     setAnswerTitleValue(oldAnswerTitle);
-  };
+  }, [oldAnswerTitle]);
 
-  const changeAnswerTitleHandler = () => {
-    setIsHiddenInputAnswer(!isHiddenInputAnswer);
+  const deleteButtonHandler = useCallback(() => {
+    removeAnswerHandler?.(question.id, answer.id);
+  }, [answer.id, question.id, removeAnswerHandler]);
+
+  const dispatchEditAnswerThunk = useCallback(() => {
+    return dispatch(
+      editAnswerThunk({
+        id: answer.id,
+        data: { text: String(answerTitleValue), is_right: answer.is_right },
+      })
+    );
+  }, [answer.id, answer.is_right, answerTitleValue]);
+
+  const changeAnswerTitleHandler = useCallback(() => {
+    setIsHiddenInputAnswer(prev => !prev);
     if (answerTitleValue) {
-      if (isHiddenInputAnswer) {
-        answerTitleValue.trim() === '' &&
-          setAnswerTitleValue(answerTitleValue.trim());
-        if (pathRouteEdit) {
-          dispatch(
-            editAnswerThunk({
-              id: answer.id,
-              data: {
-                text: String(answerTitleValue),
-                is_right: answer.is_right,
-              },
-            })
-          );
-        }
+      if (!isHiddenInputAnswer) {
+        setOldAnswerTitle(answerTitleValue);
+        return;
       }
-      setOldAnswerTitle(answerTitleValue);
-    }
-  };
-
-  const keyDownAnswerHandler = (event: React.KeyboardEvent) => {
-    if (event.key === 'Escape') {
-      cancelChangeAnswerTitle();
-    } else if (event.key === 'Enter') {
-      changeAnswerTitleHandler();
+      if (answerTitleValue.trim() === '') {
+        setAnswerTitleValue(answerTitleValue.trim());
+      }
       if (pathRouteEdit) {
-        dispatch(
-          editAnswerThunk({
-            id: answer.id,
-            data: { text: String(answerTitleValue), is_right: answer.is_right },
-          })
-        );
+        dispatchEditAnswerThunk();
       }
     }
-  };
+  }, [answerTitleValue, isHiddenInputAnswer, pathRouteEdit]);
 
-  const changeAnswerTitleEvent = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setAnswerTitleValue(e.currentTarget.value);
+  const keyDownAnswerHandler = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'Escape') cancelChangeAnswerTitle();
+      if (event.key === 'Enter') changeAnswerTitleHandler();
     },
-    [setAnswerTitleValue]
+    [cancelChangeAnswerTitle, changeAnswerTitleHandler]
   );
 
+  // const changeAnswerTitleEvent = useCallback(
+  //   (e: ChangeEvent<HTMLInputElement>) =>
+  //     setAnswerTitleValue(e.currentTarget.value),
+  //   []
+  // );
+
   return (
-    <Reorder.Item
-      value={answer}
-      key={answer.id}
-      className={s['option']}
-    >
+    <>
       {takeTest && (
         <Checkbox
+          answer={answer}
+          id={answer.id}
+          leftCheck={false}
+          name={question.id}
+          questionId={question.id}
+          setIsChecked={() => {}}
           title={answer.text}
           type={question.question_type}
-          name={question.id}
-          leftCheck={false}
-          id={answer.id}
-          questionId={question.id}
           onAnswerSelect={onAnswerSelect}
-          answer={answer}
-          setIsChecked={() => {}}
         />
       )}
       {!takeTest &&
@@ -116,34 +110,29 @@ const AnswerBox: FC<AnswerBoxItems> = ({
           </span>
         ) : (
           <Input
+            autoFocus={true}
+            leftCheck={false}
+            name={''}
             title={''}
             type={'text'}
-            name={''}
-            leftCheck={false}
             value={answerTitleValue}
-            setInputValue={setAnswerTitleValue}
-            onKeyDown={keyDownAnswerHandler}
-            onChange={changeAnswerTitleEvent}
             onBlur={changeAnswerTitleHandler}
-            autoFocus={true}
+            onChange={setAnswerTitleValue}
+            onKeyDown={keyDownAnswerHandler}
           />
         ))}
-      {!takeTest && (
-        <DeleteButton
-          onClick={() =>
-            removeAnswerHandler && removeAnswerHandler(question.id, answer.id)
-          }
-        />
-      )}
+      {!takeTest && <DeleteButton onClick={deleteButtonHandler} />}
       {!takeTest && answer.is_right && <div className={s.true}>True</div>}
       {!takeTest && (
-        <Image
-          className={s['dots-icon']}
-          alt={'dots'}
-          src={dotsIcon}
-        />
+        <div className={s.grab}>
+          <Image
+            alt={'dots'}
+            className={s['dots-icon']}
+            src={dotsIcon}
+          />
+        </div>
       )}
-    </Reorder.Item>
+    </>
   );
 };
 

@@ -1,30 +1,32 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { sidebarLinksState } from '@/components/state/sidebarLinksState';
+
 import ButtonBurgerMenu from '../Buttons/ButtonBurgerMenu/ButtonBurgerMenu';
 import ModalWindow from '../ModalWindow/ModalWindow';
 
-import { sidebarLinksState } from '@/components/state/sidebarLinksState';
-import { questionSelector } from '@/store/selectors';
-import { AppDispatch } from '@/store';
 import { useActionWithPayload } from '@/hooks/useAction';
-import { removeAllQuestion } from '@/store/questionReducer';
-import { logoutThunk } from '@/thunk/authThunk';
 import { useModal } from '@/hooks/useModal';
+import { AppDispatch } from '@/store';
+import { removeAllQuestion } from '@/store/questionReducer';
+import { questionSelector } from '@/store/selectors';
+import { logoutThunk } from '@/thunk/authThunk';
 
 import s from './Sidebar.module.sass';
 import cx from 'classnames';
 
-type SidebarItems = {
-  showSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+type SidebarProps = {
+  showSidebar: (v: boolean) => void;
   menuOpen: boolean;
   user?: string;
   pathRouteCreate?: boolean;
 };
 
-const Sidebar: FC<SidebarItems> = ({
+const Sidebar: FC<SidebarProps> = ({
   showSidebar,
   menuOpen,
   user,
@@ -64,7 +66,7 @@ const Sidebar: FC<SidebarItems> = ({
       router.replace(nextHref);
       setNextHref(null);
     }
-  }, [nextHref, router]);
+  }, [closeModal, nextHref, removeAllQuestionAction, router]);
 
   useEffect(() => {
     const handleBeforePopState = (state: { url: string }) => {
@@ -79,7 +81,7 @@ const Sidebar: FC<SidebarItems> = ({
     return () => {
       router.beforePopState(() => true);
     };
-  }, [router]);
+  }, [openModal, pathRouteCreate, router]);
 
   return (
     <>
@@ -124,9 +126,9 @@ const Sidebar: FC<SidebarItems> = ({
       </aside>
       <ModalWindow
         isModalWindowOpen={isModalOpen}
-        onConfirm={onConfirm}
         title={modalTitle}
         onClose={() => closeModal()}
+        onConfirm={onConfirm}
       />
     </>
   );

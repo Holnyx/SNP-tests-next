@@ -1,18 +1,18 @@
 import React, { memo } from 'react';
 
-import SeoTags from '@/components/commons/SeoTags/SeoTags';
-import Registration from '@/components/pages/Registration/Registration';
-import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
+import { GetServerSideProps } from 'next';
+
 import axios from 'axios';
 
-const SignUpPage = ({}: InferGetServerSidePropsType<
-  typeof getServerSideProps
->) => {
+import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
+import SeoTags from '@/components/commons/SeoTags/SeoTags';
+import Registration from '@/components/pages/Registration/Registration';
+
+const SignUpPage = () => {
   return (
     <>
       <SeoTags title="Sign Up" />
-      <Registration url={'sign-up'}/>
+      <Registration url={'sign-up'} />
       <ErrorMessage />
     </>
   );

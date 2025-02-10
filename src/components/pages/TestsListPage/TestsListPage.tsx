@@ -1,40 +1,43 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useRouter } from 'next/router';
-import { setCookie } from 'cookies-next';
 
+import { setCookie } from 'cookies-next';
+import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+
+import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
+import Footer from '@/components/commons/Footer/Footer';
 import Header from '@/components/commons/Header/Header';
 import SeoTags from '@/components/commons/SeoTags/SeoTags';
 import Sidebar from '@/components/commons/Sidebar/Sidebar';
-import Footer from '@/components/commons/Footer/Footer';
+
 import CreateTests from '../CreateTests/CreateTests';
 import TakeTestsPage from '../TakeTestsPage/TakeTestsPage';
 import TestPage from '../TestPage/TestPage';
-import ErrorMessage from '@/components/commons/ErrorMessage/ErrorMessage';
 
 import { useDebounce } from '@/hooks/useDebounce';
-import { TestsItem } from '@/store/types';
 import { sortedTestsSelector, testSelector } from '@/store/selectors';
+import { TestsItem } from '@/store/types';
 
 import s from './TestsListPage.module.sass';
-import cx from 'classnames';
 
-type TestsListPageItems = {
+type TestsListPageProps = {
   user?: string;
   id?: string;
   search: string;
   selectedTest: TestsItem | null;
   username: string;
   role: boolean;
+  page: number;
 };
 
-const TestsListPage: FC<TestsListPageItems> = ({
+const TestsListPage: FC<TestsListPageProps> = ({
   user,
   id,
   search,
   selectedTest,
   username,
   role,
+  page,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
@@ -43,7 +46,7 @@ const TestsListPage: FC<TestsListPageItems> = ({
   const [selectedTestItem, setSelectedTestItem] = useState<TestsItem | null>(
     selectedTest
   );
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(page);
 
   const router = useRouter();
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -139,18 +142,20 @@ const TestsListPage: FC<TestsListPageItems> = ({
       <div
         className={s.background}
         onClick={() => {
-          menuOpen && setMenuOpen(!menuOpen);
+          if (menuOpen) {
+            setMenuOpen(!menuOpen);
+          }
         }}
       >
         <Header
-          showSidebar={setMenuOpen}
+          currentPage={currentPage}
           menuOpen={menuOpen}
           name={username}
-          setSearchTerm={setSearchTerm}
-          searchTerm={searchTerm}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
           pathRouteTestsList={pathRouteTestsList}
+          searchTerm={searchTerm}
+          setCurrentPage={setCurrentPage}
+          setSearchTerm={setSearchTerm}
+          showSidebar={setMenuOpen}
         />
 
         {role &&
@@ -158,40 +163,40 @@ const TestsListPage: FC<TestsListPageItems> = ({
             router.asPath.startsWith(`/admin/edit-test/${id}`)) && (
             <CreateTests
               id={id}
-              selectedTestItem={selectedTestItem}
-              pathRouteEdit={pathRouteEdit}
               pathRouteCreate={pathRouteCreate}
+              pathRouteEdit={pathRouteEdit}
               pathRouteTakeTest={pathRouteTakeTest}
+              selectedTestItem={selectedTestItem}
             />
           )}
 
         {pathRouteTestsList && (
           <TakeTestsPage
-            user={user}
-            editTest={editTest}
-            search={search}
-            isSearching={isSearching}
-            results={results}
-            searchTerm={searchTerm}
             currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
+            editTest={editTest}
+            isSearching={isSearching}
             pathRouteTestsList={pathRouteTestsList}
+            results={results}
             role={role}
+            search={search}
+            searchTerm={searchTerm}
+            setCurrentPage={setCurrentPage}
+            user={user}
           />
         )}
         {pathRouteTakeTest && (
           <TestPage
-            user={user}
-            selectedTestItem={selectedTestItem}
             pathRouteTakeTest={pathRouteTakeTest}
+            selectedTestItem={selectedTestItem}
+            user={user}
           />
         )}
 
         <Sidebar
-          showSidebar={setMenuOpen}
           menuOpen={menuOpen}
-          user={user}
           pathRouteCreate={pathRouteCreate}
+          showSidebar={setMenuOpen}
+          user={user}
         />
         <Footer />
       </div>
