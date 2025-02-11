@@ -1,6 +1,6 @@
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
-
+import configPrettier from 'eslint-config-prettier';
 import pluginJs from '@eslint/js';
 import nextPlugin from '@next/eslint-plugin-next';
 import pluginImport from 'eslint-plugin-import';
@@ -12,6 +12,7 @@ import tseslint from 'typescript-eslint';
 export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
+  configPrettier,
   {
     plugins: {
       '@next/next': nextPlugin,
