@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { memo } from 'react';
 
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
@@ -9,13 +10,13 @@ import { useGetServerSideProps } from '@/hooks/useGetServerSideProps';
 const TakeTests = ({
   username,
   search,
-  role,
+  isAdmin,
   page,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <TestsListPage
+      isAdmin={isAdmin}
       page={page}
-      role={role}
       search={search}
       selectedTest={null}
       user={'admin'}

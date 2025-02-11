@@ -1,4 +1,11 @@
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, {
+  FC,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 import { useRouter } from 'next/router';
 
@@ -23,9 +30,6 @@ const TestPage: FC<TestPageProps> = ({
   pathRouteTakeTest,
 }) => {
   const [nextHref, setNextHref] = useState<string | null>(null);
-  const [correctAnswers, setCorrectAnswers] = useState<
-    AnswerItem[] | undefined
-  >([]);
   const [userSelectedAnswers, setUserSelectedAnswers] = useState<AnswerItem[]>(
     []
   );
@@ -34,6 +38,16 @@ const TestPage: FC<TestPageProps> = ({
   const { isModalOpen, modalTitle, openModal, closeModal } = useModal();
 
   const router = useRouter();
+
+  const correctAnswers = useMemo(() => {
+    if (selectedTestItem) {
+      return selectedTestItem.questions.flatMap(question =>
+        question.answers.filter(answer => answer.is_right)
+      );
+    }
+    return [];
+  }, [selectedTestItem]);
+
   const retryTest = useCallback(() => {
     setUserSelectedAnswers([]);
     setCompleteTest(false);
@@ -132,15 +146,6 @@ const TestPage: FC<TestPageProps> = ({
   const onClickHandlerCompleteTest = useCallback(() => {
     openModal('Are you sure you want to complete the test?');
   }, [openModal]);
-
-  useEffect(() => {
-    if (selectedTestItem) {
-      const correct = selectedTestItem.questions.flatMap(question =>
-        question.answers.filter(answer => answer.is_right)
-      );
-      setCorrectAnswers(correct);
-    }
-  }, [selectedTestItem]);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {

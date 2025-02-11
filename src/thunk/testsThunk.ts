@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import api from '@/api/api';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+
+import api from '@/api/api';
 import { AnswerItem, TestForAdd, TestsItem } from '@/store/types';
 
 export const getCurrentUser = createAsyncThunk(
@@ -34,6 +33,7 @@ export const getAllTestsThunk = createAsyncThunk(
       const response = await api.getTests(data);
       return response;
     } catch (error: any) {
+      console.error('Error fetching tests:', error);
       return rejectWithValue('Error fetching tests');
     }
   }

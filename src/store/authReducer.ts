@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
 import { signinThunk, signupThunk } from '@/thunk/authThunk';
 import { getCurrentUser } from '@/thunk/testsThunk';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
   user: null | {

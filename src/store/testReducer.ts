@@ -1,10 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-  FilteredTestsByDate,
-  QuestionItem,
-  TestsItem,
-  TestsState,
-} from './types';
+
 import {
   createTestThunk,
   deleteTestThunk,
@@ -12,6 +7,13 @@ import {
   getTestByIdThunk,
   updateTestThunk,
 } from '@/thunk/testsThunk';
+
+import {
+  FilteredTestsByDate,
+  QuestionItem,
+  TestsItem,
+  TestsState,
+} from './types';
 
 const initialState: TestsState = {
   testsList: [],

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, memo } from 'react';
+import React, { FC, memo } from 'react';
 
 import ChangeButton from '@/components/commons/Buttons/ChangeButton/ChangeButton';
 import Input from '@/components/commons/Inputs/Input/Input';

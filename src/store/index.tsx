@@ -1,8 +1,9 @@
 import { applyMiddleware, combineReducers, legacy_createStore } from 'redux';
+import { thunk } from 'redux-thunk';
+
+import authReducer from './authReducer';
 import questionReducer from './questionReducer';
 import testReducer from './testReducer';
-import { thunk } from 'redux-thunk';
-import authReducer from './authReducer';
 
 const rootReducer = combineReducers({
   questions: questionReducer,
