@@ -19,4 +19,7 @@ const ProfileBox = memo(({ name }: { name?: string }) => {
     </div>
   );
 });
+
+ProfileBox.displayName = 'ProfileBox';
+
 export default ProfileBox;

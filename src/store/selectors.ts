@@ -1,6 +1,8 @@
 import { createSelector } from 'reselect';
-import { AppRootStateItems } from '.';
+
 import { AnswerItem, QuestionItem } from './types';
+
+import { AppRootStateItems } from '.';
 
 const sortOrderSelector = (state: AppRootStateItems) => state.tests.sortOrder;
 

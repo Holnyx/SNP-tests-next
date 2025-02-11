@@ -19,7 +19,7 @@ type TestItemProps = {
   user?: string;
   editTest: (id: string) => void;
   pathRouteTestsList: boolean;
-  role: boolean;
+  isAdmin: boolean;
   onClickHandlerDeleteTest: (id: string) => void;
   deleteLoading: boolean;
   selectedTestId: string;
@@ -31,7 +31,7 @@ const TestItem: FC<TestItemProps> = ({
   user,
   editTest,
   pathRouteTestsList,
-  role,
+  isAdmin,
   onClickHandlerDeleteTest,
   deleteLoading,
   selectedTestId,
@@ -80,7 +80,7 @@ const TestItem: FC<TestItemProps> = ({
         <span className={s['test-date']}>
           {formatDate(String(test.created_at))}
         </span>
-        {pathRouteTestsList && role && (
+        {pathRouteTestsList && isAdmin && (
           <Image
             alt={'arrow'}
             className={cx(s['arrow-icon'], { [s.show]: show })}

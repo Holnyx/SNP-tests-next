@@ -31,7 +31,7 @@ type TakeTestsPageProps = {
   setCurrentPage: (v: number) => void;
   currentPage: number;
   pathRouteTestsList: boolean;
-  role: boolean;
+  isAdmin: boolean;
 };
 
 const TakeTestsPage: FC<TakeTestsPageProps> = ({
@@ -43,7 +43,7 @@ const TakeTestsPage: FC<TakeTestsPageProps> = ({
   setCurrentPage,
   currentPage,
   pathRouteTestsList,
-  role,
+  isAdmin,
 }) => {
   const [selectedTestId, setSelectedTestId] = useState('');
   const [totalPages, setTotalPages] = useState(1);
@@ -161,7 +161,7 @@ const TakeTestsPage: FC<TakeTestsPageProps> = ({
             editTest={editTest}
             handleTakeTest={handleTakeTest}
             pathRouteTestsList={pathRouteTestsList}
-            role={role}
+            isAdmin={isAdmin}
             selectedTestId={selectedTestId}
             test={test}
             user={user}

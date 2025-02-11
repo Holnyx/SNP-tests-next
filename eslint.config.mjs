@@ -1,57 +1,63 @@
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
-
-import pluginJs from '@eslint/js';
 import configPrettier from 'eslint-config-prettier';
+import pluginJs from '@eslint/js';
+import nextPlugin from '@next/eslint-plugin-next';
 import pluginImport from 'eslint-plugin-import';
 import pluginPrettier from 'eslint-plugin-prettier';
 import pluginUnusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-/** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
-  { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
-  { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   configPrettier,
   {
     plugins: {
-      react: pluginReact,
-      'react-hooks': pluginReactHooks,
-      prettier: pluginPrettier,
-      import: pluginImport,
-      'unused-imports': pluginUnusedImports,
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
+      '@next/next': nextPlugin,
     },
     rules: {
+      ...nextPlugin.configs.recommended.rules,
+    },
+  },
+  {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        project: './tsconfig.json',
+      },
+    },
+    plugins: {
+      react: pluginReact,
+      'react-hooks': pluginReactHooks,
+      import: pluginImport,
+      '@typescript-eslint': tseslint.plugin,
+      'unused-imports': pluginUnusedImports,
+    },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
-      'react/jsx-sort-props': [
-        'warn',
-        {
-          callbacksLast: true,
-          shorthandFirst: true,
-          reservedFirst: true,
-        },
-      ],
       'import/order': [
         'error',
         {
           groups: [
-            'builtin', // Встроенные модули (fs, path и т. д.)
-            'external', // Внешние библиотеки (react, redux, motion, uuid)
-            'internal', // Внутренние компоненты (../)
-            'parent', // Родительские папки (../../)
-            'sibling', // Файлы из той же директории (./)
-            'index', // index.js в той же папке
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
           ],
           pathGroups: [
             {
@@ -75,30 +81,26 @@ export default [
               position: 'after',
             },
             {
-              pattern: '{./*.module.*,classnames}', // Объединяем стили и classnames
+              pattern: '{./*.module.*,classnames}',
               group: 'sibling',
               position: 'before',
             },
           ],
-          pathGroupsExcludedImportTypes: ['react, next'],
-          'newlines-between': 'always', // Пустая строка между группами
-          alphabetize: {
-            order: 'asc', // Импорты внутри групп сортируются по алфавиту
-            caseInsensitive: true, // Игнорировать регистр букв
-          },
+          pathGroupsExcludedImportTypes: ['react', 'next'],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          distinctGroup: true,
         },
       ],
       'unused-imports/no-unused-imports': 'warn',
-      'prettier/prettier': 'error',
-      'no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          args: 'none',
-          ignoreRestSiblings: false,
-        },
-      ],
       'no-undef': 'error',
+    },
+  },
+  {
+    plugins: { prettier: pluginPrettier },
+    rules: {
+      ...pluginPrettier.configs.recommended.rules,
+      'prettier/prettier': 'error',
     },
   },
 ];

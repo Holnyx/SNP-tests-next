@@ -26,7 +26,7 @@ type TestsListPageProps = {
   search: string;
   selectedTest: TestsItem | null;
   username: string;
-  role: boolean;
+  isAdmin: boolean;
   page: number;
 };
 
@@ -36,7 +36,7 @@ const TestsListPage: FC<TestsListPageProps> = ({
   search,
   selectedTest,
   username,
-  role,
+  isAdmin,
   page,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -110,7 +110,7 @@ const TestsListPage: FC<TestsListPageProps> = ({
     }
   }, [allTests]);
 
-  const userRole = role === true ? 'admin' : 'user';
+  const userRole = isAdmin === true ? 'admin' : 'user';
   const pathRouteEdit = router.pathname.startsWith(`/${userRole}/edit-test`);
   const pathRouteCreate = router.pathname === `/${userRole}/create-tests`;
   const pathRouteTestsList = router.pathname === `/${userRole}/take-tests`;
@@ -158,7 +158,7 @@ const TestsListPage: FC<TestsListPageProps> = ({
           showSidebar={setMenuOpen}
         />
 
-        {role &&
+        {isAdmin &&
           (router.asPath.startsWith('/admin/create-tests') ||
             router.asPath.startsWith(`/admin/edit-test/${id}`)) && (
             <CreateTests
@@ -177,7 +177,7 @@ const TestsListPage: FC<TestsListPageProps> = ({
             isSearching={isSearching}
             pathRouteTestsList={pathRouteTestsList}
             results={results}
-            role={role}
+            isAdmin={isAdmin}
             search={search}
             searchTerm={searchTerm}
             setCurrentPage={setCurrentPage}

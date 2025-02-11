@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AnswerItem, QuestionItem, QuestionState } from './types';
+
 import {
   createAnswerThunk,
   createQuestionThunk,
@@ -10,6 +10,8 @@ import {
   getQuestionsThunk,
   moveAnswerThunk,
 } from '@/thunk/testsThunk';
+
+import { AnswerItem, QuestionItem, QuestionState } from './types';
 
 const initialState: QuestionState = {
   questionsList: [],

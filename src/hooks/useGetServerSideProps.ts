@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getCookie } from 'cookies-next';
 import { GetServerSidePropsContext } from 'next';
 
@@ -52,7 +51,7 @@ export const useGetServerSideProps = async (
     props: {
       search: search || '',
       username: user ? user.username : null,
-      role: user.is_admin,
+      isAdmin: user.is_admin,
       page,
       id: id ? (id as string) : null,
       selectedTest,

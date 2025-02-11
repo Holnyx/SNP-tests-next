@@ -82,12 +82,6 @@ const AnswerBox: FC<AnswerBoxProps> = ({
     [cancelChangeAnswerTitle, changeAnswerTitleHandler]
   );
 
-  // const changeAnswerTitleEvent = useCallback(
-  //   (e: ChangeEvent<HTMLInputElement>) =>
-  //     setAnswerTitleValue(e.currentTarget.value),
-  //   []
-  // );
-
   return (
     <>
       {takeTest && (
