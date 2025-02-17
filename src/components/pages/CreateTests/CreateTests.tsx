@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
@@ -123,7 +124,14 @@ const CreateTests: FC<CreateTestsProps> = ({
     setErrorTestTitle(false);
     removeAllQuestionAction();
     router.replace('/admin/take-tests');
-  }, [dispatch, id]);
+  }, [
+    cleanInputs,
+    dispatch,
+    id,
+    pathRouteCreate,
+    removeAllQuestionAction,
+    router,
+  ]);
 
   const saveQuestionClickHandler = useCallback(() => {
     const newQuestion: QuestionItem = {

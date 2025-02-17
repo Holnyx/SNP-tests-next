@@ -56,7 +56,7 @@ const AnswerBox: FC<AnswerBoxProps> = ({
         data: { text: String(answerTitleValue), is_right: answer.is_right },
       })
     );
-  }, [answer.id, answer.is_right, answerTitleValue]);
+  }, [answer.id, answer.is_right, answerTitleValue, dispatch]);
 
   const changeAnswerTitleHandler = useCallback(() => {
     setIsHiddenInputAnswer(prev => !prev);
@@ -72,7 +72,12 @@ const AnswerBox: FC<AnswerBoxProps> = ({
         dispatchEditAnswerThunk();
       }
     }
-  }, [answerTitleValue, isHiddenInputAnswer, pathRouteEdit]);
+  }, [
+    answerTitleValue,
+    dispatchEditAnswerThunk,
+    isHiddenInputAnswer,
+    pathRouteEdit,
+  ]);
 
   const keyDownAnswerHandler = useCallback(
     (event: React.KeyboardEvent) => {

@@ -52,6 +52,7 @@ const Authorization: FC<AuthorizationProps> = ({ url }) => {
       username: inputNameRef.current,
       password: inputPasswordRef.current,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

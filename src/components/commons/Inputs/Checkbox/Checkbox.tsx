@@ -56,7 +56,7 @@ const Checkbox: FC<CheckboxProps> = ({
       }
       setIsChecked(e.currentTarget.checked);
     },
-    [type, questionId, answer, setIsChecked, onAnswerSelect]
+    [type, inputNumberValue, questionId, answer, setIsChecked, onAnswerSelect]
   );
 
   const changeStyleAdminCheckbox = router.pathname === '/sign-up';

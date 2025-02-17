@@ -53,7 +53,7 @@ const TestPage: FC<TestPageProps> = ({
     setCompleteTest(false);
     setCorrectUserAnswers(0);
     router.replace(router.asPath);
-  }, []);
+  }, [router]);
 
   const onConfirm = useCallback(() => {
     closeModal();
@@ -86,7 +86,14 @@ const TestPage: FC<TestPageProps> = ({
       setCompleteTest(true);
       setCorrectUserAnswers(correctUserAnswers);
     }
-  }, [nextHref, router, userSelectedAnswers, correctAnswers, modalTitle]);
+  }, [
+    closeModal,
+    nextHref,
+    modalTitle,
+    router,
+    userSelectedAnswers,
+    correctAnswers,
+  ]);
 
   const handleAnswerSelect = useCallback((args: OnAnswerSelectArgs) => {
     setUserSelectedAnswers(prevSelectedAnswers => {
@@ -141,7 +148,7 @@ const TestPage: FC<TestPageProps> = ({
     if (completeTest && pathRouteTakeTest) {
       router.replace(`/${user}/take-tests`);
     }
-  }, [completeTest, pathRouteTakeTest]);
+  }, [completeTest, openModal, pathRouteTakeTest, router, user]);
 
   const onClickHandlerCompleteTest = useCallback(() => {
     openModal('Are you sure you want to complete the test?');

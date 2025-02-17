@@ -37,6 +37,12 @@ const SortIcon: FC<SortIconProps> = ({
   const setSortQueryAction = useActionWithPayload(setSortQuery);
   const changeTestsFilterAction = useActionWithPayload(filteredTestsByDate);
 
+  const initialSortOrder = router.query.sort || filterAction;
+  const newSortOrder =
+    initialSortOrder === 'created_at_asc'
+      ? 'created_at_desc'
+      : 'created_at_asc';
+
   const handleSortChange = useCallback(
     (sortOrder: string) => {
       router.replace(
@@ -69,7 +75,7 @@ const SortIcon: FC<SortIconProps> = ({
     handleSortChange(newSortOrder);
     changeTestsFilter(newSortOrder);
     setCurrentPage(1);
-  }, [filterAction, changeTestsFilter, handleSortChange]);
+  }, [handleSortChange, newSortOrder, changeTestsFilter, setCurrentPage]);
 
   useEffect(() => {
     if (!router.query.sort && filterAction) {
@@ -79,11 +85,6 @@ const SortIcon: FC<SortIconProps> = ({
     }
   }, [router.query.sort, filterAction, setSortQueryAction]);
 
-  const initialSortOrder = router.query.sort || filterAction;
-  const newSortOrder =
-    initialSortOrder === 'created_at_asc'
-      ? 'created_at_desc'
-      : 'created_at_asc';
   return (
     <Image
       alt={'adminIcon'}

@@ -62,6 +62,7 @@ const Registration: FC<RegistrationProps> = ({ url }) => {
     } else {
       setError(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkNameValue, isPasswordValid, registrationInAction]);
 
   return (
