@@ -46,9 +46,12 @@ const Input: FC<InputProps> = ({
 }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
-  const onValueChanged = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    onChange(e.currentTarget.value);
-  }, []);
+  const onValueChanged = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      onChange(e.currentTarget.value);
+    },
+    [onChange]
+  );
 
   useEffect(() => {
     setErrorMessage('');

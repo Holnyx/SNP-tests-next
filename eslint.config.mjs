@@ -43,7 +43,7 @@ export default [
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': 'error',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react/prop-types': 'off',
@@ -92,7 +92,7 @@ export default [
           distinctGroup: true,
         },
       ],
-      'unused-imports/no-unused-imports': 'warn',
+      'unused-imports/no-unused-imports': 'error',
       'no-undef': 'error',
     },
   },

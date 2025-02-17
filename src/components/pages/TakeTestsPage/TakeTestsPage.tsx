@@ -90,7 +90,16 @@ const TakeTestsPage: FC<TakeTestsPageProps> = ({
     } else if (modalTitle.includes('taking')) {
       router.replace(`/${user}/test-page/${selectedTestId}`);
     }
-  }, [modalTitle, dispatch, selectedTestId, currentPage, router, user]);
+  }, [
+    modalTitle,
+    dispatch,
+    selectedTestId,
+    currentPage,
+    debouncedSearchValue,
+    filterAction,
+    router,
+    user,
+  ]);
 
   const loadMoreTests = useCallback(() => {
     if (currentPage <= totalPages) {
@@ -104,7 +113,14 @@ const TakeTestsPage: FC<TakeTestsPageProps> = ({
         })
       );
     }
-  }, []);
+  }, [
+    currentPage,
+    debouncedSearchValue,
+    dispatch,
+    filterAction,
+    setCurrentPage,
+    totalPages,
+  ]);
 
   const prevPage = useCallback(() => {
     if (currentPage > 1) {
@@ -142,6 +158,7 @@ const TakeTestsPage: FC<TakeTestsPageProps> = ({
     };
     handlePageChange();
     fetchTests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, dispatch, debouncedSearchValue, filterAction]);
 
   return (

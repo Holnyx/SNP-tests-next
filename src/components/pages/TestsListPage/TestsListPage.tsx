@@ -89,6 +89,7 @@ const TestsListPage: FC<TestsListPageProps> = ({
       setResults(filteredTestsByDate);
       setIsSearching(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearchTerm, filteredTestsByDate]);
 
   useEffect(() => {
